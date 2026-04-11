@@ -2,12 +2,15 @@ import { useState } from 'react';
 import { Button, Card } from '@/shared/ui';
 
 const STEPS = [
-  { sense: 'ВИДИТЕ', count: 5, icon: '👁', color: 'bg-blue-50 text-blue-700' },
-  { sense: 'ТРОГАЕТЕ', count: 4, icon: '✋', color: 'bg-emerald-50 text-emerald-700' },
-  { sense: 'СЛЫШИТЕ', count: 3, icon: '👂', color: 'bg-amber-50 text-amber-700' },
-  { sense: 'ЧУВСТВУЕТЕ (запах)', count: 2, icon: '👃', color: 'bg-purple-50 text-purple-700' },
-  { sense: 'ОЩУЩАЕТЕ на вкус', count: 1, icon: '👅', color: 'bg-rose-50 text-rose-700' },
+  { sense: 'ВИДИТЕ', count: 5, icon: '👁', color: 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300' },
+  { sense: 'ТРОГАЕТЕ', count: 4, icon: '✋', color: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' },
+  { sense: 'СЛЫШИТЕ', count: 3, icon: '👂', color: 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300' },
+  { sense: 'ЧУВСТВУЕТЕ (запах)', count: 2, icon: '👃', color: 'bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300' },
+  { sense: 'ОЩУЩАЕТЕ на вкус', count: 1, icon: '👅', color: 'bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300' },
 ];
+
+const inputClass =
+  'w-full rounded-xl border border-slate-200 bg-white p-3 text-sm placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-50 dark:placeholder:text-slate-500';
 
 interface GroundingExerciseProps {
   onComplete: () => void;
@@ -35,7 +38,7 @@ export function GroundingExercise({ onComplete, onCancel }: GroundingExercisePro
         {STEPS.map((_, i) => (
           <div
             key={i}
-            className={`h-1 flex-1 rounded-full ${i <= currentStep ? 'bg-indigo-500' : 'bg-slate-200'}`}
+            className={`h-1 flex-1 rounded-full ${i <= currentStep ? 'bg-indigo-500' : 'bg-slate-200 dark:bg-slate-600'}`}
           />
         ))}
       </div>
@@ -57,7 +60,7 @@ export function GroundingExercise({ onComplete, onCancel }: GroundingExercisePro
             value={val}
             onChange={(e) => updateInput(i, e.target.value)}
             placeholder={`${i + 1}.`}
-            className="w-full rounded-xl border border-slate-200 p-3 text-sm placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+            className={inputClass}
             autoFocus={i === 0}
           />
         ))}

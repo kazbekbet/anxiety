@@ -13,17 +13,17 @@ export function AnxietyCard({ entry, onDelete }: AnxietyCardProps) {
       <LevelIndicator level={entry.level} />
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-slate-700">
+          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
             {formatEntryDate(entry.timestamp)}
           </span>
           <span className="text-xs text-slate-400">{formatTime(entry.timestamp)}</span>
         </div>
         <LevelBar level={entry.level} />
-        {entry.note && <p className="mt-1.5 text-sm text-slate-600 line-clamp-2">{entry.note}</p>}
+        {entry.note && <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400 line-clamp-2">{entry.note}</p>}
         {entry.triggers.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1">
             {entry.triggers.map((t) => (
-              <span key={t} className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-600">
+              <span key={t} className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-600 dark:bg-indigo-950 dark:text-indigo-300">
                 {t}
               </span>
             ))}

@@ -1,4 +1,5 @@
 import { HashRouter, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from '@/shared/lib/theme.tsx';
 import { BottomNav } from '@/widgets/bottom-nav';
 import { HomePage } from '@/pages/home';
 import { DiaryPage } from '@/pages/diary';
@@ -7,16 +8,18 @@ import { StatsPage } from '@/pages/stats';
 
 export function App() {
   return (
-    <HashRouter>
-      <div className="mx-auto min-h-screen max-w-lg pb-20 pt-[max(1rem,env(safe-area-inset-top))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/diary" element={<DiaryPage />} />
-          <Route path="/techniques" element={<TechniquesPage />} />
-          <Route path="/stats" element={<StatsPage />} />
-        </Routes>
-      </div>
-      <BottomNav />
-    </HashRouter>
+    <ThemeProvider>
+      <HashRouter>
+        <div className="mx-auto min-h-screen max-w-lg bg-slate-50 pb-20 pt-[max(1rem,env(safe-area-inset-top))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] dark:bg-slate-900">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/diary" element={<DiaryPage />} />
+            <Route path="/techniques" element={<TechniquesPage />} />
+            <Route path="/stats" element={<StatsPage />} />
+          </Routes>
+        </div>
+        <BottomNav />
+      </HashRouter>
+    </ThemeProvider>
   );
 }
