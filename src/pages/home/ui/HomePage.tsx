@@ -10,6 +10,7 @@ import { WorryTimer } from '@/features/worry-time';
 import { techniques } from '@/entities/technique';
 import { getLevelBgColor, getLevelTextColor } from '@/shared/lib/level-colors';
 import { sparklineData, trendDirection } from '@/shared/lib/insights';
+import { generateSmartInsight } from '@/shared/lib/smart-insights';
 import { useAssessmentResults, assessments } from '@/entities/assessment';
 
 const QUICK_LEVELS = [
@@ -72,11 +73,13 @@ export function HomePage() {
   })();
   const sparkData = useMemo(() => sparklineData(entries), [entries]);
   const trend = useMemo(() => trendDirection(entries), [entries]);
+  const smartInsight = useMemo(() => generateSmartInsight(entries), [entries]);
 
   const handleQuickTap = (level: number) => {
     addEntry({ level, note: '', triggers: [] });
     setTapped(level);
     setRecommendation(getRecommendation(level));
+    if ('vibrate' in navigator) navigator.vibrate(level <= 4 ? 10 : level <= 7 ? 20 : 40);
     setTimeout(() => setTapped(null), 1500);
   };
 
@@ -144,6 +147,17 @@ export function HomePage() {
           </p>
         )}
       </Card>
+
+      {/* Smart insight */}
+      {smartInsight && (
+        <Card className={`text-sm ${
+          smartInsight.type === 'positive' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+          : smartInsight.type === 'suggestion' ? 'bg-accent-soft text-accent-soft-fg'
+          : 'bg-elevated text-subtle'
+        }`}>
+          {smartInsight.text}
+        </Card>
+      )}
 
       {/* Test banner */}
       {showTestBanner && (

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
@@ -40,16 +41,18 @@ export const useAnxietyEntries = create<AnxietyEntriesState>()(
 
 export function useAverageByDay() {
   const entries = useAnxietyEntries((s) => s.entries);
-  const groups = new Map<string, number[]>();
-  for (const entry of entries) {
-    const key = startOfDay(new Date(entry.timestamp)).toISOString();
-    const arr = groups.get(key) ?? [];
-    arr.push(entry.level);
-    groups.set(key, arr);
-  }
-  const result = new Map<string, number>();
-  for (const [key, levels] of groups) {
-    result.set(key, Math.round(levels.reduce((a, b) => a + b, 0) / levels.length));
-  }
-  return result;
+  return useMemo(() => {
+    const groups = new Map<string, number[]>();
+    for (const entry of entries) {
+      const key = startOfDay(new Date(entry.timestamp)).toISOString();
+      const arr = groups.get(key) ?? [];
+      arr.push(entry.level);
+      groups.set(key, arr);
+    }
+    const result = new Map<string, number>();
+    for (const [key, levels] of groups) {
+      result.set(key, Math.round(levels.reduce((a, b) => a + b, 0) / levels.length));
+    }
+    return result;
+  }, [entries]);
 }
