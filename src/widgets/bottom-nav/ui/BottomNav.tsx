@@ -53,13 +53,20 @@ export function BottomNav() {
             to={item.to}
             end={item.to === '/'}
             className={({ isActive }) =>
-              `flex flex-1 flex-col items-center gap-0.5 py-2 text-xs transition-colors ${
-                isActive ? 'text-accent-fg' : 'text-faint'
+              `relative flex flex-1 flex-col items-center gap-0.5 py-2 text-xs transition-all duration-200 ${
+                isActive ? 'text-accent-fg' : 'text-faint hover:text-muted'
               }`
             }
           >
-            {item.icon}
-            <span>{item.label}</span>
+            {({ isActive }) => (
+              <>
+                <div className={`transition-transform duration-200 ${isActive ? 'scale-110' : 'scale-100'}`}>
+                  {item.icon}
+                </div>
+                <span>{item.label}</span>
+                {isActive && <div className="absolute bottom-1 h-1 w-1 rounded-full bg-accent-fg" />}
+              </>
+            )}
           </NavLink>
         ))}
       </div>

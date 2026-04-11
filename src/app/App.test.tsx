@@ -6,7 +6,7 @@ import { App } from './App';
 describe('App', () => {
   it('renders home page by default', () => {
     render(<App />);
-    expect(screen.getByText('Anxiety Tracker')).toBeInTheDocument();
+    expect(screen.getByText('Быстрая запись')).toBeInTheDocument();
   });
 
   it('navigates to diary page', async () => {
