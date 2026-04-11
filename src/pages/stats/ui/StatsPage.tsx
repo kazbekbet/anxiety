@@ -3,12 +3,13 @@ import { startOfDay } from 'date-fns';
 import { Header } from '@/widgets/header';
 import { Card } from '@/shared/ui';
 import { getLevelColor } from '@/shared/lib/level-colors';
-import { useAnxietyEntries, useThoughtRecords } from '@/entities/anxiety';
+import { useAnxietyEntries, useAverageByDay, useThoughtRecords } from '@/entities/anxiety';
 import { getLast7Days, formatShortDay } from '@/shared/lib/date';
 
 export function StatsPage() {
-  const { entries, averageByDay } = useAnxietyEntries();
-  const { records } = useThoughtRecords();
+  const entries = useAnxietyEntries((s) => s.entries);
+  const records = useThoughtRecords((s) => s.records);
+  const averageByDay = useAverageByDay();
 
   const days = getLast7Days();
 

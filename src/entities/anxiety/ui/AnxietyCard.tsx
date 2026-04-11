@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { AnxietyEntry } from '@/shared/types';
 import { Card, LevelIndicator, LevelBar } from '@/shared/ui';
 import { formatEntryDate, formatTime } from '@/shared/lib/date';
@@ -8,6 +9,8 @@ interface AnxietyCardProps {
 }
 
 export function AnxietyCard({ entry, onDelete }: AnxietyCardProps) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
   return (
     <Card className="flex gap-3">
       <LevelIndicator level={entry.level} />
@@ -30,12 +33,30 @@ export function AnxietyCard({ entry, onDelete }: AnxietyCardProps) {
           </div>
         )}
         {onDelete && (
-          <button
-            onClick={() => onDelete(entry.id)}
-            className="mt-2 text-xs text-faint hover:text-red-500 transition-colors"
-          >
-            Удалить
-          </button>
+          confirmDelete ? (
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-xs text-danger-soft-fg">Удалить запись?</span>
+              <button
+                onClick={() => onDelete(entry.id)}
+                className="text-xs font-medium text-danger-soft-fg"
+              >
+                Да
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="text-xs text-faint"
+              >
+                Нет
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="mt-2 text-xs text-faint hover:text-red-500 transition-colors"
+            >
+              Удалить
+            </button>
+          )
         )}
       </div>
     </Card>

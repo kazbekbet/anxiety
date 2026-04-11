@@ -13,7 +13,7 @@ type Tab = 'all' | 'cbt' | 'existential';
 export function TechniquesPage() {
   const [tab, setTab] = useState<Tab>('all');
   const [activeTechnique, setActiveTechnique] = useState<Technique | null>(null);
-  const { addRecord } = useThoughtRecords();
+  const addRecord = useThoughtRecords((s) => s.addRecord);
 
   const filtered =
     tab === 'all' ? techniques : techniques.filter((t) => t.category === tab);
