@@ -10,7 +10,7 @@ const STEPS = [
 ];
 
 const inputClass =
-  'w-full rounded-xl border border-slate-200 bg-white p-3 text-sm placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-50 dark:placeholder:text-slate-500';
+  'w-full rounded-xl border border-input-border bg-input p-3 text-sm text-fg placeholder:text-faint focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring';
 
 interface GroundingExerciseProps {
   onComplete: () => void;
@@ -36,10 +36,7 @@ export function GroundingExercise({ onComplete, onCancel }: GroundingExercisePro
     <div className="space-y-4">
       <div className="flex gap-1">
         {STEPS.map((_, i) => (
-          <div
-            key={i}
-            className={`h-1 flex-1 rounded-full ${i <= currentStep ? 'bg-indigo-500' : 'bg-slate-200 dark:bg-slate-600'}`}
-          />
+          <div key={i} className={`h-1 flex-1 rounded-full ${i <= currentStep ? 'bg-accent' : 'bg-hover'}`} />
         ))}
       </div>
 
@@ -55,32 +52,15 @@ export function GroundingExercise({ onComplete, onCancel }: GroundingExercisePro
 
       <div className="space-y-2">
         {inputs[currentStep].map((val, i) => (
-          <input
-            key={i}
-            value={val}
-            onChange={(e) => updateInput(i, e.target.value)}
-            placeholder={`${i + 1}.`}
-            className={inputClass}
-            autoFocus={i === 0}
-          />
+          <input key={i} value={val} onChange={(e) => updateInput(i, e.target.value)} placeholder={`${i + 1}.`} className={inputClass} autoFocus={i === 0} />
         ))}
       </div>
 
       <div className="flex gap-3">
-        <Button
-          type="button"
-          variant="ghost"
-          fullWidth
-          onClick={currentStep === 0 ? onCancel : () => setCurrentStep(currentStep - 1)}
-        >
+        <Button type="button" variant="ghost" fullWidth onClick={currentStep === 0 ? onCancel : () => setCurrentStep(currentStep - 1)}>
           {currentStep === 0 ? 'Отмена' : 'Назад'}
         </Button>
-        <Button
-          type="button"
-          fullWidth
-          disabled={!allFilled}
-          onClick={isLast ? onComplete : () => setCurrentStep(currentStep + 1)}
-        >
+        <Button type="button" fullWidth disabled={!allFilled} onClick={isLast ? onComplete : () => setCurrentStep(currentStep + 1)}>
           {isLast ? 'Готово' : 'Далее'}
         </Button>
       </div>

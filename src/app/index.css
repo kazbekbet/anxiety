@@ -2,6 +2,82 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  /* ── Surfaces ── */
+  --color-surface: #f8fafc;
+  --color-card: #ffffff;
+  --color-elevated: #f1f5f9;
+  --color-hover: #e2e8f0;
+  --color-nav: rgb(255 255 255 / 0.95);
+
+  /* ── Text ── */
+  --color-fg: #0f172a;
+  --color-subtle: #475569;
+  --color-muted: #64748b;
+  --color-faint: #94a3b8;
+
+  /* ── Border / Input ── */
+  --color-border: #e2e8f0;
+  --color-ring: #818cf8;
+  --color-input: #ffffff;
+  --color-input-border: #e2e8f0;
+
+  /* ── Accent (indigo) ── */
+  --color-accent: #6366f1;
+  --color-accent-hover: #4f46e5;
+  --color-accent-active: #4338ca;
+  --color-accent-fg: #4f46e5;
+  --color-accent-soft: #eef2ff;
+  --color-accent-soft-hover: #e0e7ff;
+  --color-accent-soft-fg: #4338ca;
+
+  /* ── Danger ── */
+  --color-danger-soft: #fef2f2;
+  --color-danger-soft-hover: #fee2e2;
+  --color-danger-soft-fg: #b91c1c;
+
+  /* ── Category badges ── */
+  --color-badge-cbt: #eff6ff;
+  --color-badge-cbt-fg: #1d4ed8;
+  --color-badge-existential: #f5f3ff;
+  --color-badge-existential-fg: #6d28d9;
+}
+
+.dark {
+  --color-surface: #0f172a;
+  --color-card: #1e293b;
+  --color-elevated: #334155;
+  --color-hover: #475569;
+  --color-nav: rgb(15 23 42 / 0.95);
+
+  --color-fg: #f8fafc;
+  --color-subtle: #cbd5e1;
+  --color-muted: #94a3b8;
+  --color-faint: #64748b;
+
+  --color-border: #334155;
+  --color-ring: #818cf8;
+  --color-input: #334155;
+  --color-input-border: #475569;
+
+  --color-accent: #6366f1;
+  --color-accent-hover: #4f46e5;
+  --color-accent-active: #4338ca;
+  --color-accent-fg: #818cf8;
+  --color-accent-soft: #1e1b4b;
+  --color-accent-soft-hover: #312e81;
+  --color-accent-soft-fg: #a5b4fc;
+
+  --color-danger-soft: #450a0a;
+  --color-danger-soft-hover: #7f1d1d;
+  --color-danger-soft-fg: #fca5a5;
+
+  --color-badge-cbt: #172554;
+  --color-badge-cbt-fg: #93c5fd;
+  --color-badge-existential: #2e1065;
+  --color-badge-existential-fg: #c4b5fd;
+}
+
 html {
   -webkit-tap-highlight-color: transparent;
 }

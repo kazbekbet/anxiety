@@ -16,34 +16,24 @@ export function TechniqueSteps({ technique, onComplete }: TechniqueStepsProps) {
     <div className="space-y-4">
       <div className="flex gap-1">
         {technique.steps.map((_, i) => (
-          <div
-            key={i}
-            className={`h-1 flex-1 rounded-full ${i <= currentStep ? 'bg-indigo-500' : 'bg-slate-200 dark:bg-slate-600'}`}
-          />
+          <div key={i} className={`h-1 flex-1 rounded-full ${i <= currentStep ? 'bg-accent' : 'bg-hover'}`} />
         ))}
       </div>
 
-      <Card className="bg-indigo-50 dark:bg-indigo-950">
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+      <Card className="bg-accent-soft">
+        <p className="text-sm text-muted">
           Шаг {currentStep + 1} из {totalSteps}
         </p>
-        <p className="mt-2 text-base font-medium text-slate-800 dark:text-slate-200">
+        <p className="mt-2 text-base font-medium text-fg">
           {technique.steps[currentStep]}
         </p>
       </Card>
 
       <div className="flex gap-3">
-        <Button
-          variant="ghost"
-          fullWidth
-          onClick={currentStep === 0 ? onComplete : () => setCurrentStep(currentStep - 1)}
-        >
+        <Button variant="ghost" fullWidth onClick={currentStep === 0 ? onComplete : () => setCurrentStep(currentStep - 1)}>
           {currentStep === 0 ? 'Закрыть' : 'Назад'}
         </Button>
-        <Button
-          fullWidth
-          onClick={isLast ? onComplete : () => setCurrentStep(currentStep + 1)}
-        >
+        <Button fullWidth onClick={isLast ? onComplete : () => setCurrentStep(currentStep + 1)}>
           {isLast ? 'Готово' : 'Далее'}
         </Button>
       </div>

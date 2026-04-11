@@ -19,7 +19,7 @@ interface LogAnxietyFormProps {
 }
 
 const inputClass =
-  'w-full resize-none rounded-xl border border-slate-200 bg-white p-3 text-sm placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-50 dark:placeholder:text-slate-500';
+  'w-full resize-none rounded-xl border border-input-border bg-input p-3 text-sm text-fg placeholder:text-faint focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring';
 
 export function LogAnxietyForm({ onSubmit, onCancel }: LogAnxietyFormProps) {
   const [level, setLevel] = useState(5);
@@ -38,7 +38,7 @@ export function LogAnxietyForm({ onSubmit, onCancel }: LogAnxietyFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+        <label className="mb-2 block text-sm font-medium text-subtle">
           Уровень тревожности
         </label>
         <div className="flex items-center gap-4">
@@ -56,14 +56,14 @@ export function LogAnxietyForm({ onSubmit, onCancel }: LogAnxietyFormProps) {
             {level}
           </div>
         </div>
-        <div className="mt-1 flex justify-between text-xs text-slate-400">
+        <div className="mt-1 flex justify-between text-xs text-faint">
           <span>Спокойствие</span>
           <span>Паника</span>
         </div>
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Триггеры</label>
+        <label className="mb-2 block text-sm font-medium text-subtle">Триггеры</label>
         <div className="flex flex-wrap gap-2">
           {TRIGGER_OPTIONS.map((t) => (
             <button
@@ -72,8 +72,8 @@ export function LogAnxietyForm({ onSubmit, onCancel }: LogAnxietyFormProps) {
               onClick={() => toggleTrigger(t)}
               className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
                 triggers.includes(t)
-                  ? 'bg-indigo-500 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
+                  ? 'bg-accent text-white'
+                  : 'bg-elevated text-subtle hover:bg-hover'
               }`}
             >
               {t}
@@ -83,7 +83,7 @@ export function LogAnxietyForm({ onSubmit, onCancel }: LogAnxietyFormProps) {
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Заметка</label>
+        <label className="mb-2 block text-sm font-medium text-subtle">Заметка</label>
         <textarea
           value={note}
           onChange={(e) => setNote(e.target.value)}
