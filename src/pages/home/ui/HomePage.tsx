@@ -29,6 +29,15 @@ export function HomePage() {
   const navigate = useNavigate();
 
   const quickTechniques = techniques.slice(0, 3);
+
+  const greeting = (() => {
+    const h = new Date().getHours();
+    if (h < 6) return { title: 'Не спится?', sub: 'Здесь безопасно' };
+    if (h < 12) return { title: 'Доброе утро', sub: 'Как вы сегодня?' };
+    if (h < 18) return { title: 'Добрый день', sub: 'Проверьте своё состояние' };
+    if (h < 22) return { title: 'Добрый вечер', sub: 'Время подвести итоги дня' };
+    return { title: 'Поздний вечер', sub: 'Всё в порядке' };
+  })();
   const sparkData = useMemo(() => sparklineData(entries), [entries]);
   const trend = useMemo(() => trendDirection(entries), [entries]);
 
@@ -40,7 +49,7 @@ export function HomePage() {
 
   return (
     <div className="space-y-4">
-      <Header title="Anxiety Tracker" subtitle="Как вы себя чувствуете?" action={<ThemeToggle />} />
+      <Header title={greeting.title} subtitle={greeting.sub} action={<ThemeToggle />} />
 
       {/* One-tap check-in */}
       <Card>
@@ -50,15 +59,17 @@ export function HomePage() {
             <button
               key={q.level}
               onClick={() => handleQuickTap(q.level)}
-              className={`flex flex-1 flex-col items-center gap-1 rounded-xl py-2 transition-all active:scale-95 ${getLevelBgColor(q.level)} ${getLevelTextColor(q.level)} ${tapped === q.level ? 'ring-2 ring-accent scale-95' : ''}`}
+              className={`flex flex-1 flex-col items-center gap-1.5 rounded-xl py-3.5 transition-all active:scale-95 ${getLevelBgColor(q.level)} ${getLevelTextColor(q.level)} ${tapped === q.level ? 'ring-2 ring-accent scale-95' : ''}`}
             >
-              <span className="text-lg font-bold">{q.range}</span>
-              <span className="text-[10px] leading-tight">{q.label}</span>
+              <span className="text-base font-bold leading-none">{q.range}</span>
+              <span className="text-[11px] font-medium leading-tight opacity-80">{q.label}</span>
             </button>
           ))}
         </div>
         {tapped && (
-          <p className="mt-2 text-center text-xs text-accent-fg animate-pulse">Записано!</p>
+          <p key={tapped} className="mt-2 text-center text-xs text-accent-fg animate-success-pop">
+            ✓ Записано
+          </p>
         )}
       </Card>
 

@@ -38,11 +38,20 @@ export function DiaryPage() {
       </Button>
 
       {entries.length === 0 ? (
-        <div className="py-12 text-center">
-          <p className="text-lg text-faint">Пока пусто</p>
-          <p className="mt-1 text-sm text-faint">
-            Нажмите кнопку выше, чтобы добавить первую запись
+        <div className="flex flex-col items-center py-12 text-center px-4">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" className="mb-5 text-accent-soft opacity-80">
+            <rect x="16" y="12" width="48" height="56" rx="8" fill="currentColor"/>
+            <rect x="26" y="28" width="28" height="3" rx="1.5" fill="white" opacity="0.6"/>
+            <rect x="26" y="36" width="20" height="3" rx="1.5" fill="white" opacity="0.4"/>
+            <rect x="26" y="44" width="24" height="3" rx="1.5" fill="white" opacity="0.4"/>
+          </svg>
+          <p className="text-base font-semibold text-fg">Ваш дневник ждёт вас</p>
+          <p className="mt-2 text-sm text-muted max-w-[260px] leading-relaxed">
+            Записывайте моменты тревоги — это помогает увидеть паттерны и стать спокойнее
           </p>
+          <Button className="mt-6" onClick={() => setShowForm(true)}>
+            Добавить первую запись
+          </Button>
         </div>
       ) : (
         <div className="space-y-5">
