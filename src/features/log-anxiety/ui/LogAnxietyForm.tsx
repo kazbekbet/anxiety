@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Button, ChipGroup, inputClass } from '@/shared/ui';
 import { getLevelTextColor, getLevelBgColor } from '@/shared/lib/level-colors';
+import { getFromStorage, saveToStorage } from '@/shared/lib/storage';
 
-const TRIGGER_OPTIONS = [
+const DEFAULT_TRIGGERS = [
   'Работа',
   'Учёба',
   'Отношения',
@@ -11,7 +12,9 @@ const TRIGGER_OPTIONS = [
   'Социальные ситуации',
   'Неопределённость',
   'Сон',
-] as const;
+];
+
+const CUSTOM_TRIGGERS_KEY = 'custom-triggers';
 
 interface LogAnxietyFormProps {
   onSubmit: (data: { level: number; note: string; triggers: string[] }) => void;
@@ -22,9 +25,25 @@ export function LogAnxietyForm({ onSubmit, onCancel }: LogAnxietyFormProps) {
   const [level, setLevel] = useState(5);
   const [note, setNote] = useState('');
   const [triggers, setTriggers] = useState<string[]>([]);
+  const [customTriggers, setCustomTriggers] = useState<string[]>(
+    () => getFromStorage<string[]>(CUSTOM_TRIGGERS_KEY, []),
+  );
+  const [newTrigger, setNewTrigger] = useState('');
+
+  const allTriggers = [...DEFAULT_TRIGGERS, ...customTriggers];
 
   const toggleTrigger = (t: string) => {
     setTriggers((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
+  };
+
+  const addCustomTrigger = () => {
+    const trimmed = newTrigger.trim();
+    if (!trimmed || allTriggers.includes(trimmed)) return;
+    const updated = [...customTriggers, trimmed];
+    setCustomTriggers(updated);
+    saveToStorage(CUSTOM_TRIGGERS_KEY, updated);
+    setTriggers((prev) => [...prev, trimmed]);
+    setNewTrigger('');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -61,7 +80,19 @@ export function LogAnxietyForm({ onSubmit, onCancel }: LogAnxietyFormProps) {
 
       <div>
         <label className="mb-2 block text-sm font-medium text-subtle">Триггеры</label>
-        <ChipGroup options={TRIGGER_OPTIONS} selected={triggers} onToggle={toggleTrigger} />
+        <ChipGroup options={allTriggers} selected={triggers} onToggle={toggleTrigger} />
+        <div className="mt-2 flex gap-2">
+          <input
+            value={newTrigger}
+            onChange={(e) => setNewTrigger(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCustomTrigger(); } }}
+            placeholder="Свой триггер..."
+            className={`${inputClass} !py-2 text-xs`}
+          />
+          <Button type="button" variant="secondary" className="shrink-0 !py-2 !px-3 text-xs" onClick={addCustomTrigger}>
+            +
+          </Button>
+        </div>
       </div>
 
       <div>

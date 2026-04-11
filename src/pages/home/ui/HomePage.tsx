@@ -20,6 +20,22 @@ const QUICK_LEVELS = [
   { range: '9-10', level: 10, label: 'Паника' },
 ];
 
+const CRISIS_PHONE = '8-800-2000-122';
+
+interface Recommendation {
+  text: string;
+  route: string;
+  level: 'calm' | 'mild' | 'moderate' | 'severe' | 'crisis';
+}
+
+function getRecommendation(level: number): Recommendation {
+  if (level <= 3) return { text: 'Всё хорошо. Запишите мысли в дневник?', route: '/diary', level: 'calm' };
+  if (level <= 5) return { text: 'Попробуйте дыхание по квадрату', route: '/techniques', level: 'mild' };
+  if (level <= 7) return { text: 'Рекомендуем дыхание 4-7-8', route: '/techniques', level: 'moderate' };
+  if (level <= 9) return { text: 'Начните с дыхания, потом — Worry Time', route: '/techniques', level: 'severe' };
+  return { text: 'Вы не одиноки. Обратитесь за помощью', route: '', level: 'crisis' };
+}
+
 export function HomePage() {
   const entries = useAnxietyEntries((s) => s.entries);
   const addEntry = useAnxietyEntries((s) => s.addEntry);
@@ -27,6 +43,7 @@ export function HomePage() {
   const [showForm, setShowForm] = useState(false);
   const [showWorryTimer, setShowWorryTimer] = useState(false);
   const [tapped, setTapped] = useState<number | null>(null);
+  const [recommendation, setRecommendation] = useState<Recommendation | null>(null);
   const navigate = useNavigate();
 
   const quickTechniques = techniques.slice(0, 3);
@@ -59,12 +76,27 @@ export function HomePage() {
   const handleQuickTap = (level: number) => {
     addEntry({ level, note: '', triggers: [] });
     setTapped(level);
+    setRecommendation(getRecommendation(level));
     setTimeout(() => setTapped(null), 1500);
   };
 
   return (
     <div className="space-y-4">
       <Header title={greeting.title} subtitle={greeting.sub} action={<ThemeToggle />} />
+
+      {/* SOS button */}
+      <Card
+        className="flex cursor-pointer items-center gap-3 bg-red-50 dark:bg-red-950 active:scale-[0.98] transition-transform"
+        onClick={() => window.open(`tel:${CRISIS_PHONE}`)}
+      >
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-500 text-white text-sm font-bold">
+          SOS
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-medium text-red-700 dark:text-red-300 text-sm">Если сейчас очень плохо</p>
+          <p className="text-xs text-red-600/70 dark:text-red-400/70">Телефон доверия: {CRISIS_PHONE}</p>
+        </div>
+      </Card>
 
       {/* One-tap check-in */}
       <Card>
@@ -81,7 +113,32 @@ export function HomePage() {
             </button>
           ))}
         </div>
-        {tapped && (
+
+        {/* Recommendation after check-in */}
+        {recommendation && (
+          <div key={recommendation.text} className="mt-3 rounded-xl bg-elevated p-3 animate-success-pop">
+            <p className="text-sm text-subtle mb-2">{recommendation.text}</p>
+            {recommendation.level === 'crisis' ? (
+              <a
+                href={`tel:${CRISIS_PHONE}`}
+                className="block w-full rounded-xl bg-red-500 py-2.5 text-center text-sm font-medium text-white"
+              >
+                Позвонить: {CRISIS_PHONE}
+              </a>
+            ) : (
+              <Button
+                fullWidth
+                variant="secondary"
+                className="!py-2 text-xs"
+                onClick={() => navigate(recommendation.route)}
+              >
+                {recommendation.level === 'calm' ? 'Открыть дневник' : 'Начать технику'}
+              </Button>
+            )}
+          </div>
+        )}
+
+        {tapped && !recommendation && (
           <p key={tapped} className="mt-2 text-center text-xs text-accent-fg animate-success-pop">
             ✓ Записано
           </p>
