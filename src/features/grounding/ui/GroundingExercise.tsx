@@ -23,7 +23,7 @@ export function GroundingExercise({ onComplete, onCancel }: GroundingExercisePro
 
   const step = STEPS[currentStep];
   const isLast = currentStep === STEPS.length - 1;
-  const allFilled = inputs[currentStep].every((v) => v.trim().length > 0);
+  const hasAtLeastOne = inputs[currentStep].some((v) => v.trim().length > 0);
 
   const updateInput = (index: number, value: string) => {
     const next = [...inputs];
@@ -60,7 +60,7 @@ export function GroundingExercise({ onComplete, onCancel }: GroundingExercisePro
         <Button type="button" variant="ghost" fullWidth onClick={currentStep === 0 ? onCancel : () => setCurrentStep(currentStep - 1)}>
           {currentStep === 0 ? 'Отмена' : 'Назад'}
         </Button>
-        <Button type="button" fullWidth disabled={!allFilled} onClick={isLast ? onComplete : () => setCurrentStep(currentStep + 1)}>
+        <Button type="button" fullWidth disabled={!hasAtLeastOne} onClick={isLast ? onComplete : () => setCurrentStep(currentStep + 1)}>
           {isLast ? 'Готово' : 'Далее'}
         </Button>
       </div>

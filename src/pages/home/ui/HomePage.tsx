@@ -1,51 +1,111 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/widgets/header';
 import { ThemeToggle } from '@/widgets/theme-toggle';
 import { Card, Button, LevelIndicator, Modal } from '@/shared/ui';
+import { Sparkline } from '@/shared/ui/Sparkline';
 import { useAnxietyEntries } from '@/entities/anxiety';
 import { LogAnxietyForm } from '@/features/log-anxiety';
+import { WorryTimer } from '@/features/worry-time';
 import { techniques } from '@/entities/technique';
+import { getLevelBgColor, getLevelTextColor } from '@/shared/lib/level-colors';
+import { sparklineData, trendDirection } from '@/shared/lib/insights';
+
+const QUICK_LEVELS = [
+  { range: '1-2', level: 2, label: 'Спокойно' },
+  { range: '3-4', level: 4, label: 'Легко' },
+  { range: '5-6', level: 6, label: 'Средне' },
+  { range: '7-8', level: 8, label: 'Сильно' },
+  { range: '9-10', level: 10, label: 'Паника' },
+];
 
 export function HomePage() {
-  const { latestEntry, addEntry } = useAnxietyEntries();
+  const entries = useAnxietyEntries((s) => s.entries);
+  const addEntry = useAnxietyEntries((s) => s.addEntry);
+  const latestEntry = entries[0] ?? null;
   const [showForm, setShowForm] = useState(false);
+  const [showWorryTimer, setShowWorryTimer] = useState(false);
+  const [tapped, setTapped] = useState<number | null>(null);
   const navigate = useNavigate();
 
   const quickTechniques = techniques.slice(0, 3);
+  const sparkData = useMemo(() => sparklineData(entries), [entries]);
+  const trend = useMemo(() => trendDirection(entries), [entries]);
+
+  const handleQuickTap = (level: number) => {
+    addEntry({ level, note: '', triggers: [] });
+    setTapped(level);
+    setTimeout(() => setTapped(null), 1500);
+  };
 
   return (
     <div className="space-y-4">
       <Header title="Anxiety Tracker" subtitle="Как вы себя чувствуете?" action={<ThemeToggle />} />
 
-      <Card className="text-center">
-        {latestEntry ? (
-          <div className="flex flex-col items-center gap-3">
-            <p className="text-sm text-muted">Последняя запись</p>
-            <LevelIndicator level={latestEntry.level} size="lg" />
-            <p className="text-sm text-muted">
-              Уровень тревожности: <strong>{latestEntry.level}/10</strong>
-            </p>
-          </div>
-        ) : (
-          <div className="py-4">
-            <p className="text-muted">Пока нет записей</p>
-            <p className="mt-1 text-sm text-faint">Начните отслеживать тревожность</p>
-          </div>
+      {/* One-tap check-in */}
+      <Card>
+        <p className="mb-3 text-sm font-medium text-subtle text-center">Быстрая запись</p>
+        <div className="flex gap-2">
+          {QUICK_LEVELS.map((q) => (
+            <button
+              key={q.level}
+              onClick={() => handleQuickTap(q.level)}
+              className={`flex flex-1 flex-col items-center gap-1 rounded-xl py-2 transition-all active:scale-95 ${getLevelBgColor(q.level)} ${getLevelTextColor(q.level)} ${tapped === q.level ? 'ring-2 ring-accent scale-95' : ''}`}
+            >
+              <span className="text-lg font-bold">{q.range}</span>
+              <span className="text-[10px] leading-tight">{q.label}</span>
+            </button>
+          ))}
+        </div>
+        {tapped && (
+          <p className="mt-2 text-center text-xs text-accent-fg animate-pulse">Записано!</p>
         )}
       </Card>
 
-      <Button fullWidth onClick={() => setShowForm(true)}>
-        + Записать уровень тревожности
+      {/* Latest entry with sparkline */}
+      {latestEntry && (
+        <Card className="flex items-center gap-4">
+          <LevelIndicator level={latestEntry.level} />
+          <div className="flex-1">
+            <p className="text-sm text-muted">Последняя запись</p>
+            <p className="text-sm font-medium text-fg">
+              {latestEntry.level}/10
+              {trend && (
+                <span className={`ml-1 ${trend === 'down' ? 'text-emerald-500' : trend === 'up' ? 'text-red-500' : ''}`}>
+                  {trend === 'up' ? '↑' : trend === 'down' ? '↓' : ''}
+                </span>
+              )}
+            </p>
+          </div>
+          <Sparkline data={sparkData} width={80} height={28} className="text-accent" />
+        </Card>
+      )}
+
+      <Button fullWidth variant="secondary" onClick={() => setShowForm(true)}>
+        + Подробная запись
       </Button>
+
+      {/* Worry Time card */}
+      <Card
+        className="flex cursor-pointer items-center gap-3 active:scale-[0.98] transition-transform"
+        onClick={() => setShowWorryTimer(true)}
+      >
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent-fg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-medium text-fg text-sm">Время беспокойства</p>
+          <p className="text-xs text-faint">Запланированная сессия для тревожных мыслей</p>
+        </div>
+      </Card>
 
       <div>
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-fg">Быстрые техники</h2>
-          <button
-            onClick={() => navigate('/techniques')}
-            className="text-sm text-accent-fg hover:underline"
-          >
+          <button onClick={() => navigate('/techniques')} className="text-sm text-accent-fg hover:underline">
             Все
           </button>
         </div>
@@ -78,12 +138,13 @@ export function HomePage() {
 
       <Modal open={showForm} onClose={() => setShowForm(false)} title="Новая запись">
         <LogAnxietyForm
-          onSubmit={(data) => {
-            addEntry(data);
-            setShowForm(false);
-          }}
+          onSubmit={(data) => { addEntry(data); setShowForm(false); }}
           onCancel={() => setShowForm(false)}
         />
+      </Modal>
+
+      <Modal open={showWorryTimer} onClose={() => setShowWorryTimer(false)} title="Время беспокойства">
+        <WorryTimer onClose={() => setShowWorryTimer(false)} />
       </Modal>
     </div>
   );
