@@ -8,7 +8,7 @@ import { StatsPage } from '@/pages/stats';
 export function App() {
   return (
     <HashRouter>
-      <div className="mx-auto min-h-screen max-w-lg px-4 pb-20">
+      <div className="mx-auto min-h-screen max-w-lg px-4 pb-20 pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/diary" element={<DiaryPage />} />
