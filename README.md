@@ -1,73 +1,113 @@
-# React + TypeScript + Vite
+# Anxiety Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Бесплатное PWA-приложение для отслеживания тревожности с доказательными техниками из когнитивно-поведенческой терапии (КПТ) и экзистенциальной психотерапии.
 
-Currently, two official plugins are available:
+**[Открыть приложение](https://kazbekbet.github.io/anxiety/)**
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Зачем
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Тревожность — одно из самых распространённых состояний. Приложение помогает:
 
-## Expanding the ESLint configuration
+- **Отслеживать** уровень тревоги и триггеры в дневнике
+- **Применять** терапевтические техники в момент тревоги
+- **Видеть** паттерны и прогресс через статистику
+- **Снижать** интенсивность через дыхательные и когнитивные упражнения
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Все данные хранятся локально на устройстве. Никаких аккаунтов, серверов или трекинга.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Возможности
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Дневник тревожности
+- Быстрая запись одним касанием (5 уровней)
+- Подробная запись с триггерами и заметками
+- Группировка по дням, редактирование, экспорт в JSON
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Техники
+| Категория | Техники |
+|-----------|---------|
+| **КПТ** | Запись мыслей (6 шагов), когнитивные искажения, поведенческий эксперимент |
+| **Дыхание** | Box Breathing 4-4-4-4, техника 4-7-8 с анимацией |
+| **Экзистенциальные** | Заземление 5-4-3-2-1, парадоксальная интенция, поиск смысла, принятие, осознание конечности |
+| **Worry Time** | Таймер запланированного беспокойства (5/10/15 мин) |
+
+### Статистика
+- График за 7 / 30 дней / всё время
+- Топ триггеров, самый спокойный день
+- Эффективность КПТ-записей (до/после)
+- Карточка прогресса (первые 7 записей vs последние)
+
+### UX
+- Mobile-first, устанавливается как PWA
+- Тёмная тема (light / dark / system)
+- Анимации модалок и дыхательных упражнений
+- Greeting по времени суток
+
+## Стек
+
+| Слой | Технологии |
+|------|-----------|
+| UI | React 19, TypeScript, Tailwind CSS v4 |
+| Состояние | Zustand с persist (localStorage) |
+| Сборка | Vite 8, PWA (vite-plugin-pwa) |
+| Тесты | Vitest, Testing Library |
+| Качество | ESLint, Prettier |
+| Деплой | GitHub Pages + GitHub Actions |
+| Архитектура | Feature-Sliced Design (FSD) |
+
+## Архитектура (FSD)
+
+```
+src/
+├── app/            Providers, routing, global styles, design tokens
+├── pages/          Home, Diary, Techniques, Stats
+├── widgets/        BottomNav, Header, ThemeToggle, ProgressCard, CompletionScreen
+├── features/       LogAnxiety, ThoughtRecord, Grounding, Breathing, WorryTime, Export
+├── entities/       AnxietyEntry, Technique (models + UI)
+└── shared/         UI kit, types, lib (storage, date, insights, theme, level-colors)
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Дизайн-система
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Цвета определены через CSS custom properties в `@theme` — одно место для всей палитры:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```css
+--color-surface     /* фон страницы */
+--color-card        /* фон карточки */
+--color-fg          /* основной текст */
+--color-accent      /* акцентный цвет */
+--color-accent-soft /* мягкий акцент */
+/* ... ~30 токенов */
 ```
+
+Тёмная тема переключается одним `.dark` классом — все токены переопределяются.
+
+## Запуск
+
+```bash
+npm install
+npm run dev          # dev-сервер на localhost:5173
+npm test             # запуск тестов
+npm run build        # production-сборка
+npm run lint         # проверка ESLint
+npm run format       # форматирование Prettier
+```
+
+## Деплой
+
+Автоматический через GitHub Actions при пуше в `main`:
+1. Lint + тесты
+2. Сборка
+3. Деплой на GitHub Pages
+
+## Принципы
+
+- **Доказательные техники** — только методы с научным обоснованием (КПТ, ACT, логотерапия)
+- **Приватность** — все данные на устройстве, нет серверов
+- **Простота** — минимум шагов до результата, особенно в момент тревоги
+- **Без геймификации** — никаких стриков и бейджей, чтобы не создавать дополнительную тревогу
+
+## Лицензия
+
+MIT
