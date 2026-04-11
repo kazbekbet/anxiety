@@ -1,6 +1,5 @@
 import { Card } from '@/shared/ui';
-import { useValuesStore } from '@/features/values-diary';
-import { VALUE_OPTIONS } from '@/features/values-diary/model/data';
+import { useValuesStore, VALUE_OPTIONS } from '@/features/values-diary';
 
 export function ValuesWidget() {
   const entries = useValuesStore((s) => s.entries);

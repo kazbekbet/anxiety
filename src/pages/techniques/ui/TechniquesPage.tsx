@@ -74,6 +74,7 @@ export function TechniquesPage() {
         <ThoughtRecordForm
           onSubmit={(data) => {
             addRecord(data);
+            if (activeTechnique) recordUsage(activeTechnique.id);
             const elapsedSeconds = Math.round((Date.now() - startTimeRef.current) / 1000);
             setCompletion({
               elapsedSeconds,
@@ -109,7 +110,7 @@ export function TechniquesPage() {
       return (
         <BreathingExercise
           techniqueId={activeTechnique.id}
-          onComplete={(elapsedSeconds) => setCompletion({ elapsedSeconds })}
+          onComplete={(elapsedSeconds) => { if (activeTechnique) recordUsage(activeTechnique.id); setCompletion({ elapsedSeconds }); }}
           onCancel={handleClose}
         />
       );

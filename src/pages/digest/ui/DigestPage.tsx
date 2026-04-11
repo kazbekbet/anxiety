@@ -5,6 +5,7 @@ import { Heatmap } from '@/widgets/heatmap';
 import { useAnxietyEntries } from '@/entities/anxiety';
 import { filterByPeriod, averageLevel } from '@/shared/lib/insights';
 import { generateSmartInsight } from '@/shared/lib/smart-insights';
+import { subDays, startOfDay, isWithinInterval } from 'date-fns';
 
 export function DigestPage() {
   const entries = useAnxietyEntries((s) => s.entries);
@@ -12,9 +13,11 @@ export function DigestPage() {
 
   const weekEntries = useMemo(() => filterByPeriod(entries, '7d'), [entries]);
   const prevWeekEntries = useMemo(() => {
-    const all30 = filterByPeriod(entries, '30d');
-    return all30.filter((e) => !weekEntries.includes(e)).slice(0, weekEntries.length * 2);
-  }, [entries, weekEntries]);
+    const now = new Date();
+    const start = startOfDay(subDays(now, 13));
+    const end = startOfDay(subDays(now, 6));
+    return entries.filter((e) => isWithinInterval(new Date(e.timestamp), { start, end }));
+  }, [entries]);
 
   const weekAvg = averageLevel(weekEntries);
   const prevAvg = averageLevel(prevWeekEntries);

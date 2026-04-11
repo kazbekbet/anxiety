@@ -23,9 +23,11 @@ export const useProgression = create<ProgressionState>()(
           },
         })),
       manualUnlock: (techniqueId) =>
-        set((state) => ({
-          manualUnlocks: [...state.manualUnlocks, techniqueId],
-        })),
+        set((state) =>
+          state.manualUnlocks.includes(techniqueId)
+            ? state
+            : { manualUnlocks: [...state.manualUnlocks, techniqueId] },
+        ),
       isUnlocked: (techniqueId, requiredId, requiredUses) => {
         if (!requiredId || !requiredUses) return true;
         const state = get();
