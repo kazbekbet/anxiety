@@ -10,7 +10,7 @@ export function App() {
   return (
     <ThemeProvider>
       <HashRouter>
-        <div className="mx-auto min-h-screen max-w-lg bg-surface pb-20 pt-[max(1rem,env(safe-area-inset-top))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
+        <div className="mx-auto min-h-screen max-w-lg bg-surface pb-[calc(5rem+env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/diary" element={<DiaryPage />} />
