@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button } from '@/shared/ui';
+import { Button, StepProgress, ChipGroup, inputClass } from '@/shared/ui';
 import {
   type CognitiveDistortion,
   COGNITIVE_DISTORTION_LABELS,
@@ -13,11 +13,6 @@ interface ThoughtRecordFormProps {
 }
 
 const ALL_DISTORTIONS = Object.keys(COGNITIVE_DISTORTION_LABELS) as CognitiveDistortion[];
-
-const inputClass =
-  'w-full resize-none rounded-xl border border-input-border bg-input p-3 text-sm text-fg placeholder:text-faint focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring';
-
-const chipOff = 'bg-elevated text-subtle hover:bg-hover';
 
 export function ThoughtRecordForm({ onSubmit, onCancel }: ThoughtRecordFormProps) {
   const [step, setStep] = useState(0);
@@ -80,13 +75,12 @@ export function ThoughtRecordForm({ onSubmit, onCancel }: ThoughtRecordFormProps
     <div key="distortions">
       <h3 className="mb-1 font-medium text-fg">Шаг 4: Когнитивные искажения</h3>
       <p className="mb-3 text-sm text-muted">Какие ловушки мышления вы заметили?</p>
-      <div className="flex flex-wrap gap-2">
-        {ALL_DISTORTIONS.map((d) => (
-          <button key={d} type="button" onClick={() => toggleDistortion(d)} className={`rounded-full px-3 py-1.5 text-sm transition-colors ${cognitiveDistortions.includes(d) ? 'bg-accent text-white' : chipOff}`}>
-            {COGNITIVE_DISTORTION_LABELS[d]}
-          </button>
-        ))}
-      </div>
+      <ChipGroup
+        options={ALL_DISTORTIONS}
+        selected={cognitiveDistortions}
+        onToggle={toggleDistortion}
+        labels={COGNITIVE_DISTORTION_LABELS}
+      />
     </div>,
     <div key="alternative">
       <h3 className="mb-1 font-medium text-fg">Шаг 5: Альтернативная мысль</h3>
@@ -111,11 +105,7 @@ export function ThoughtRecordForm({ onSubmit, onCancel }: ThoughtRecordFormProps
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-1">
-        {Array.from({ length: totalSteps }).map((_, i) => (
-          <div key={i} className={`h-1 flex-1 rounded-full ${i <= step ? 'bg-accent' : 'bg-hover'}`} />
-        ))}
-      </div>
+      <StepProgress total={totalSteps} current={step} />
       {steps[step]}
       <div className="flex gap-3">
         <Button type="button" variant="ghost" fullWidth onClick={step === 0 ? onCancel : () => setStep(step - 1)}>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Card } from '@/shared/ui';
+import { Button, Card, StepProgress } from '@/shared/ui';
 import type { Technique } from '@/shared/types';
 
 interface TechniqueStepsProps {
@@ -14,11 +14,7 @@ export function TechniqueSteps({ technique, onComplete }: TechniqueStepsProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-1">
-        {technique.steps.map((_, i) => (
-          <div key={i} className={`h-1 flex-1 rounded-full ${i <= currentStep ? 'bg-accent' : 'bg-hover'}`} />
-        ))}
-      </div>
+      <StepProgress total={totalSteps} current={currentStep} />
 
       <Card className="bg-accent-soft">
         <p className="text-sm text-muted">

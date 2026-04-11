@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Card } from '@/shared/ui';
+import { Button, Card, StepProgress } from '@/shared/ui';
 import { getTestById, getLevel } from '@/entities/assessment';
 import { useAssessmentResults } from '@/entities/assessment';
 
@@ -143,15 +143,8 @@ export function AssessmentPage() {
       </div>
 
       {/* Progress bar */}
-      <div className="mb-6 flex gap-1">
-        {test.questions.map((_, i) => (
-          <div
-            key={i}
-            className={`h-1 flex-1 rounded-full transition-colors ${
-              i <= step ? 'bg-accent' : 'bg-hover'
-            }`}
-          />
-        ))}
+      <div className="mb-6">
+        <StepProgress total={test.questionCount} current={step} />
       </div>
 
       {/* Preamble */}

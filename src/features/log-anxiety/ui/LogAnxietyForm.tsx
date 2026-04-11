@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button } from '@/shared/ui';
+import { Button, ChipGroup, inputClass } from '@/shared/ui';
 import { getLevelTextColor, getLevelBgColor } from '@/shared/lib/level-colors';
 
 const TRIGGER_OPTIONS = [
@@ -11,15 +11,12 @@ const TRIGGER_OPTIONS = [
   'Социальные ситуации',
   'Неопределённость',
   'Сон',
-];
+] as const;
 
 interface LogAnxietyFormProps {
   onSubmit: (data: { level: number; note: string; triggers: string[] }) => void;
   onCancel: () => void;
 }
-
-const inputClass =
-  'w-full resize-none rounded-xl border border-input-border bg-input p-3 text-sm text-fg placeholder:text-faint focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring';
 
 export function LogAnxietyForm({ onSubmit, onCancel }: LogAnxietyFormProps) {
   const [level, setLevel] = useState(5);
@@ -64,22 +61,7 @@ export function LogAnxietyForm({ onSubmit, onCancel }: LogAnxietyFormProps) {
 
       <div>
         <label className="mb-2 block text-sm font-medium text-subtle">Триггеры</label>
-        <div className="flex flex-wrap gap-2">
-          {TRIGGER_OPTIONS.map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => toggleTrigger(t)}
-              className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
-                triggers.includes(t)
-                  ? 'bg-accent text-white'
-                  : 'bg-elevated text-subtle hover:bg-hover'
-              }`}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
+        <ChipGroup options={TRIGGER_OPTIONS} selected={triggers} onToggle={toggleTrigger} />
       </div>
 
       <div>
