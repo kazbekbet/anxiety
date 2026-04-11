@@ -12,6 +12,7 @@ const TechniquesPage = lazy(() => import('@/pages/techniques').then((m) => ({ de
 const StatsPage = lazy(() => import('@/pages/stats').then((m) => ({ default: m.StatsPage })));
 const TestsPage = lazy(() => import('@/pages/tests').then((m) => ({ default: m.TestsPage })));
 const ExposurePage = lazy(() => import('@/pages/exposure').then((m) => ({ default: m.ExposurePage })));
+const DigestPage = lazy(() => import('@/pages/digest').then((m) => ({ default: m.DigestPage })));
 const AssessmentPage = lazy(() => import('@/pages/assessment').then((m) => ({ default: m.AssessmentPage })));
 const AssessmentResultPage = lazy(() => import('@/pages/assessment').then((m) => ({ default: m.AssessmentResultPage })));
 
@@ -20,6 +21,10 @@ function AppRoutes() {
 
   return (
     <Routes>
+      <Route
+        path="/digest"
+        element={<Suspense fallback={fallback}><DigestPage /></Suspense>}
+      />
       <Route
         path="/stats/tests/:testId"
         element={<Suspense fallback={fallback}><AssessmentPage /></Suspense>}

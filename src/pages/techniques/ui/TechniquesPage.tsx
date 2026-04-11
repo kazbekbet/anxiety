@@ -2,12 +2,15 @@ import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Header } from '@/widgets/header';
 import { Card, Modal } from '@/shared/ui';
-import { techniques, TechniqueCard } from '@/entities/technique';
+import { techniques, TechniqueCard, useProgression } from '@/entities/technique';
 import { useThoughtRecords } from '@/entities/anxiety';
 import { ThoughtRecordForm } from '@/features/thought-record';
 import { GroundingExercise } from '@/features/grounding';
 import { BreathingExercise } from '@/features/breathing';
 import { BodyScan } from '@/features/body-scan';
+import { TippExercise } from '@/features/tipp';
+import { StopSkill } from '@/features/stop-skill';
+import { PmrExercise } from '@/features/pmr';
 import { CompletionScreen } from '@/widgets/completion-screen';
 import { TechniqueSteps } from './TechniqueSteps';
 import type { Technique, TechniqueSituation } from '@/shared/types';
@@ -31,6 +34,7 @@ export function TechniquesPage() {
   const [activeTechnique, setActiveTechnique] = useState<Technique | null>(null);
   const [completion, setCompletion] = useState<CompletionData | null>(null);
   const addRecord = useThoughtRecords((s) => s.addRecord);
+  const { recordUsage, isUnlocked, getUsageCount, manualUnlock } = useProgression();
   const startTimeRef = useRef<number>(0);
 
   const filtered = tab === 'all' ? techniques : techniques.filter((t) => t.situation === tab);
@@ -43,6 +47,7 @@ export function TechniquesPage() {
 
   const handleComplete = () => {
     const elapsedSeconds = Math.round((Date.now() - startTimeRef.current) / 1000);
+    if (activeTechnique) recordUsage(activeTechnique.id);
     setCompletion({ elapsedSeconds });
   };
 
@@ -88,6 +93,18 @@ export function TechniquesPage() {
       return <BodyScan onComplete={() => handleComplete()} onCancel={handleClose} />;
     }
 
+    if (activeTechnique.id === 'tipp') {
+      return <TippExercise onComplete={handleComplete} onCancel={handleClose} />;
+    }
+
+    if (activeTechnique.id === 'stop-skill') {
+      return <StopSkill onComplete={handleComplete} onCancel={handleClose} />;
+    }
+
+    if (activeTechnique.id === 'pmr') {
+      return <PmrExercise onComplete={handleComplete} onCancel={handleClose} />;
+    }
+
     if (activeTechnique.id === 'box-breathing' || activeTechnique.id === 'breathing-478') {
       return (
         <BreathingExercise
@@ -120,9 +137,21 @@ export function TechniquesPage() {
       </div>
 
       <div className="space-y-3">
-        {filtered.map((t) => (
-          <TechniqueCard key={t.id} technique={t} onStart={handleStart} />
-        ))}
+        {filtered.map((t) => {
+          const uc = t.unlockCondition;
+          const unlocked = isUnlocked(t.id, uc?.requiredId, uc?.uses);
+          const progress = uc ? { current: getUsageCount(uc.requiredId), required: uc.uses } : undefined;
+          return (
+            <TechniqueCard
+              key={t.id}
+              technique={t}
+              onStart={handleStart}
+              locked={!unlocked}
+              unlockProgress={!unlocked ? progress : undefined}
+              onManualUnlock={!unlocked ? () => manualUnlock(t.id) : undefined}
+            />
+          );
+        })}
       </div>
 
       {/* Exposure hierarchy link */}
