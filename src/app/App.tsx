@@ -6,6 +6,7 @@ import { HomePage } from '@/pages/home';
 import { DiaryPage } from '@/pages/diary';
 import { TechniquesPage } from '@/pages/techniques';
 import { StatsPage } from '@/pages/stats';
+import { TestsPage } from '@/pages/tests';
 
 const AssessmentPage = lazy(() =>
   import('@/pages/assessment').then((m) => ({ default: m.AssessmentPage })),
@@ -37,6 +38,7 @@ export function App() {
                     <Route path="/diary" element={<DiaryPage />} />
                     <Route path="/techniques" element={<TechniquesPage />} />
                     <Route path="/stats" element={<StatsPage />} />
+                    <Route path="/tests" element={<TestsPage />} />
                   </Routes>
                 </div>
                 <BottomNav />

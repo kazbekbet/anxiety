@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Card, Button } from '@/shared/ui';
 import { LevelBar } from '@/shared/ui/LevelIndicator';
-import { assessments, getLevel } from '@/entities/assessment';
+import { allAssessments, getLevel } from '@/entities/assessment';
 import { useAssessmentResults } from '@/entities/assessment';
 import { formatEntryDate } from '@/shared/lib/date';
 
@@ -10,7 +10,7 @@ export function AssessmentWidget() {
   const navigate = useNavigate();
 
   const now = new Date();
-  const testCards = assessments.map((test) => {
+  const testCards = allAssessments.slice(0, 2).map((test) => {
     const lastResult = results.find((r) => r.testId === test.id);
     const daysSince = lastResult
       ? Math.floor((now.getTime() - new Date(lastResult.timestamp).getTime()) / 86400000)

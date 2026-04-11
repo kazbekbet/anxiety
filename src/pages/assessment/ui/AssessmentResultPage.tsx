@@ -44,7 +44,7 @@ export function AssessmentResultPage() {
   const delta = prevResult ? latest.score - prevResult.score : null;
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-lg flex-col px-4 py-6">
+    <div className="mx-auto flex min-h-screen max-w-lg flex-col px-4 pb-6 pt-[max(1.5rem,env(safe-area-inset-top))]">
       <h1 className="mb-6 text-center text-xl font-bold text-fg">{test.shortTitle} — результат</h1>
 
       {/* Gauge */}
