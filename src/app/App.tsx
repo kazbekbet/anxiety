@@ -8,6 +8,9 @@ import { DiaryPage } from '@/pages/diary';
 import { TechniquesPage } from '@/pages/techniques';
 import { StatsPage } from '@/pages/stats';
 import { TestsPage } from '@/pages/tests';
+const ExposurePage = lazy(() =>
+  import('@/pages/exposure').then((m) => ({ default: m.ExposurePage })),
+);
 
 const AssessmentPage = lazy(() =>
   import('@/pages/assessment').then((m) => ({ default: m.AssessmentPage })),
@@ -41,6 +44,7 @@ export function App() {
                     <Route path="/techniques" element={<TechniquesPage />} />
                     <Route path="/stats" element={<StatsPage />} />
                     <Route path="/tests" element={<TestsPage />} />
+                    <Route path="/exposure" element={<Suspense fallback={null}><ExposurePage /></Suspense>} />
                   </Routes>
                 </div>
                 <BottomNav />

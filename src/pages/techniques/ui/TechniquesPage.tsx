@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { Header } from '@/widgets/header';
-import { Modal } from '@/shared/ui';
+import { Card, Modal } from '@/shared/ui';
 import { techniques, TechniqueCard } from '@/entities/technique';
 import { useThoughtRecords } from '@/entities/anxiety';
 import { ThoughtRecordForm } from '@/features/thought-record';
@@ -8,14 +9,21 @@ import { GroundingExercise } from '@/features/grounding';
 import { BreathingExercise } from '@/features/breathing';
 import { CompletionScreen } from '@/widgets/completion-screen';
 import { TechniqueSteps } from './TechniqueSteps';
-import type { Technique } from '@/shared/types';
+import type { Technique, TechniqueSituation } from '@/shared/types';
 
-type Tab = 'all' | 'cbt' | 'existential';
+type Tab = 'all' | TechniqueSituation;
 
 interface CompletionData {
   elapsedSeconds: number;
   thoughtRecordDiff?: { before: number; after: number };
 }
+
+const TABS: { key: Tab; label: string }[] = [
+  { key: 'all', label: 'Все' },
+  { key: 'panic', label: 'Прямо сейчас' },
+  { key: 'rumination', label: 'Крутятся мысли' },
+  { key: 'deep-work', label: 'Разобраться' },
+];
 
 export function TechniquesPage() {
   const [tab, setTab] = useState<Tab>('all');
@@ -24,14 +32,7 @@ export function TechniquesPage() {
   const addRecord = useThoughtRecords((s) => s.addRecord);
   const startTimeRef = useRef<number>(0);
 
-  const filtered =
-    tab === 'all' ? techniques : techniques.filter((t) => t.category === tab);
-
-  const tabs: { key: Tab; label: string }[] = [
-    { key: 'all', label: 'Все' },
-    { key: 'cbt', label: 'КПТ' },
-    { key: 'existential', label: 'Экзистенциальные' },
-  ];
+  const filtered = tab === 'all' ? techniques : techniques.filter((t) => t.situation === tab);
 
   const handleStart = (technique: Technique) => {
     startTimeRef.current = Date.now();
@@ -67,15 +68,10 @@ export function TechniquesPage() {
         <ThoughtRecordForm
           onSubmit={(data) => {
             addRecord(data);
-            const elapsedSeconds = Math.round(
-              (Date.now() - startTimeRef.current) / 1000,
-            );
+            const elapsedSeconds = Math.round((Date.now() - startTimeRef.current) / 1000);
             setCompletion({
               elapsedSeconds,
-              thoughtRecordDiff: {
-                before: data.emotionIntensity,
-                after: data.newEmotionIntensity,
-              },
+              thoughtRecordDiff: { before: data.emotionIntensity, after: data.newEmotionIntensity },
             });
           }}
           onCancel={handleClose}
@@ -84,50 +80,33 @@ export function TechniquesPage() {
     }
 
     if (activeTechnique.id === 'grounding-54321') {
-      return (
-        <GroundingExercise
-          onComplete={handleComplete}
-          onCancel={handleClose}
-        />
-      );
+      return <GroundingExercise onComplete={handleComplete} onCancel={handleClose} />;
     }
 
-    if (
-      activeTechnique.id === 'box-breathing' ||
-      activeTechnique.id === 'breathing-478'
-    ) {
+    if (activeTechnique.id === 'box-breathing' || activeTechnique.id === 'breathing-478') {
       return (
         <BreathingExercise
           techniqueId={activeTechnique.id}
-          onComplete={(elapsedSeconds) => {
-            setCompletion({ elapsedSeconds });
-          }}
+          onComplete={(elapsedSeconds) => setCompletion({ elapsedSeconds })}
           onCancel={handleClose}
         />
       );
     }
 
-    return (
-      <TechniqueSteps
-        technique={activeTechnique}
-        onComplete={handleComplete}
-      />
-    );
+    return <TechniqueSteps technique={activeTechnique} onComplete={handleComplete} />;
   };
 
   return (
     <div className="space-y-4">
-      <Header title="Техники" subtitle="Инструменты для работы с тревогой" />
+      <Header title="Техники" subtitle="Выберите, что вы чувствуете" />
 
-      <div className="flex gap-2">
-        {tabs.map((t) => (
+      <div className="flex gap-2 overflow-x-auto scrollbar-none -mx-1 px-1">
+        {TABS.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-              tab === t.key
-                ? 'bg-accent text-white'
-                : 'bg-elevated text-subtle hover:bg-hover'
+            className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+              tab === t.key ? 'bg-accent text-white' : 'bg-elevated text-subtle hover:bg-hover'
             }`}
           >
             {t.label}
@@ -140,6 +119,21 @@ export function TechniquesPage() {
           <TechniqueCard key={t.id} technique={t} onStart={handleStart} />
         ))}
       </div>
+
+      {/* Exposure hierarchy link */}
+      {(tab === 'all' || tab === 'deep-work') && (
+        <Link to="/exposure" className="block">
+          <Card className="flex items-center gap-3 active:scale-[0.98] transition-transform">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent-fg text-lg">
+              ↗
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-fg text-sm">Лестница страха</p>
+              <p className="text-xs text-muted">Пошаговая экспозиция к тревожным ситуациям</p>
+            </div>
+          </Card>
+        </Link>
+      )}
 
       <Modal
         open={!!activeTechnique}
