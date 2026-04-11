@@ -43,11 +43,14 @@ export const COGNITIVE_DISTORTION_LABELS: Record<CognitiveDistortion, string> = 
   magnification: 'Преувеличение',
 };
 
+export type TechniqueSituation = 'panic' | 'rumination' | 'deep-work';
+
 export interface Technique {
   id: string;
   title: string;
   description: string;
   category: 'cbt' | 'existential';
+  situation: TechniqueSituation;
   duration: string;
   steps: string[];
 }

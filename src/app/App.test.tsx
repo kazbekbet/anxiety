@@ -18,7 +18,7 @@ describe('App', () => {
   it('navigates to techniques page', async () => {
     render(<App />);
     await userEvent.click(screen.getByText('Техники'));
-    expect(screen.getByText('Инструменты для работы с тревогой')).toBeInTheDocument();
+    expect(screen.getByText('Выберите, что вы чувствуете')).toBeInTheDocument();
   });
 
   it('navigates to stats page', async () => {
