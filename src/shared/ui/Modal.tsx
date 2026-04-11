@@ -10,9 +10,19 @@ interface ModalProps {
 export function Modal({ open, onClose, title, children }: ModalProps) {
   useEffect(() => {
     if (open) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
       document.body.style.overflow = 'hidden';
       return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
         document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
       };
     }
   }, [open]);
@@ -22,8 +32,8 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
       <div className="fixed inset-0 bg-black/40 animate-fade-in" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-lg rounded-t-2xl bg-card p-5 pb-[calc(2rem+env(safe-area-inset-bottom))] animate-slide-up sm:rounded-2xl sm:pb-5 sm:animate-fade-in">
-        <div className="mb-4 flex items-center justify-between">
+      <div className="relative z-10 w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-t-2xl bg-card p-5 pb-[calc(2rem+env(safe-area-inset-bottom))] animate-slide-up sm:rounded-2xl sm:pb-5 sm:animate-fade-in">
+        <div className="mb-4 flex items-center justify-between sticky top-0 bg-card pb-2 -mt-1 pt-1 z-10">
           <h2 className="text-lg font-semibold text-fg">{title}</h2>
           <button
             onClick={onClose}
