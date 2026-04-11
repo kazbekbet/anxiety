@@ -1,19 +1,28 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Header } from '@/widgets/header';
 import { Modal } from '@/shared/ui';
 import { techniques, TechniqueCard } from '@/entities/technique';
 import { useThoughtRecords } from '@/entities/anxiety';
 import { ThoughtRecordForm } from '@/features/thought-record';
 import { GroundingExercise } from '@/features/grounding';
+import { BreathingExercise } from '@/features/breathing';
+import { CompletionScreen } from '@/widgets/completion-screen';
 import { TechniqueSteps } from './TechniqueSteps';
 import type { Technique } from '@/shared/types';
 
 type Tab = 'all' | 'cbt' | 'existential';
 
+interface CompletionData {
+  elapsedSeconds: number;
+  thoughtRecordDiff?: { before: number; after: number };
+}
+
 export function TechniquesPage() {
   const [tab, setTab] = useState<Tab>('all');
   const [activeTechnique, setActiveTechnique] = useState<Technique | null>(null);
+  const [completion, setCompletion] = useState<CompletionData | null>(null);
   const addRecord = useThoughtRecords((s) => s.addRecord);
+  const startTimeRef = useRef<number>(0);
 
   const filtered =
     tab === 'all' ? techniques : techniques.filter((t) => t.category === tab);
@@ -25,20 +34,51 @@ export function TechniquesPage() {
   ];
 
   const handleStart = (technique: Technique) => {
+    startTimeRef.current = Date.now();
     setActiveTechnique(technique);
+    setCompletion(null);
+  };
+
+  const handleComplete = () => {
+    const elapsedSeconds = Math.round((Date.now() - startTimeRef.current) / 1000);
+    setCompletion({ elapsedSeconds });
+  };
+
+  const handleClose = () => {
+    setActiveTechnique(null);
+    setCompletion(null);
   };
 
   const renderTechniqueContent = () => {
     if (!activeTechnique) return null;
+
+    if (completion) {
+      return (
+        <CompletionScreen
+          elapsedSeconds={completion.elapsedSeconds}
+          thoughtRecordDiff={completion.thoughtRecordDiff}
+          onClose={handleClose}
+        />
+      );
+    }
 
     if (activeTechnique.id === 'thought-record') {
       return (
         <ThoughtRecordForm
           onSubmit={(data) => {
             addRecord(data);
-            setActiveTechnique(null);
+            const elapsedSeconds = Math.round(
+              (Date.now() - startTimeRef.current) / 1000,
+            );
+            setCompletion({
+              elapsedSeconds,
+              thoughtRecordDiff: {
+                before: data.emotionIntensity,
+                after: data.newEmotionIntensity,
+              },
+            });
           }}
-          onCancel={() => setActiveTechnique(null)}
+          onCancel={handleClose}
         />
       );
     }
@@ -46,8 +86,23 @@ export function TechniquesPage() {
     if (activeTechnique.id === 'grounding-54321') {
       return (
         <GroundingExercise
-          onComplete={() => setActiveTechnique(null)}
-          onCancel={() => setActiveTechnique(null)}
+          onComplete={handleComplete}
+          onCancel={handleClose}
+        />
+      );
+    }
+
+    if (
+      activeTechnique.id === 'box-breathing' ||
+      activeTechnique.id === 'breathing-478'
+    ) {
+      return (
+        <BreathingExercise
+          techniqueId={activeTechnique.id}
+          onComplete={(elapsedSeconds) => {
+            setCompletion({ elapsedSeconds });
+          }}
+          onCancel={handleClose}
         />
       );
     }
@@ -55,7 +110,7 @@ export function TechniquesPage() {
     return (
       <TechniqueSteps
         technique={activeTechnique}
-        onComplete={() => setActiveTechnique(null)}
+        onComplete={handleComplete}
       />
     );
   };
@@ -88,8 +143,8 @@ export function TechniquesPage() {
 
       <Modal
         open={!!activeTechnique}
-        onClose={() => setActiveTechnique(null)}
-        title={activeTechnique?.title ?? ''}
+        onClose={handleClose}
+        title={completion ? 'Завершено' : (activeTechnique?.title ?? '')}
       >
         {renderTechniqueContent()}
       </Modal>
