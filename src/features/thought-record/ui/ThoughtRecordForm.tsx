@@ -14,6 +14,12 @@ interface ThoughtRecordFormProps {
 
 const ALL_DISTORTIONS = Object.keys(COGNITIVE_DISTORTION_LABELS) as CognitiveDistortion[];
 
+const inputClass =
+  'w-full resize-none rounded-xl border border-slate-200 bg-white p-3 text-sm placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-50 dark:placeholder:text-slate-500';
+
+const chipOff =
+  'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600';
+
 export function ThoughtRecordForm({ onSubmit, onCancel }: ThoughtRecordFormProps) {
   const [step, setStep] = useState(0);
   const [situation, setSituation] = useState('');
@@ -53,40 +59,40 @@ export function ThoughtRecordForm({ onSubmit, onCancel }: ThoughtRecordFormProps
 
   const steps = [
     <div key="situation">
-      <h3 className="mb-1 font-medium text-slate-900">Шаг 1: Ситуация</h3>
-      <p className="mb-3 text-sm text-slate-500">Опишите ситуацию, которая вызвала тревогу</p>
+      <h3 className="mb-1 font-medium text-slate-900 dark:text-slate-50">Шаг 1: Ситуация</h3>
+      <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">Опишите ситуацию, которая вызвала тревогу</p>
       <textarea
         value={situation}
         onChange={(e) => setSituation(e.target.value)}
         placeholder="Что произошло?"
         rows={3}
-        className="w-full resize-none rounded-xl border border-slate-200 p-3 text-sm placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+        className={inputClass}
         autoFocus
       />
     </div>,
     <div key="thought">
-      <h3 className="mb-1 font-medium text-slate-900">Шаг 2: Автоматическая мысль</h3>
-      <p className="mb-3 text-sm text-slate-500">Какая мысль возникла первой?</p>
+      <h3 className="mb-1 font-medium text-slate-900 dark:text-slate-50">Шаг 2: Автоматическая мысль</h3>
+      <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">Какая мысль возникла первой?</p>
       <textarea
         value={automaticThought}
         onChange={(e) => setAutomaticThought(e.target.value)}
         placeholder="Я подумал(а), что..."
         rows={3}
-        className="w-full resize-none rounded-xl border border-slate-200 p-3 text-sm placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+        className={inputClass}
         autoFocus
       />
     </div>,
     <div key="emotion">
-      <h3 className="mb-1 font-medium text-slate-900">Шаг 3: Эмоция</h3>
-      <p className="mb-3 text-sm text-slate-500">Какую эмоцию вы почувствовали?</p>
+      <h3 className="mb-1 font-medium text-slate-900 dark:text-slate-50">Шаг 3: Эмоция</h3>
+      <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">Какую эмоцию вы почувствовали?</p>
       <input
         value={emotion}
         onChange={(e) => setEmotion(e.target.value)}
         placeholder="Например: страх, тревога, стыд"
-        className="mb-4 w-full rounded-xl border border-slate-200 p-3 text-sm placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+        className={`mb-4 ${inputClass}`}
         autoFocus
       />
-      <label className="mb-2 block text-sm text-slate-600">Интенсивность</label>
+      <label className="mb-2 block text-sm text-slate-600 dark:text-slate-400">Интенсивность</label>
       <div className="flex items-center gap-3">
         <input
           type="range"
@@ -104,8 +110,8 @@ export function ThoughtRecordForm({ onSubmit, onCancel }: ThoughtRecordFormProps
       </div>
     </div>,
     <div key="distortions">
-      <h3 className="mb-1 font-medium text-slate-900">Шаг 4: Когнитивные искажения</h3>
-      <p className="mb-3 text-sm text-slate-500">Какие ловушки мышления вы заметили?</p>
+      <h3 className="mb-1 font-medium text-slate-900 dark:text-slate-50">Шаг 4: Когнитивные искажения</h3>
+      <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">Какие ловушки мышления вы заметили?</p>
       <div className="flex flex-wrap gap-2">
         {ALL_DISTORTIONS.map((d) => (
           <button
@@ -113,9 +119,7 @@ export function ThoughtRecordForm({ onSubmit, onCancel }: ThoughtRecordFormProps
             type="button"
             onClick={() => toggleDistortion(d)}
             className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
-              cognitiveDistortions.includes(d)
-                ? 'bg-indigo-500 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              cognitiveDistortions.includes(d) ? 'bg-indigo-500 text-white' : chipOff
             }`}
           >
             {COGNITIVE_DISTORTION_LABELS[d]}
@@ -124,20 +128,20 @@ export function ThoughtRecordForm({ onSubmit, onCancel }: ThoughtRecordFormProps
       </div>
     </div>,
     <div key="alternative">
-      <h3 className="mb-1 font-medium text-slate-900">Шаг 5: Альтернативная мысль</h3>
-      <p className="mb-3 text-sm text-slate-500">Как можно переформулировать мысль?</p>
+      <h3 className="mb-1 font-medium text-slate-900 dark:text-slate-50">Шаг 5: Альтернативная мысль</h3>
+      <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">Как можно переформулировать мысль?</p>
       <textarea
         value={alternativeThought}
         onChange={(e) => setAlternativeThought(e.target.value)}
         placeholder="Более реалистичный взгляд..."
         rows={3}
-        className="w-full resize-none rounded-xl border border-slate-200 p-3 text-sm placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+        className={inputClass}
         autoFocus
       />
     </div>,
     <div key="result">
-      <h3 className="mb-1 font-medium text-slate-900">Шаг 6: Переоценка</h3>
-      <p className="mb-3 text-sm text-slate-500">
+      <h3 className="mb-1 font-medium text-slate-900 dark:text-slate-50">Шаг 6: Переоценка</h3>
+      <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">
         Какова интенсивность эмоции теперь?
       </p>
       <div className="flex items-center gap-3">
@@ -155,7 +159,7 @@ export function ThoughtRecordForm({ onSubmit, onCancel }: ThoughtRecordFormProps
           {newEmotionIntensity}
         </div>
       </div>
-      <div className="mt-4 rounded-xl bg-slate-50 p-3 text-sm text-slate-600">
+      <div className="mt-4 rounded-xl bg-slate-50 p-3 text-sm text-slate-600 dark:bg-slate-700 dark:text-slate-300">
         <p>
           Было: <strong>{emotionIntensity}/10</strong> → Стало:{' '}
           <strong>{newEmotionIntensity}/10</strong>
@@ -173,7 +177,7 @@ export function ThoughtRecordForm({ onSubmit, onCancel }: ThoughtRecordFormProps
         {Array.from({ length: totalSteps }).map((_, i) => (
           <div
             key={i}
-            className={`h-1 flex-1 rounded-full ${i <= step ? 'bg-indigo-500' : 'bg-slate-200'}`}
+            className={`h-1 flex-1 rounded-full ${i <= step ? 'bg-indigo-500' : 'bg-slate-200 dark:bg-slate-600'}`}
           />
         ))}
       </div>

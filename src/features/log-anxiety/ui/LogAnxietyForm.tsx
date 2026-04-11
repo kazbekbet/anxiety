@@ -18,6 +18,9 @@ interface LogAnxietyFormProps {
   onCancel: () => void;
 }
 
+const inputClass =
+  'w-full resize-none rounded-xl border border-slate-200 bg-white p-3 text-sm placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-50 dark:placeholder:text-slate-500';
+
 export function LogAnxietyForm({ onSubmit, onCancel }: LogAnxietyFormProps) {
   const [level, setLevel] = useState(5);
   const [note, setNote] = useState('');
@@ -35,7 +38,7 @@ export function LogAnxietyForm({ onSubmit, onCancel }: LogAnxietyFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="mb-2 block text-sm font-medium text-slate-700">
+        <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
           Уровень тревожности
         </label>
         <div className="flex items-center gap-4">
@@ -60,7 +63,7 @@ export function LogAnxietyForm({ onSubmit, onCancel }: LogAnxietyFormProps) {
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-slate-700">Триггеры</label>
+        <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Триггеры</label>
         <div className="flex flex-wrap gap-2">
           {TRIGGER_OPTIONS.map((t) => (
             <button
@@ -70,7 +73,7 @@ export function LogAnxietyForm({ onSubmit, onCancel }: LogAnxietyFormProps) {
               className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
                 triggers.includes(t)
                   ? 'bg-indigo-500 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
               }`}
             >
               {t}
@@ -80,13 +83,13 @@ export function LogAnxietyForm({ onSubmit, onCancel }: LogAnxietyFormProps) {
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-slate-700">Заметка</label>
+        <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Заметка</label>
         <textarea
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder="Что вы чувствуете?"
           rows={3}
-          className="w-full resize-none rounded-xl border border-slate-200 p-3 text-sm placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+          className={inputClass}
         />
       </div>
 

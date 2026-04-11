@@ -36,21 +36,21 @@ export function StatsPage() {
 
       <div className="grid grid-cols-3 gap-3">
         <Card className="text-center">
-          <p className="text-2xl font-bold text-indigo-600">{entries.length}</p>
-          <p className="text-xs text-slate-500">Записей</p>
+          <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{entries.length}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Записей</p>
         </Card>
         <Card className="text-center">
-          <p className="text-2xl font-bold text-indigo-600">{records.length}</p>
-          <p className="text-xs text-slate-500">Мыслей КПТ</p>
+          <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{records.length}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Мыслей КПТ</p>
         </Card>
         <Card className="text-center">
-          <p className="text-2xl font-bold text-indigo-600">{overallAverage || '—'}</p>
-          <p className="text-xs text-slate-500">Средний</p>
+          <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{overallAverage || '—'}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Средний</p>
         </Card>
       </div>
 
       <Card>
-        <h3 className="mb-4 font-semibold text-slate-900">Тревожность за 7 дней</h3>
+        <h3 className="mb-4 font-semibold text-slate-900 dark:text-slate-50">Тревожность за 7 дней</h3>
         {entries.length === 0 ? (
           <p className="py-8 text-center text-sm text-slate-400">
             Нет данных — добавьте записи в дневник
@@ -59,12 +59,12 @@ export function StatsPage() {
           <div className="flex items-end justify-between gap-2" style={{ height: 160 }}>
             {chartData.map((d, i) => (
               <div key={i} className="flex flex-1 flex-col items-center gap-1">
-                <span className="text-xs font-medium text-slate-600">
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
                   {d.value || ''}
                 </span>
                 <div className="w-full flex flex-col justify-end" style={{ height: 120 }}>
                   <div
-                    className={`w-full rounded-t-md transition-all duration-300 ${d.value ? getLevelColor(d.value) : 'bg-slate-100'}`}
+                    className={`w-full rounded-t-md transition-all duration-300 ${d.value ? getLevelColor(d.value) : 'bg-slate-100 dark:bg-slate-700'}`}
                     style={{ height: d.value ? `${(d.value / 10) * 100}%` : '4px' }}
                   />
                 </div>
@@ -77,23 +77,23 @@ export function StatsPage() {
 
       {entries.length > 0 && (
         <Card>
-          <h3 className="mb-3 font-semibold text-slate-900">Сводка</h3>
+          <h3 className="mb-3 font-semibold text-slate-900 dark:text-slate-50">Сводка</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-slate-500">Максимум</span>
-              <span className="font-medium text-slate-900">{maxLevel}/10</span>
+              <span className="text-slate-500 dark:text-slate-400">Максимум</span>
+              <span className="font-medium text-slate-900 dark:text-slate-50">{maxLevel}/10</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">Минимум</span>
-              <span className="font-medium text-slate-900">{minLevel}/10</span>
+              <span className="text-slate-500 dark:text-slate-400">Минимум</span>
+              <span className="font-medium text-slate-900 dark:text-slate-50">{minLevel}/10</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">Средний</span>
-              <span className="font-medium text-slate-900">{overallAverage}/10</span>
+              <span className="text-slate-500 dark:text-slate-400">Средний</span>
+              <span className="font-medium text-slate-900 dark:text-slate-50">{overallAverage}/10</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">Всего записей</span>
-              <span className="font-medium text-slate-900">{entries.length}</span>
+              <span className="text-slate-500 dark:text-slate-400">Всего записей</span>
+              <span className="font-medium text-slate-900 dark:text-slate-50">{entries.length}</span>
             </div>
           </div>
         </Card>
