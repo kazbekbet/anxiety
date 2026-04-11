@@ -31,8 +31,8 @@ describe('ExportButton', () => {
   beforeEach(() => {
     createObjectURLMock = vi.fn().mockReturnValue('blob:http://localhost/fake');
     revokeObjectURLMock = vi.fn();
-    globalThis.URL.createObjectURL = createObjectURLMock;
-    globalThis.URL.revokeObjectURL = revokeObjectURLMock;
+    globalThis.URL.createObjectURL = createObjectURLMock as typeof URL.createObjectURL;
+    globalThis.URL.revokeObjectURL = revokeObjectURLMock as typeof URL.revokeObjectURL;
   });
 
   afterEach(() => {
