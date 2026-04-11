@@ -7,8 +7,8 @@ interface TechniqueCardProps {
 }
 
 const categoryBadge = {
-  cbt: { bg: 'bg-blue-50 dark:bg-blue-950', text: 'text-blue-700 dark:text-blue-300', label: 'КПТ' },
-  existential: { bg: 'bg-violet-50 dark:bg-violet-950', text: 'text-violet-700 dark:text-violet-300', label: 'Экзистенциальная' },
+  cbt: { bg: 'bg-badge-cbt', text: 'text-badge-cbt-fg', label: 'КПТ' },
+  existential: { bg: 'bg-badge-existential', text: 'text-badge-existential-fg', label: 'Экзистенциальная' },
 };
 
 export function TechniqueCard({ technique, onStart }: TechniqueCardProps) {
@@ -25,12 +25,12 @@ export function TechniqueCard({ technique, onStart }: TechniqueCardProps) {
             <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${badge.bg} ${badge.text}`}>
               {badge.label}
             </span>
-            <span className="text-xs text-slate-400">{technique.duration}</span>
+            <span className="text-xs text-faint">{technique.duration}</span>
           </div>
-          <h3 className="font-semibold text-slate-900 dark:text-slate-50">{technique.title}</h3>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 line-clamp-2">{technique.description}</p>
+          <h3 className="font-semibold text-fg">{technique.title}</h3>
+          <p className="mt-1 text-sm text-muted line-clamp-2">{technique.description}</p>
         </div>
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-500 dark:bg-indigo-950 dark:text-indigo-400">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent-fg">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="9 18 15 12 9 6" />
           </svg>
