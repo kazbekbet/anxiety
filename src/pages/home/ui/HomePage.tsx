@@ -10,6 +10,7 @@ import { WorryTimer } from '@/features/worry-time';
 import { techniques } from '@/entities/technique';
 import { getLevelBgColor, getLevelTextColor } from '@/shared/lib/level-colors';
 import { sparklineData, trendDirection } from '@/shared/lib/insights';
+import { useAssessmentResults, assessments } from '@/entities/assessment';
 
 const QUICK_LEVELS = [
   { range: '1-2', level: 2, label: 'Спокойно' },
@@ -29,6 +30,20 @@ export function HomePage() {
   const navigate = useNavigate();
 
   const quickTechniques = techniques.slice(0, 3);
+  const assessmentResults = useAssessmentResults((s) => s.results);
+  const [dismissedBanner, setDismissedBanner] = useState(false);
+
+  const showTestBanner = (() => {
+    if (dismissedBanner) return false;
+    const gad7 = assessments.find((t) => t.id === 'gad7');
+    if (!gad7) return false;
+    const lastGad7 = assessmentResults.find((r) => r.testId === 'gad7');
+    if (!lastGad7) return true;
+    const daysSince = Math.floor(
+      (new Date().getTime() - new Date(lastGad7.timestamp).getTime()) / 86400000,
+    );
+    return daysSince >= gad7.intervalDays;
+  })();
 
   const greeting = (() => {
     const h = new Date().getHours();
@@ -72,6 +87,25 @@ export function HomePage() {
           </p>
         )}
       </Card>
+
+      {/* Test banner */}
+      {showTestBanner && (
+        <Card className="flex items-center gap-3 bg-accent-soft">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent text-white text-lg">
+            ?
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-accent-soft-fg">Оцените тревожность</p>
+            <p className="text-xs text-muted">GAD-7 — займёт 2 минуты</p>
+          </div>
+          <Button variant="secondary" className="shrink-0 !py-2 !px-3 text-xs" onClick={() => navigate('/stats/tests/gad7')}>
+            Пройти
+          </Button>
+          <button onClick={() => setDismissedBanner(true)} className="text-faint hover:text-subtle text-xs">
+            ✕
+          </button>
+        </Card>
+      )}
 
       {/* Latest entry with sparkline */}
       {latestEntry && (

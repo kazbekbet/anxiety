@@ -51,3 +51,40 @@ export interface Technique {
   duration: string;
   steps: string[];
 }
+
+export interface TestQuestion {
+  id: number;
+  text: string;
+  options: { value: number; label: string }[];
+}
+
+export interface TestLevel {
+  max: number;
+  label: string;
+  color: 'emerald' | 'amber' | 'orange' | 'red';
+}
+
+export interface TestDefinition {
+  id: string;
+  title: string;
+  shortTitle: string;
+  description: string;
+  preamble: string;
+  questionCount: number;
+  intervalDays: number;
+  maxScore: number;
+  questions: TestQuestion[];
+  levels: TestLevel[];
+  attribution: string;
+  hasCrisisQuestion?: { questionIndex: number };
+}
+
+export interface TestResult {
+  id: string;
+  testId: string;
+  score: number;
+  answers: number[];
+  levelLabel: string;
+  levelColor: string;
+  timestamp: string;
+}
