@@ -20,6 +20,6 @@ export const useAssessmentResults = create<AssessmentState>()(
           ],
         })),
     }),
-    { name: 'assessment-results', version: 1, storage: createJSONStorage(() => localStorage) },
+    { name: 'assessment-results', storage: createJSONStorage(() => localStorage) },
   ),
 );

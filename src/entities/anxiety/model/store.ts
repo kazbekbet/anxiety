@@ -34,7 +34,6 @@ export const useAnxietyEntries = create<AnxietyEntriesState>()(
     }),
     {
       name: 'anxiety-entries',
-      version: 1,
       storage: createJSONStorage(() => localStorage),
     },
   ),

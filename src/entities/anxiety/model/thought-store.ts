@@ -27,7 +27,6 @@ export const useThoughtRecords = create<ThoughtRecordsState>()(
     }),
     {
       name: 'thought-records',
-      version: 1,
       storage: createJSONStorage(() => localStorage),
     },
   ),

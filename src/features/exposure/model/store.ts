@@ -82,6 +82,6 @@ export const useExposure = create<ExposureState>()(
           ),
         })),
     }),
-    { name: 'exposure-hierarchies', version: 1, storage: createJSONStorage(() => localStorage) },
+    { name: 'exposure-hierarchies', storage: createJSONStorage(() => localStorage) },
   ),
 );

@@ -64,7 +64,7 @@ export const techniques: Technique[] = [
     title: 'Сканирование тела',
     description: 'Найдите, где в теле живёт тревога, и осознайте ощущения.',
     category: 'existential',
-    situation: 'panic',
+    situation: 'deep-work',
     duration: '3-5 мин',
     steps: [
       'Обратите внимание на тело',

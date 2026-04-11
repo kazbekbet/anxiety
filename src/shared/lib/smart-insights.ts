@@ -5,6 +5,7 @@ export interface SmartInsight {
   type: 'positive' | 'neutral' | 'suggestion';
 }
 
+/** Expects entries sorted newest-first (as stored in Zustand) */
 export function generateSmartInsight(entries: AnxietyEntry[]): SmartInsight | null {
   if (entries.length < 3) return null;
 
@@ -54,7 +55,8 @@ export function generateSmartInsight(entries: AnxietyEntry[]): SmartInsight | nu
   if (triggerCounts.size > 0) {
     const sorted = [...triggerCounts.entries()].sort((a, b) => b[1] - a[1]);
     if (sorted[0][1] >= 3) {
-      return { text: `Частый триггер — «${sorted[0][0]}». Замечать паттерн — уже шаг к управлению`, type: 'neutral' };
+      const trigger = sorted[0][0].slice(0, 50);
+      return { text: `Частый триггер — «${trigger}». Замечать паттерн — уже шаг к управлению`, type: 'neutral' };
     }
   }
 
