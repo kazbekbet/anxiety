@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@/shared/lib/theme.tsx';
+import { AppErrorBoundary } from './ErrorBoundary';
 import { BottomNav } from '@/widgets/bottom-nav';
 import { HomePage } from '@/pages/home';
 import { DiaryPage } from '@/pages/diary';
@@ -17,6 +18,7 @@ const AssessmentResultPage = lazy(() =>
 
 export function App() {
   return (
+    <AppErrorBoundary>
     <ThemeProvider>
       <HashRouter>
         <Routes>
@@ -48,5 +50,6 @@ export function App() {
         </Routes>
       </HashRouter>
     </ThemeProvider>
+    </AppErrorBoundary>
   );
 }

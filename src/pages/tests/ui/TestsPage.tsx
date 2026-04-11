@@ -4,18 +4,11 @@ import { Card, Button } from '@/shared/ui';
 import { LevelBar } from '@/shared/ui/LevelIndicator';
 import { allAssessments, getLevel, useAssessmentResults } from '@/entities/assessment';
 import { formatEntryDate } from '@/shared/lib/date';
+import { levelColorToNumber, daysSince } from '@/shared/lib/assessment-utils';
 
 export function TestsPage() {
   const results = useAssessmentResults((s) => s.results);
   const navigate = useNavigate();
-  const now = new Date();
-
-  const levelToNumber = (color: string) => {
-    if (color === 'emerald') return 2;
-    if (color === 'amber') return 4;
-    if (color === 'orange') return 7;
-    return 9;
-  };
 
   return (
     <div className="space-y-4">
@@ -31,11 +24,9 @@ export function TestsPage() {
       <div className="space-y-3">
         {allAssessments.map((test) => {
           const lastResult = results.find((r) => r.testId === test.id);
-          const daysSince = lastResult
-            ? Math.floor((now.getTime() - new Date(lastResult.timestamp).getTime()) / 86400000)
-            : null;
+          const days = lastResult ? daysSince(lastResult.timestamp) : null;
           const level = lastResult ? getLevel(test, lastResult.score) : null;
-          const isDue = daysSince === null || daysSince >= test.intervalDays;
+          const isDue = days === null || days >= test.intervalDays;
 
           return (
             <Card key={test.id}>
@@ -51,7 +42,7 @@ export function TestsPage() {
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">
                         <div className="flex-1">
-                          <LevelBar level={levelToNumber(level.color)} />
+                          <LevelBar level={levelColorToNumber(level.color)} />
                         </div>
                         <span className="text-xs font-medium text-subtle">
                           {lastResult.score}/{test.maxScore}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Card } from '@/shared/ui';
+import { Button, Card, StepProgress, inputClass } from '@/shared/ui';
 
 const STEPS = [
   { sense: 'ВИДИТЕ', count: 5, icon: '👁', color: 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300' },
@@ -9,8 +9,6 @@ const STEPS = [
   { sense: 'ОЩУЩАЕТЕ на вкус', count: 1, icon: '👅', color: 'bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300' },
 ];
 
-const inputClass =
-  'w-full rounded-xl border border-input-border bg-input p-3 text-sm text-fg placeholder:text-faint focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring';
 
 interface GroundingExerciseProps {
   onComplete: () => void;
@@ -34,11 +32,7 @@ export function GroundingExercise({ onComplete, onCancel }: GroundingExercisePro
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-1">
-        {STEPS.map((_, i) => (
-          <div key={i} className={`h-1 flex-1 rounded-full ${i <= currentStep ? 'bg-accent' : 'bg-hover'}`} />
-        ))}
-      </div>
+      <StepProgress total={STEPS.length} current={currentStep} />
 
       <Card className={step.color}>
         <div className="text-center">
