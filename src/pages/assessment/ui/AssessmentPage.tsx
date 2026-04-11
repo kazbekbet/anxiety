@@ -76,7 +76,7 @@ export function AssessmentPage() {
   // Crisis contact screen
   if (showCrisis) {
     return (
-      <div className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4">
+      <div className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4 pt-[env(safe-area-inset-top)]">
         <Card className="w-full text-center">
           <h2 className="text-lg font-semibold text-fg mb-3">Вы не одиноки</h2>
           <p className="text-sm text-muted mb-4">
@@ -111,7 +111,7 @@ export function AssessmentPage() {
   // Exit confirmation
   if (showExitConfirm) {
     return (
-      <div className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4">
+      <div className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4 pt-[env(safe-area-inset-top)]">
         <Card className="w-full">
           <h2 className="text-lg font-semibold text-fg mb-2">Прервать тест?</h2>
           <p className="text-sm text-muted mb-5">
@@ -131,7 +131,7 @@ export function AssessmentPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-lg flex-col px-4 py-6">
+    <div className="mx-auto flex min-h-screen max-w-lg flex-col px-4 pb-6 pt-[max(1.5rem,env(safe-area-inset-top))]">
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <button onClick={() => setShowExitConfirm(true)} className="text-sm text-faint hover:text-subtle">
