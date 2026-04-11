@@ -26,6 +26,6 @@ export const useWorryTime = create<WorryTimeState>()(
           ],
         })),
     }),
-    { name: 'worry-sessions', storage: createJSONStorage(() => localStorage) },
+    { name: 'worry-sessions', version: 1, storage: createJSONStorage(() => localStorage) },
   ),
 );

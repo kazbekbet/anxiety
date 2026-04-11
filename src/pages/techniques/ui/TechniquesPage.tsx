@@ -7,6 +7,7 @@ import { useThoughtRecords } from '@/entities/anxiety';
 import { ThoughtRecordForm } from '@/features/thought-record';
 import { GroundingExercise } from '@/features/grounding';
 import { BreathingExercise } from '@/features/breathing';
+import { BodyScan } from '@/features/body-scan';
 import { CompletionScreen } from '@/widgets/completion-screen';
 import { TechniqueSteps } from './TechniqueSteps';
 import type { Technique, TechniqueSituation } from '@/shared/types';
@@ -81,6 +82,10 @@ export function TechniquesPage() {
 
     if (activeTechnique.id === 'grounding-54321') {
       return <GroundingExercise onComplete={handleComplete} onCancel={handleClose} />;
+    }
+
+    if (activeTechnique.id === 'body-scan') {
+      return <BodyScan onComplete={() => handleComplete()} onCancel={handleClose} />;
     }
 
     if (activeTechnique.id === 'box-breathing' || activeTechnique.id === 'breathing-478') {

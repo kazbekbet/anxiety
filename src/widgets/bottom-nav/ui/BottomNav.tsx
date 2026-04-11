@@ -73,7 +73,7 @@ export function BottomNav() {
                   {item.icon}
                 </div>
                 <span>{item.label}</span>
-                {isActive && <div className="absolute bottom-1 h-1 w-1 rounded-full bg-accent-fg" />}
+                {isActive && <div className="absolute bottom-0.5 h-0.5 w-8 rounded-full bg-accent-fg transition-all duration-300" />}
               </>
             )}
           </NavLink>
