@@ -4,9 +4,11 @@ interface CompletionScreenProps {
   elapsedSeconds: number;
   thoughtRecordDiff?: { before: number; after: number };
   onClose: () => void;
+  /** Текст кнопки закрытия. По умолчанию «Закрыть» (для модалки). На странице передавайте «К техникам». */
+  closeLabel?: string;
 }
 
-export function CompletionScreen({ elapsedSeconds, thoughtRecordDiff, onClose }: CompletionScreenProps) {
+export function CompletionScreen({ elapsedSeconds, thoughtRecordDiff, onClose, closeLabel = 'Закрыть' }: CompletionScreenProps) {
   const minutes = Math.max(1, Math.round(elapsedSeconds / 60));
 
   return (
@@ -23,7 +25,7 @@ export function CompletionScreen({ elapsedSeconds, thoughtRecordDiff, onClose }:
           </div>
         )}
       </Card>
-      <Button type="button" fullWidth onClick={onClose}>Закрыть</Button>
+      <Button type="button" fullWidth onClick={onClose}>{closeLabel}</Button>
     </div>
   );
 }

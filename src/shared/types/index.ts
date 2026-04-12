@@ -54,6 +54,8 @@ export interface Technique {
   duration: string;
   steps: string[];
   unlockCondition?: { requiredId: string; uses: number };
+  /** Где рендерится техника: отдельная страница или bottom-sheet модалка */
+  renderMode?: 'page' | 'modal';
 }
 
 export interface ValueEntry {

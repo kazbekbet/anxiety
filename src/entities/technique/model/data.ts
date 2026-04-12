@@ -9,6 +9,7 @@ export const techniques: Technique[] = [
     category: 'cbt',
     situation: 'panic',
     duration: '5 мин',
+    renderMode: 'page',
     steps: [
       'Вдохните на 4 секунды',
       'Задержите дыхание на 4 секунды',
@@ -23,6 +24,7 @@ export const techniques: Technique[] = [
     category: 'cbt',
     situation: 'panic',
     duration: '5 мин',
+    renderMode: 'page',
     steps: [
       'Вдохните на 4 секунды',
       'Задержите дыхание на 7 секунд',
@@ -36,6 +38,7 @@ export const techniques: Technique[] = [
     category: 'existential',
     situation: 'panic',
     duration: '5 мин',
+    renderMode: 'page',
     steps: [
       'Назовите 5 вещей, которые вы ВИДИТЕ',
       'Назовите 4 вещи, которые вы ТРОГАЕТЕ',
@@ -66,6 +69,7 @@ export const techniques: Technique[] = [
     category: 'existential',
     situation: 'deep-work',
     duration: '3-5 мин',
+    renderMode: 'page',
     steps: [
       'Обратите внимание на тело',
       'Отметьте зоны напряжения',
@@ -172,6 +176,7 @@ export const techniques: Technique[] = [
     category: 'cbt',
     situation: 'panic',
     duration: '3-5 мин',
+    renderMode: 'page',
     unlockCondition: { requiredId: 'box-breathing', uses: 3 },
     steps: [
       'Температура — приложите холод к лицу',
@@ -204,6 +209,7 @@ export const techniques: Technique[] = [
     category: 'existential',
     situation: 'deep-work',
     duration: '10-15 мин',
+    renderMode: 'page',
     unlockCondition: { requiredId: 'body-scan', uses: 2 },
     steps: [
       'Выберите группы мышц',
