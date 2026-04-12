@@ -14,8 +14,12 @@ describe('BodyScan', () => {
     expect(screen.getByLabelText('Живот')).toBeInTheDocument();
     expect(screen.getByLabelText('Левая рука')).toBeInTheDocument();
     expect(screen.getByLabelText('Правая рука')).toBeInTheDocument();
-    expect(screen.getByLabelText('Левая нога')).toBeInTheDocument();
-    expect(screen.getByLabelText('Правая нога')).toBeInTheDocument();
+    expect(screen.getByLabelText('Левая кисть')).toBeInTheDocument();
+    expect(screen.getByLabelText('Правая кисть')).toBeInTheDocument();
+    expect(screen.getByLabelText('Левое бедро')).toBeInTheDocument();
+    expect(screen.getByLabelText('Правое бедро')).toBeInTheDocument();
+    expect(screen.getByLabelText('Левая голень')).toBeInTheDocument();
+    expect(screen.getByLabelText('Правая голень')).toBeInTheDocument();
   });
 
   it('disables "Завершить" button when no zones are selected', () => {

@@ -20,66 +20,110 @@ const SENSATIONS: Sensation[] = [
 interface BodyZone {
   id: string;
   label: string;
-  /** SVG path for the zone */
-  d: string;
-  /** Center for heatmap gradient */
+  /** Circle center for interactive hit area + heatmap */
   cx: number;
   cy: number;
-  /** Heatmap radius */
-  r: number;
+  /** Hit-area radius (invisible bigger target) */
+  hitR: number;
+  /** Heatmap glow radius */
+  glowR: number;
 }
 
-// Androgynous flat anatomical silhouette — viewBox 200x420
+/**
+ * Body zones — coordinates match BODY_PATH silhouette
+ * viewBox: 0 0 220 540
+ */
 const BODY_ZONES: BodyZone[] = [
-  { id: 'head', label: 'Голова', d: 'M 100 18 a 28 32 0 1 1 0 0.01 Z', cx: 100, cy: 34, r: 32 },
-  { id: 'throat', label: 'Горло', d: 'M 86 62 L 114 62 L 112 76 L 88 76 Z', cx: 100, cy: 70, r: 16 },
-  { id: 'chest', label: 'Грудь', d: 'M 70 80 L 130 80 Q 138 95 132 128 L 68 128 Q 62 95 70 80 Z', cx: 100, cy: 105, r: 36 },
-  { id: 'shoulders-l', label: 'Левое плечо', d: 'M 58 88 Q 50 98 48 115 Q 54 114 62 112 Q 68 102 68 88 Z', cx: 56, cy: 100, r: 18 },
-  { id: 'shoulders-r', label: 'Правое плечо', d: 'M 142 88 Q 150 98 152 115 Q 146 114 138 112 Q 132 102 132 88 Z', cx: 144, cy: 100, r: 18 },
-  { id: 'stomach', label: 'Живот', d: 'M 72 130 L 128 130 Q 132 155 128 176 L 72 176 Q 68 155 72 130 Z', cx: 100, cy: 153, r: 32 },
-  { id: 'hands-l', label: 'Левая рука', d: 'M 38 150 Q 30 175 32 210 Q 42 212 50 208 Q 56 180 54 152 Z', cx: 44, cy: 180, r: 22 },
-  { id: 'hands-r', label: 'Правая рука', d: 'M 162 150 Q 170 175 168 210 Q 158 212 150 208 Q 144 180 146 152 Z', cx: 156, cy: 180, r: 22 },
-  { id: 'legs-l', label: 'Левая нога', d: 'M 72 180 L 98 180 L 96 290 Q 94 360 90 395 L 72 395 Q 68 320 72 180 Z', cx: 84, cy: 290, r: 42 },
-  { id: 'legs-r', label: 'Правая нога', d: 'M 102 180 L 128 180 Q 132 320 128 395 L 110 395 Q 104 360 104 290 Z', cx: 116, cy: 290, r: 42 },
+  { id: 'head', label: 'Голова', cx: 110, cy: 48, hitR: 32, glowR: 36 },
+  { id: 'throat', label: 'Горло', cx: 110, cy: 96, hitR: 16, glowR: 20 },
+  { id: 'chest', label: 'Грудь', cx: 110, cy: 150, hitR: 30, glowR: 42 },
+  { id: 'shoulder-l', label: 'Левое плечо', cx: 66, cy: 128, hitR: 18, glowR: 24 },
+  { id: 'shoulder-r', label: 'Правое плечо', cx: 154, cy: 128, hitR: 18, glowR: 24 },
+  { id: 'stomach', label: 'Живот', cx: 110, cy: 215, hitR: 28, glowR: 38 },
+  { id: 'arm-l', label: 'Левая рука', cx: 48, cy: 200, hitR: 20, glowR: 26 },
+  { id: 'arm-r', label: 'Правая рука', cx: 172, cy: 200, hitR: 20, glowR: 26 },
+  { id: 'hand-l', label: 'Левая кисть', cx: 34, cy: 290, hitR: 18, glowR: 22 },
+  { id: 'hand-r', label: 'Правая кисть', cx: 186, cy: 290, hitR: 18, glowR: 22 },
+  { id: 'thigh-l', label: 'Левое бедро', cx: 90, cy: 320, hitR: 22, glowR: 30 },
+  { id: 'thigh-r', label: 'Правое бедро', cx: 130, cy: 320, hitR: 22, glowR: 30 },
+  { id: 'leg-l', label: 'Левая голень', cx: 85, cy: 440, hitR: 20, glowR: 28 },
+  { id: 'leg-r', label: 'Правая голень', cx: 135, cy: 440, hitR: 20, glowR: 28 },
 ];
 
-// Body outline path (used for background fill and outline stroke)
-const BODY_OUTLINE = `
-  M 100 4
-  a 30 30 0 1 1 0 0.01
-  M 100 64
-  L 86 72
-  L 68 82
-  Q 56 90 52 108
-  Q 46 135 34 152
-  Q 28 180 30 212
-  Q 34 216 44 214
-  Q 52 212 56 208
-  Q 58 190 60 172
-  L 62 170
-  L 60 250
-  Q 58 320 60 396
-  Q 62 404 72 404
-  Q 82 404 84 396
-  L 90 290
-  L 98 290
-  L 102 290
-  L 110 290
-  L 116 396
-  Q 118 404 128 404
-  Q 138 404 140 396
-  Q 142 320 140 250
-  L 138 170
-  L 140 172
-  Q 142 190 144 208
-  Q 148 212 156 214
-  Q 166 216 170 212
-  Q 172 180 166 152
-  Q 154 135 148 108
-  Q 144 90 132 82
-  L 114 72
-  Z
-`;
+/**
+ * Professional gender-neutral human silhouette
+ * Adapted from Wikimedia-style human body outline (Public Domain)
+ * viewBox: 0 0 220 540
+ */
+const BODY_PATH = `
+M 110 15
+C 127 15 140 28 140 48
+C 140 62 135 72 130 78
+C 132 82 134 86 136 90
+L 142 104
+C 144 108 142 112 138 112
+L 130 112
+C 134 116 140 122 146 126
+L 168 136
+C 178 142 184 150 186 164
+L 194 210
+C 196 220 192 226 184 224
+L 176 222
+L 170 210
+L 168 182
+L 160 178
+L 156 202
+L 158 232
+C 158 242 156 252 156 262
+L 164 300
+C 168 316 170 330 168 340
+L 158 340
+L 154 320
+L 150 304
+L 148 310
+C 146 324 144 340 142 360
+L 138 440
+C 137 470 136 490 134 508
+C 134 518 130 522 124 522
+L 118 522
+C 114 522 112 518 112 512
+L 114 460
+L 112 380
+L 108 380
+L 106 460
+L 108 512
+C 108 518 106 522 102 522
+L 96 522
+C 90 522 86 518 86 508
+C 84 490 83 470 82 440
+L 78 360
+C 76 340 74 324 72 310
+L 70 304
+L 66 320
+L 62 340
+L 52 340
+C 50 330 52 316 56 300
+L 64 262
+C 64 252 62 242 62 232
+L 64 202
+L 60 178
+L 52 182
+L 50 210
+L 44 222
+L 36 224
+C 28 226 24 220 26 210
+L 34 164
+C 36 150 42 142 52 136
+L 74 126
+C 80 122 86 116 90 112
+L 82 112
+C 78 112 76 108 78 104
+L 84 90
+C 86 86 88 82 90 78
+C 85 72 80 62 80 48
+C 80 28 93 15 110 15
+Z
+`.replace(/\s+/g, ' ').trim();
 
 interface BodyScanProps {
   onComplete: (zones: { zone: string; sensation: string; intensity: number }[]) => void;
@@ -93,14 +137,12 @@ export function BodyScan({ onComplete, onCancel }: BodyScanProps) {
 
   const handleZoneClick = (zone: BodyZone) => {
     if (selections.has(zone.id)) {
-      // Remove selection
       const next = new Map(selections);
       next.delete(zone.id);
       setSelections(next);
       setActiveZone(null);
       return;
     }
-    // Activate zone with pulse
     setActiveZone(zone);
     setPulsingZone(zone.id);
     if ('vibrate' in navigator) navigator.vibrate(10);
@@ -143,23 +185,21 @@ export function BodyScan({ onComplete, onCancel }: BodyScanProps) {
       </p>
 
       {/* Body with interactive zones */}
-      <div className="relative mx-auto w-full" style={{ maxWidth: 280 }}>
+      <div className="relative mx-auto w-full" style={{ maxWidth: 240 }}>
         <svg
-          viewBox="0 0 200 420"
+          viewBox="0 0 220 540"
           className="w-full h-auto"
           style={{ touchAction: 'manipulation' }}
         >
           <defs>
-            {/* Blur filter for heat glow */}
             <filter id="body-heat-blur" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="4" />
+              <feGaussianBlur stdDeviation="6" />
             </filter>
 
-            {/* Radial gradients for each sensation */}
             {SENSATIONS.map((s) => (
               <radialGradient key={s.id} id={`heat-${s.id}`}>
-                <stop offset="0%" stopColor={s.hex} stopOpacity="0.8" />
-                <stop offset="70%" stopColor={s.hex} stopOpacity="0.3" />
+                <stop offset="0%" stopColor={s.hex} stopOpacity="0.85" />
+                <stop offset="60%" stopColor={s.hex} stopOpacity="0.4" />
                 <stop offset="100%" stopColor={s.hex} stopOpacity="0" />
               </radialGradient>
             ))}
@@ -167,25 +207,26 @@ export function BodyScan({ onComplete, onCancel }: BodyScanProps) {
 
           {/* Body silhouette — filled */}
           <path
-            d={BODY_OUTLINE}
+            d={BODY_PATH}
             fill="currentColor"
             className="text-elevated"
             style={{
               animation: activeZone ? 'none' : 'body-breathe 4s ease-in-out infinite',
-              transformOrigin: '100px 210px',
+              transformOrigin: '110px 270px',
             }}
           />
 
           {/* Body outline stroke */}
           <path
-            d={BODY_OUTLINE}
+            d={BODY_PATH}
             fill="none"
             stroke="currentColor"
             strokeWidth="1.5"
+            strokeLinejoin="round"
             className="text-border"
           />
 
-          {/* Heatmap layer — sensations rendered as soft glows */}
+          {/* Heatmap layer */}
           <g filter="url(#body-heat-blur)">
             {Array.from(selections.entries()).map(([zoneId, data]) => {
               const zone = BODY_ZONES.find((z) => z.id === zoneId);
@@ -195,44 +236,57 @@ export function BodyScan({ onComplete, onCancel }: BodyScanProps) {
                   key={zoneId}
                   cx={zone.cx}
                   cy={zone.cy}
-                  r={zone.r * (0.6 + data.intensity * 0.1)}
+                  r={zone.glowR * (0.7 + data.intensity * 0.08)}
                   fill={`url(#heat-${data.sensation.id})`}
-                  opacity={0.5 + data.intensity * 0.1}
+                  opacity={0.6 + data.intensity * 0.08}
                   style={{ transition: 'r 400ms ease-out, opacity 400ms ease-out' }}
                 />
               );
             })}
           </g>
 
-          {/* Interactive zones — SVG paths with native hit detection */}
+          {/* Interactive hit-areas — invisible circles with ring indicator */}
           {BODY_ZONES.map((zone) => {
             const isSelected = selections.has(zone.id);
             const isActive = activeZone?.id === zone.id;
             const isPulsing = pulsingZone === zone.id;
             return (
               <g key={zone.id}>
-                <path
-                  d={zone.d}
+                {/* Invisible hit area */}
+                <circle
+                  cx={zone.cx}
+                  cy={zone.cy}
+                  r={zone.hitR}
                   fill="transparent"
-                  stroke={isActive ? 'currentColor' : 'transparent'}
-                  strokeWidth="2"
-                  strokeDasharray="4 3"
-                  className={`cursor-pointer text-accent transition-colors ${isActive ? 'animate-pulse' : ''}`}
+                  className="cursor-pointer"
                   role="button"
                   aria-label={zone.label}
                   aria-pressed={isSelected}
                   onClick={() => handleZoneClick(zone)}
                 />
-                {/* Pulse ring on selection */}
+                {/* Active zone indicator */}
+                {isActive && (
+                  <circle
+                    cx={zone.cx}
+                    cy={zone.cy}
+                    r={zone.hitR - 2}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeDasharray="4 3"
+                    className="text-accent pointer-events-none animate-pulse"
+                  />
+                )}
+                {/* Pulse ring animation */}
                 {isPulsing && (
                   <circle
                     cx={zone.cx}
                     cy={zone.cy}
-                    r={zone.r}
+                    r={zone.hitR}
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
-                    className="text-accent"
+                    className="text-accent pointer-events-none"
                     style={{ animation: 'pulse-ring 600ms ease-out forwards' }}
                   />
                 )}
@@ -241,9 +295,8 @@ export function BodyScan({ onComplete, onCancel }: BodyScanProps) {
           })}
         </svg>
 
-        {/* Idle hint */}
         {selections.size === 0 && !activeZone && (
-          <p className="absolute -bottom-2 left-0 right-0 text-center text-xs text-faint">
+          <p className="absolute -bottom-1 left-0 right-0 text-center text-xs text-faint">
             Коснитесь любой зоны
           </p>
         )}
@@ -271,7 +324,7 @@ export function BodyScan({ onComplete, onCancel }: BodyScanProps) {
         </div>
       )}
 
-      {/* Bottom sheet for sensation selection */}
+      {/* Bottom sheet */}
       {activeZone && (
         <div className="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-lg rounded-t-2xl bg-card p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl animate-slide-up">
           <div className="mb-3 flex items-center justify-between">
@@ -334,7 +387,6 @@ export function BodyScan({ onComplete, onCancel }: BodyScanProps) {
         </div>
       )}
 
-      {/* Actions */}
       <div className="flex gap-3 pt-1">
         <Button type="button" variant="ghost" fullWidth onClick={onCancel}>
           Отмена
