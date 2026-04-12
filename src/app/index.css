@@ -131,3 +131,13 @@ input[type='range']::-webkit-slider-thumb {
 .animate-fade-in {
   animation: fade-in 200ms ease-out forwards;
 }
+
+@keyframes body-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.015); }
+}
+
+@keyframes pulse-ring {
+  0%   { opacity: 0.8; r: 0; }
+  100% { opacity: 0; r: 60; }
+}
