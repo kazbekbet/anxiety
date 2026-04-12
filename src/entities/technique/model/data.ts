@@ -165,7 +165,53 @@ export const techniques: Technique[] = [
     ],
   },
 
+  {
+    id: 'tipp',
+    title: 'TIPP (кризисная помощь)',
+    description: 'Техника DBT для быстрого снижения интенсивных эмоций: температура, нагрузка, дыхание, релаксация.',
+    category: 'cbt',
+    situation: 'panic',
+    duration: '3-5 мин',
+    unlockCondition: { requiredId: 'box-breathing', uses: 3 },
+    steps: [
+      'Температура — приложите холод к лицу',
+      'Интенсивная нагрузка — приседания или бег',
+      'Ритмичное дыхание — вдох 4с, выдох 8с',
+      'Парная релаксация — напрягите и расслабьте тело',
+    ],
+  },
+  {
+    id: 'stop-skill',
+    title: 'Навык СТОП',
+    description: 'Пошаговая техника для осознанной реакции вместо импульсивной.',
+    category: 'cbt',
+    situation: 'panic',
+    duration: '2 мин',
+    unlockCondition: { requiredId: 'grounding-54321', uses: 2 },
+    steps: [
+      'Стоп — остановитесь',
+      'Шаг назад — отойдите мысленно',
+      'Наблюдайте — что вы чувствуете?',
+      'Действуйте осознанно',
+    ],
+  },
+
   // === DEEP WORK ===
+  {
+    id: 'pmr',
+    title: 'Мышечная релаксация',
+    description: 'Прогрессивная мышечная релаксация: поочерёдное напряжение и расслабление групп мышц.',
+    category: 'existential',
+    situation: 'deep-work',
+    duration: '10-15 мин',
+    unlockCondition: { requiredId: 'body-scan', uses: 2 },
+    steps: [
+      'Выберите группы мышц',
+      'Напрягите группу на 5 секунд',
+      'Расслабьте на 10 секунд',
+      'Оцените напряжение до и после',
+    ],
+  },
   {
     id: 'behavioral-experiment',
     title: 'Поведенческий эксперимент',

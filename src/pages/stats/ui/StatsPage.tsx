@@ -4,6 +4,7 @@ import { Header } from '@/widgets/header';
 import { Card } from '@/shared/ui';
 import { ProgressCard } from '@/widgets/progress-card';
 import { AssessmentWidget } from '@/widgets/assessment-widget';
+import { ValuesWidget } from '@/widgets/values-widget';
 import { getLevelColor } from '@/shared/lib/level-colors';
 import { useAnxietyEntries, useAverageByDay, useThoughtRecords } from '@/entities/anxiety';
 import { getLast7Days, formatShortDay } from '@/shared/lib/date';
@@ -90,6 +91,9 @@ export function StatsPage() {
 
       {/* Psychological tests */}
       <AssessmentWidget />
+
+      {/* Values */}
+      <ValuesWidget />
 
       {/* 7-day bar chart */}
       <Card>

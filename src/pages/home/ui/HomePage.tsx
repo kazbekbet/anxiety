@@ -148,6 +148,25 @@ export function HomePage() {
         )}
       </Card>
 
+      {/* Digest banner */}
+      {entries.length >= 3 && (() => {
+        const lastDigest = localStorage.getItem('last-digest-shown');
+        const daysSinceDigest = lastDigest ? Math.floor((new Date().getTime() - new Date(lastDigest).getTime()) / 86400000) : 999;
+        if (daysSinceDigest < 7) return null;
+        return (
+          <Card
+            className="flex cursor-pointer items-center gap-3 bg-accent-soft active:scale-[0.98] transition-transform"
+            onClick={() => { localStorage.setItem('last-digest-shown', new Date().toISOString()); navigate('/digest'); }}
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent text-white text-sm font-bold">7д</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-accent-soft-fg">Итоги недели</p>
+              <p className="text-xs text-muted">Посмотрите вашу динамику</p>
+            </div>
+          </Card>
+        );
+      })()}
+
       {/* Smart insight */}
       {smartInsight && (
         <Card className={`text-sm ${

@@ -3,6 +3,7 @@ import { startOfDay } from 'date-fns';
 import { Header } from '@/widgets/header';
 import { Modal, Button } from '@/shared/ui';
 import { useAnxietyEntries, AnxietyCard } from '@/entities/anxiety';
+import { ValuesDiaryForm } from '@/features/values-diary';
 import { LogAnxietyForm } from '@/features/log-anxiety';
 import { formatEntryDate } from '@/shared/lib/date';
 import type { AnxietyEntry } from '@/shared/types';
@@ -12,6 +13,7 @@ export function DiaryPage() {
   const addEntry = useAnxietyEntries((s) => s.addEntry);
   const removeEntry = useAnxietyEntries((s) => s.removeEntry);
   const [showForm, setShowForm] = useState(false);
+  const [showValues, setShowValues] = useState(false);
 
   const grouped = useMemo(() => {
     const groups: { date: string; label: string; entries: AnxietyEntry[] }[] = [];
@@ -33,9 +35,14 @@ export function DiaryPage() {
     <div className="space-y-4">
       <Header title="Дневник" subtitle={`${entries.length} записей`} />
 
-      <Button fullWidth onClick={() => setShowForm(true)}>
-        + Новая запись
-      </Button>
+      <div className="flex gap-2">
+        <Button fullWidth onClick={() => setShowForm(true)}>
+          + Запись
+        </Button>
+        <Button fullWidth variant="secondary" onClick={() => setShowValues(true)}>
+          Ценности
+        </Button>
+      </div>
 
       {entries.length === 0 ? (
         <div className="flex flex-col items-center py-12 text-center px-4">
@@ -77,6 +84,13 @@ export function DiaryPage() {
             setShowForm(false);
           }}
           onCancel={() => setShowForm(false)}
+        />
+      </Modal>
+
+      <Modal open={showValues} onClose={() => setShowValues(false)} title="Дневник ценностей">
+        <ValuesDiaryForm
+          onComplete={() => setShowValues(false)}
+          onCancel={() => setShowValues(false)}
         />
       </Modal>
     </div>

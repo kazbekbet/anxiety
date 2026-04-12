@@ -53,6 +53,14 @@ export interface Technique {
   situation: TechniqueSituation;
   duration: string;
   steps: string[];
+  unlockCondition?: { requiredId: string; uses: number };
+}
+
+export interface ValueEntry {
+  id: string;
+  values: { valueId: string; score: number }[];
+  action: string;
+  timestamp: string;
 }
 
 export interface TestQuestion {
