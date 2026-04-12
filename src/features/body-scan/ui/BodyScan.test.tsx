@@ -4,20 +4,23 @@ import userEvent from '@testing-library/user-event';
 import { BodyScan } from './BodyScan';
 
 describe('BodyScan', () => {
-  it('renders all body zone buttons', () => {
+  it('renders body zones', () => {
     render(<BodyScan onComplete={vi.fn()} onCancel={vi.fn()} />);
     expect(screen.getByLabelText('Голова')).toBeInTheDocument();
     expect(screen.getByLabelText('Горло')).toBeInTheDocument();
     expect(screen.getByLabelText('Грудь')).toBeInTheDocument();
-    expect(screen.getByLabelText('Плечи')).toBeInTheDocument();
+    expect(screen.getByLabelText('Левое плечо')).toBeInTheDocument();
+    expect(screen.getByLabelText('Правое плечо')).toBeInTheDocument();
     expect(screen.getByLabelText('Живот')).toBeInTheDocument();
-    expect(screen.getByLabelText('Руки')).toBeInTheDocument();
-    expect(screen.getByLabelText('Ноги')).toBeInTheDocument();
+    expect(screen.getByLabelText('Левая рука')).toBeInTheDocument();
+    expect(screen.getByLabelText('Правая рука')).toBeInTheDocument();
+    expect(screen.getByLabelText('Левая нога')).toBeInTheDocument();
+    expect(screen.getByLabelText('Правая нога')).toBeInTheDocument();
   });
 
-  it('disables "Готово" button when no zones are selected', () => {
+  it('disables "Завершить" button when no zones are selected', () => {
     render(<BodyScan onComplete={vi.fn()} onCancel={vi.fn()} />);
-    const doneButton = screen.getByText('Готово (0)');
+    const doneButton = screen.getByText('Завершить (0)');
     expect(doneButton.closest('button')).toBeDisabled();
   });
 
@@ -29,22 +32,26 @@ describe('BodyScan', () => {
     expect(screen.getByText('Давление')).toBeInTheDocument();
   });
 
-  it('selects a zone with sensation and enables "Готово"', async () => {
+  it('selects a zone with sensation and enables "Завершить"', async () => {
     render(<BodyScan onComplete={vi.fn()} onCancel={vi.fn()} />);
     await userEvent.click(screen.getByLabelText('Грудь'));
     await userEvent.click(screen.getByText('Давление'));
-    const doneButton = screen.getByText('Готово (1)');
+    await userEvent.click(screen.getByText('Готово'));
+    const doneButton = screen.getByText('Завершить (1)');
     expect(doneButton.closest('button')).not.toBeDisabled();
   });
 
-  it('calls onComplete with selected zones when "Готово" is clicked', async () => {
+  it('calls onComplete with selected zones when "Завершить" is clicked', async () => {
     const onComplete = vi.fn();
     render(<BodyScan onComplete={onComplete} onCancel={vi.fn()} />);
     await userEvent.click(screen.getByLabelText('Грудь'));
     await userEvent.click(screen.getByText('Напряжение'));
-    await userEvent.click(screen.getByText('Готово (1)'));
+    await userEvent.click(screen.getByText('Готово'));
+    await userEvent.click(screen.getByText('Завершить (1)'));
     expect(onComplete).toHaveBeenCalledOnce();
-    expect(onComplete).toHaveBeenCalledWith([{ zone: 'chest', sensation: 'Напряжение' }]);
+    expect(onComplete).toHaveBeenCalledWith([
+      { zone: 'chest', sensation: 'Напряжение', intensity: 3 },
+    ]);
   });
 
   it('calls onCancel when "Отмена" is clicked', async () => {
@@ -56,12 +63,11 @@ describe('BodyScan', () => {
 
   it('deselects a zone when clicking it again after sensation was chosen', async () => {
     render(<BodyScan onComplete={vi.fn()} onCancel={vi.fn()} />);
-    // Select zone + sensation
     await userEvent.click(screen.getByLabelText('Живот'));
     await userEvent.click(screen.getByText('Жжение'));
-    expect(screen.getByText('Готово (1)')).toBeInTheDocument();
-    // Click the same zone again to deselect
+    await userEvent.click(screen.getByText('Готово'));
+    expect(screen.getByText('Завершить (1)')).toBeInTheDocument();
     await userEvent.click(screen.getByLabelText('Живот'));
-    expect(screen.getByText('Готово (0)')).toBeInTheDocument();
+    expect(screen.getByText('Завершить (0)')).toBeInTheDocument();
   });
 });
