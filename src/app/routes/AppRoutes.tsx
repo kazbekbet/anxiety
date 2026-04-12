@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { PageSkeleton } from '@/shared/ui/PageSkeleton';
-import { BottomNav } from '@/widgets/bottom-nav';
+import { AppLayout } from '../layouts/AppLayout';
 
 const HomePage = lazy(() => import('@/pages/home').then((m) => ({ default: m.HomePage })));
 const DiaryPage = lazy(() => import('@/pages/diary').then((m) => ({ default: m.DiaryPage })));
@@ -38,21 +38,18 @@ export function AppRoutes() {
       <Route
         path="*"
         element={
-          <>
-            <div className="mx-auto min-h-screen max-w-lg bg-surface pb-[calc(5rem+env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
-              <Suspense fallback={fallback}>
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/diary" element={<DiaryPage />} />
-                  <Route path="/techniques" element={<TechniquesPage />} />
-                  <Route path="/stats" element={<StatsPage />} />
-                  <Route path="/tests" element={<TestsPage />} />
-                  <Route path="/exposure" element={<ExposurePage />} />
-                </Routes>
-              </Suspense>
-            </div>
-            <BottomNav />
-          </>
+          <AppLayout>
+            <Suspense fallback={fallback}>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/diary" element={<DiaryPage />} />
+                <Route path="/techniques" element={<TechniquesPage />} />
+                <Route path="/stats" element={<StatsPage />} />
+                <Route path="/tests" element={<TestsPage />} />
+                <Route path="/exposure" element={<ExposurePage />} />
+              </Routes>
+            </Suspense>
+          </AppLayout>
         }
       />
     </Routes>
