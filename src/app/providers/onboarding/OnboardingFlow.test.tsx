@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { OnboardingFlow } from './OnboardingFlow';
 
+
 describe('OnboardingFlow', () => {
   it('renders the first step initially', () => {
     render(<OnboardingFlow onComplete={vi.fn()} />);
