@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Card } from '@/shared/ui';
+import { Group, Paper, Stack, Text, Title } from '@mantine/core';
 import { useAnxietyEntries, useThoughtRecords } from '@/entities/anxiety';
 
 export function ProgressCard() {
@@ -17,7 +17,12 @@ export function ProgressCard() {
     const lastAvg = last7.reduce((sum, e) => sum + e.level, 0) / last7.length;
     const diff = firstAvg - lastAvg;
     const percentChange = firstAvg > 0 ? Math.round((diff / firstAvg) * 100) : 0;
-    return { firstAvg: Math.round(firstAvg * 10) / 10, lastAvg: Math.round(lastAvg * 10) / 10, percentChange, improved: diff > 0 };
+    return {
+      firstAvg: Math.round(firstAvg * 10) / 10,
+      lastAvg: Math.round(lastAvg * 10) / 10,
+      percentChange,
+      improved: diff > 0,
+    };
   }, [entries]);
 
   const thoughtEffectiveness = useMemo(() => {
@@ -29,44 +34,60 @@ export function ProgressCard() {
   if (!anxietyProgress && thoughtEffectiveness === null) return null;
 
   return (
-    <Card>
-      <h3 className="mb-3 font-semibold text-fg">Прогресс</h3>
+    <Paper withBorder radius="lg" p="md">
+      <Stack gap="sm">
+        <Title order={3} fz="md" fw={600}>
+          Прогресс
+        </Title>
 
-      {anxietyProgress && (
-        <div className="mb-3 rounded-xl bg-elevated p-3">
-          <p className="mb-2 text-sm text-muted">Уровень тревожности</p>
-          <div className="flex items-center gap-2 text-sm">
-            <span className="font-medium text-subtle">Было: {anxietyProgress.firstAvg}</span>
-            <span className="text-faint">&rarr;</span>
-            <span className="font-medium text-subtle">Сейчас: {anxietyProgress.lastAvg}</span>
-          </div>
-          <p className={`mt-1 text-sm font-medium ${anxietyProgress.improved ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
-            {anxietyProgress.improved ? `Улучшение на ${anxietyProgress.percentChange}%` : anxietyProgress.percentChange === 0 ? 'Без изменений' : `Рост на ${Math.abs(anxietyProgress.percentChange)}%`}
-          </p>
-        </div>
-      )}
+        {anxietyProgress && (
+          <Paper radius="md" p="sm" bg="var(--mantine-color-default-hover)">
+            <Stack gap={4}>
+              <Text fz="sm" c="dimmed">
+                Уровень тревожности
+              </Text>
+              <Group gap="xs" fz="sm">
+                <Text fw={500}>Было: {anxietyProgress.firstAvg}</Text>
+                <Text c="dimmed">→</Text>
+                <Text fw={500}>Сейчас: {anxietyProgress.lastAvg}</Text>
+              </Group>
+              <Text fz="sm" fw={500} c={anxietyProgress.improved ? 'teal' : 'red'}>
+                {anxietyProgress.improved
+                  ? `Улучшение на ${anxietyProgress.percentChange}%`
+                  : anxietyProgress.percentChange === 0
+                    ? 'Без изменений'
+                    : `Рост на ${Math.abs(anxietyProgress.percentChange)}%`}
+              </Text>
+            </Stack>
+          </Paper>
+        )}
 
-      {thoughtEffectiveness !== null && records.length > 0 && (
-        <div className="rounded-xl bg-elevated p-3">
-          <p className="mb-1 text-sm text-muted">Эффективность записей мыслей</p>
-          <p className="text-sm text-subtle">
-            Среднее снижение интенсивности:{' '}
-            <span className="font-semibold text-accent-fg">
-              {thoughtEffectiveness > 0 ? `-${thoughtEffectiveness}` : thoughtEffectiveness}
-            </span>{' '}
-            баллов
-          </p>
-          <p className="mt-1 text-xs text-faint">
-            На основе {records.length} {records.length === 1 ? 'записи' : 'записей'}
-          </p>
-        </div>
-      )}
+        {thoughtEffectiveness !== null && records.length > 0 && (
+          <Paper radius="md" p="sm" bg="var(--mantine-color-default-hover)">
+            <Stack gap={4}>
+              <Text fz="sm" c="dimmed">
+                Эффективность записей мыслей
+              </Text>
+              <Text fz="sm">
+                Среднее снижение интенсивности:{' '}
+                <Text span fw={600} c="brand">
+                  {thoughtEffectiveness > 0 ? `-${thoughtEffectiveness}` : thoughtEffectiveness}
+                </Text>{' '}
+                баллов
+              </Text>
+              <Text fz="xs" c="dimmed">
+                На основе {records.length} {records.length === 1 ? 'записи' : 'записей'}
+              </Text>
+            </Stack>
+          </Paper>
+        )}
 
-      {!anxietyProgress && entries.length > 0 && entries.length < 7 && (
-        <p className="text-sm text-faint">
-          Добавьте ещё {7 - entries.length} записей для отслеживания прогресса
-        </p>
-      )}
-    </Card>
+        {!anxietyProgress && entries.length > 0 && entries.length < 7 && (
+          <Text fz="sm" c="dimmed">
+            Добавьте ещё {7 - entries.length} записей для отслеживания прогресса
+          </Text>
+        )}
+      </Stack>
+    </Paper>
   );
 }

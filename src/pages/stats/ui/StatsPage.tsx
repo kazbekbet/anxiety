@@ -1,11 +1,20 @@
 import { useMemo, useState } from 'react';
 import { startOfDay } from 'date-fns';
+import {
+  Center,
+  Group,
+  Paper,
+  SegmentedControl,
+  SimpleGrid,
+  Stack,
+  Text,
+  Title,
+} from '@mantine/core';
+import { BarChart } from '@mantine/charts';
 import { Header } from '@/widgets/header';
-import { Card } from '@/shared/ui';
 import { ProgressCard } from '@/widgets/progress-card';
 import { AssessmentWidget } from '@/widgets/assessment-widget';
 import { ValuesWidget } from '@/widgets/values-widget';
-import { getLevelColor } from '@/shared/lib/level-colors';
 import { useAnxietyEntries, useAverageByDay, useThoughtRecords } from '@/entities/anxiety';
 import { getLast7Days, formatShortDay } from '@/shared/lib/date';
 import {
@@ -19,11 +28,49 @@ import {
 } from '@/shared/lib/insights';
 import { ExportButton } from '@/features/export-data';
 
-const PERIODS: { key: Period; label: string }[] = [
-  { key: '7d', label: '7 дней' },
-  { key: '30d', label: '30 дней' },
-  { key: 'all', label: 'Всё время' },
+const PERIODS: { value: Period; label: string }[] = [
+  { value: '7d', label: '7 дней' },
+  { value: '30d', label: '30 дней' },
+  { value: 'all', label: 'Всё время' },
 ];
+
+const CHART_SERIES = [{ name: 'value', label: 'Уровень', color: 'brand.5' }];
+
+function levelColor(value: number) {
+  if (value <= 0) return 'gray.3';
+  if (value <= 3) return 'teal.5';
+  if (value <= 5) return 'yellow.5';
+  if (value <= 7) return 'orange.5';
+  return 'red.5';
+}
+
+function StatCard({ value, label }: { value: string | number; label: string }) {
+  return (
+    <Paper withBorder radius="lg" p="md">
+      <Stack gap={4} align="center">
+        <Text fz={24} fw={700} c="brand">
+          {value}
+        </Text>
+        <Text fz="xs" c="dimmed">
+          {label}
+        </Text>
+      </Stack>
+    </Paper>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <Paper withBorder radius="lg" p="md">
+      <Stack gap="sm">
+        <Title order={3} fz="md" fw={600}>
+          {title}
+        </Title>
+        {children}
+      </Stack>
+    </Paper>
+  );
+}
 
 export function StatsPage() {
   const entries = useAnxietyEntries((s) => s.entries);
@@ -33,16 +80,21 @@ export function StatsPage() {
 
   const days = getLast7Days();
 
-  const chartData = useMemo(() => {
-    return days.map((day) => {
-      const key = startOfDay(day).toISOString();
-      return { label: formatShortDay(day), value: averageByDay.get(key) ?? 0 };
-    });
-  }, [days, averageByDay]);
+  const chartData = useMemo(
+    () =>
+      days.map((day) => {
+        const key = startOfDay(day).toISOString();
+        return { day: formatShortDay(day), value: averageByDay.get(key) ?? 0 };
+      }),
+    [days, averageByDay],
+  );
 
   const filteredEntries = useMemo(() => filterByPeriod(entries, period), [entries, period]);
   const filteredRecords = useMemo(() => filterByPeriod(records, period), [records, period]);
-  const overallAverage = useMemo(() => Math.round(averageLevel(filteredEntries)), [filteredEntries]);
+  const overallAverage = useMemo(
+    () => Math.round(averageLevel(filteredEntries)),
+    [filteredEntries],
+  );
   const maxLevel = filteredEntries.length > 0 ? Math.max(...filteredEntries.map((e) => e.level)) : 0;
   const minLevel = filteredEntries.length > 0 ? Math.min(...filteredEntries.map((e) => e.level)) : 0;
   const top3Triggers = useMemo(() => topTriggers(filteredEntries, 3), [filteredEntries]);
@@ -50,134 +102,116 @@ export function StatsPage() {
   const cbtReduction = useMemo(() => averageCbtReduction(filteredRecords), [filteredRecords]);
 
   return (
-    <div className="space-y-4">
+    <Stack gap="md">
       <Header title="Статистика" subtitle="Ваш прогресс" />
 
-      {/* Period selector */}
-      <div className="flex gap-1 rounded-xl bg-elevated p-1">
-        {PERIODS.map((p) => (
-          <button
-            key={p.key}
-            onClick={() => setPeriod(p.key)}
-            className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-              period === p.key
-                ? 'bg-card text-accent-fg shadow-sm'
-                : 'text-muted hover:text-subtle'
-            }`}
-          >
-            {p.label}
-          </button>
-        ))}
-      </div>
+      <SegmentedControl
+        fullWidth
+        radius="lg"
+        value={period}
+        onChange={(v) => setPeriod(v as Period)}
+        data={PERIODS}
+      />
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-3 gap-3">
-        <Card className="text-center">
-          <p className="text-2xl font-bold text-accent-fg">{filteredEntries.length}</p>
-          <p className="text-xs text-muted">Записей</p>
-        </Card>
-        <Card className="text-center">
-          <p className="text-2xl font-bold text-accent-fg">{filteredRecords.length}</p>
-          <p className="text-xs text-muted">Мыслей КПТ</p>
-        </Card>
-        <Card className="text-center">
-          <p className="text-2xl font-bold text-accent-fg">{overallAverage || '—'}</p>
-          <p className="text-xs text-muted">Средний</p>
-        </Card>
-      </div>
+      <SimpleGrid cols={3} spacing="sm">
+        <StatCard value={filteredEntries.length} label="Записей" />
+        <StatCard value={filteredRecords.length} label="Мыслей КПТ" />
+        <StatCard value={overallAverage || '—'} label="Средний" />
+      </SimpleGrid>
 
-      {/* Progress card */}
       <ProgressCard />
 
-      {/* Psychological tests */}
       <AssessmentWidget />
 
-      {/* Values */}
       <ValuesWidget />
 
-      {/* 7-day bar chart */}
-      <Card>
-        <h3 className="mb-4 font-semibold text-fg">Тревожность за 7 дней</h3>
+      <Section title="Тревожность за 7 дней">
         {entries.length === 0 ? (
-          <p className="py-8 text-center text-sm text-faint">Нет данных — добавьте записи в дневник</p>
+          <Center py="xl">
+            <Text fz="sm" c="dimmed">
+              Нет данных — добавьте записи в дневник
+            </Text>
+          </Center>
         ) : (
-          <div className="flex items-end justify-between gap-2" style={{ height: 160 }}>
-            {chartData.map((d, i) => (
-              <div key={i} className="flex flex-1 flex-col items-center gap-1">
-                <span className="text-xs font-medium text-subtle">{d.value || ''}</span>
-                <div className="w-full flex flex-col justify-end" style={{ height: 120 }}>
-                  <div
-                    className={`w-full rounded-t-md transition-all duration-300 ${d.value ? getLevelColor(d.value) : 'bg-elevated'}`}
-                    style={{ height: d.value ? `${(d.value / 10) * 100}%` : '4px' }}
-                  />
-                </div>
-                <span className="text-xs text-faint">{d.label}</span>
-              </div>
-            ))}
-          </div>
+          <BarChart
+            h={180}
+            data={chartData}
+            dataKey="day"
+            series={CHART_SERIES}
+            withYAxis={false}
+            withTooltip
+            withBarValueLabel
+            yAxisProps={{ domain: [0, 10] }}
+            getBarColor={(v) => levelColor(v)}
+            barProps={{ radius: 6 }}
+          />
         )}
-      </Card>
+      </Section>
 
-      {/* Top triggers */}
       {top3Triggers.length > 0 && (
-        <Card>
-          <h3 className="mb-3 font-semibold text-fg">Частые триггеры</h3>
-          <div className="space-y-2">
-            {top3Triggers.map((t, i) => (
-              <div key={i} className="flex items-center justify-between text-sm">
-                <span className="text-subtle">{t.trigger}</span>
-                <span className="text-faint">{formatTriggerCount(t.count)}</span>
-              </div>
+        <Section title="Частые триггеры">
+          <Stack gap="xs">
+            {top3Triggers.map((t) => (
+              <Group key={t.trigger} justify="space-between" wrap="nowrap">
+                <Text fz="sm">{t.trigger}</Text>
+                <Text fz="sm" c="dimmed">
+                  {formatTriggerCount(t.count)}
+                </Text>
+              </Group>
             ))}
-          </div>
-        </Card>
+          </Stack>
+        </Section>
       )}
 
-      {/* Text insights */}
       {insights.length > 0 && (
-        <Card>
-          <h3 className="mb-3 font-semibold text-fg">Аналитика</h3>
-          <div className="space-y-2">
+        <Section title="Аналитика">
+          <Stack gap="xs">
             {insights.map((text, i) => (
-              <p key={i} className="text-sm text-muted">{text}</p>
+              <Text key={i} fz="sm" c="dimmed">
+                {text}
+              </Text>
             ))}
-          </div>
-        </Card>
+          </Stack>
+        </Section>
       )}
 
-      {/* CBT effectiveness */}
       {cbtReduction !== null && (
-        <Card>
-          <h3 className="mb-3 font-semibold text-fg">Эффективность КПТ</h3>
-          <p className="text-sm text-muted">
+        <Section title="Эффективность КПТ">
+          <Text fz="sm" c="dimmed">
             КПТ-записи снижают тревогу в среднем на{' '}
-            <strong className="text-fg">{cbtReduction.toFixed(1)}</strong> баллов
-          </p>
-        </Card>
+            <Text span fw={600} c="bright">
+              {cbtReduction.toFixed(1)}
+            </Text>{' '}
+            баллов
+          </Text>
+        </Section>
       )}
 
-      {/* Summary */}
       {filteredEntries.length > 0 && (
-        <Card>
-          <h3 className="mb-3 font-semibold text-fg">Сводка</h3>
-          <div className="space-y-2 text-sm">
-            {[
-              ['Максимум', `${maxLevel}/10`],
-              ['Минимум', `${minLevel}/10`],
-              ['Средний', `${overallAverage}/10`],
-              ['Всего записей', `${filteredEntries.length}`],
-            ].map(([label, value]) => (
-              <div key={label} className="flex justify-between">
-                <span className="text-muted">{label}</span>
-                <span className="font-medium text-fg">{value}</span>
-              </div>
+        <Section title="Сводка">
+          <Stack gap="xs">
+            {(
+              [
+                ['Максимум', `${maxLevel}/10`],
+                ['Минимум', `${minLevel}/10`],
+                ['Средний', `${overallAverage}/10`],
+                ['Всего записей', `${filteredEntries.length}`],
+              ] as const
+            ).map(([label, value]) => (
+              <Group key={label} justify="space-between" wrap="nowrap">
+                <Text fz="sm" c="dimmed">
+                  {label}
+                </Text>
+                <Text fz="sm" fw={500}>
+                  {value}
+                </Text>
+              </Group>
             ))}
-          </div>
-        </Card>
+          </Stack>
+        </Section>
       )}
 
-      {/* Export */}
       <ExportButton entries={entries} records={records} />
-    </div>
+    </Stack>
   );
 }

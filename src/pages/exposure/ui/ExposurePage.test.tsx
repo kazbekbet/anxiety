@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderWithProviders as render } from '@/shared/test/render';
 import { MemoryRouter } from 'react-router-dom';
 import { ExposurePage } from './ExposurePage';
 import { useExposure } from '@/features/exposure';

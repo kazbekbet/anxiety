@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderWithProviders as render } from '@/shared/test/render';
 import userEvent from '@testing-library/user-event';
 import { ExportButton } from './ExportButton';
 import type { AnxietyEntry, ThoughtRecord } from '@/shared/types';

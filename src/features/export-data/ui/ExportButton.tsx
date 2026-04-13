@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { format } from 'date-fns';
-import { Button } from '@/shared/ui';
+import { Button } from '@mantine/core';
 import type { AnxietyEntry, ThoughtRecord } from '@/shared/types';
 
 interface ExportButtonProps {
@@ -25,7 +25,7 @@ export function ExportButton({ entries, records }: ExportButtonProps) {
   }, [entries, records]);
 
   return (
-    <Button variant="secondary" fullWidth onClick={handleExport}>
+    <Button variant="light" fullWidth onClick={handleExport}>
       Экспортировать данные
     </Button>
   );

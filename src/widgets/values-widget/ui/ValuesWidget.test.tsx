@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderWithProviders as render } from '@/shared/test/render';
 import { ValuesWidget } from './ValuesWidget';
 import { useValuesStore } from '@/features/values-diary';
 
@@ -10,8 +11,8 @@ describe('ValuesWidget', () => {
   });
 
   it('renders nothing when there are no entries', () => {
-    const { container } = render(<ValuesWidget />);
-    expect(container.innerHTML).toBe('');
+    render(<ValuesWidget />);
+    expect(screen.queryByText('Ваши ценности')).not.toBeInTheDocument();
   });
 
   it('renders the heading when an entry exists', () => {

@@ -1,10 +1,16 @@
 import { useNavigate } from 'react-router-dom';
-import { Card, Button } from '@/shared/ui';
-import { LevelBar } from '@/shared/ui/LevelIndicator';
+import { Anchor, Button, Group, Paper, Progress, Stack, Text, Title } from '@mantine/core';
 import { allAssessments, getLevel } from '@/entities/assessment';
 import { useAssessmentResults } from '@/entities/assessment';
 import { formatEntryDate } from '@/shared/lib/date';
 import { levelColorToNumber, daysSince } from '@/shared/lib/assessment-utils';
+
+function levelProgressColor(level: number) {
+  if (level <= 3) return 'teal';
+  if (level <= 5) return 'yellow';
+  if (level <= 7) return 'orange';
+  return 'red';
+}
 
 export function AssessmentWidget() {
   const results = useAssessmentResults((s) => s.results);
@@ -18,56 +24,77 @@ export function AssessmentWidget() {
   });
 
   return (
-    <Card>
-      <h3 className="mb-3 font-semibold text-fg">Психологические тесты</h3>
-      <div className="space-y-3">
-        {testCards.map(({ test, lastResult, days, level }) => (
-          <div key={test.id} className="rounded-xl bg-elevated p-3">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-fg">{test.shortTitle}</span>
-              {lastResult ? (
-                <span className="text-xs text-faint">
-                  {formatEntryDate(lastResult.timestamp)}
-                </span>
-              ) : (
-                <span className="text-xs text-faint">не пройден</span>
-              )}
-            </div>
-            {lastResult && level ? (
-              <>
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="flex-1">
-                    <LevelBar level={levelColorToNumber(level.color)} />
-                  </div>
-                  <span className="text-xs font-medium text-subtle">
-                    {lastResult.score}/{test.maxScore}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted">{level.label}</span>
-                  {days !== null && days >= test.intervalDays && (
-                    <button
-                      onClick={() => navigate(`/stats/tests/${test.id}`)}
-                      className="text-xs font-medium text-accent-fg"
-                    >
-                      Пройти снова
-                    </button>
-                  )}
-                </div>
-              </>
-            ) : (
-              <Button
-                variant="secondary"
-                fullWidth
-                className="mt-1"
-                onClick={() => navigate(`/stats/tests/${test.id}`)}
+    <Paper withBorder radius="lg" p="md">
+      <Stack gap="sm">
+        <Title order={3} fz="md" fw={600}>
+          Психологические тесты
+        </Title>
+
+        <Stack gap="sm">
+          {testCards.map(({ test, lastResult, days, level }) => {
+            const numericLevel = level ? levelColorToNumber(level.color) : 0;
+            return (
+              <Paper
+                key={test.id}
+                radius="md"
+                p="sm"
+                bg="var(--mantine-color-default-hover)"
               >
-                Пройти тест
-              </Button>
-            )}
-          </div>
-        ))}
-      </div>
-    </Card>
+                <Stack gap="xs">
+                  <Group justify="space-between" wrap="nowrap">
+                    <Text fz="sm" fw={500}>
+                      {test.shortTitle}
+                    </Text>
+                    <Text fz="xs" c="dimmed">
+                      {lastResult ? formatEntryDate(lastResult.timestamp) : 'не пройден'}
+                    </Text>
+                  </Group>
+
+                  {lastResult && level ? (
+                    <Stack gap={4}>
+                      <Group gap="xs" wrap="nowrap" align="center">
+                        <Progress
+                          flex={1}
+                          value={numericLevel * 10}
+                          color={levelProgressColor(numericLevel)}
+                          size="sm"
+                          radius="xl"
+                        />
+                        <Text fz="xs" fw={500}>
+                          {lastResult.score}/{test.maxScore}
+                        </Text>
+                      </Group>
+                      <Group justify="space-between" wrap="nowrap">
+                        <Text fz="xs" c="dimmed">
+                          {level.label}
+                        </Text>
+                        {days !== null && days >= test.intervalDays && (
+                          <Anchor
+                            component="button"
+                            fz="xs"
+                            fw={500}
+                            onClick={() => navigate(`/stats/tests/${test.id}`)}
+                          >
+                            Пройти снова
+                          </Anchor>
+                        )}
+                      </Group>
+                    </Stack>
+                  ) : (
+                    <Button
+                      variant="light"
+                      fullWidth
+                      onClick={() => navigate(`/stats/tests/${test.id}`)}
+                    >
+                      Пройти тест
+                    </Button>
+                  )}
+                </Stack>
+              </Paper>
+            );
+          })}
+        </Stack>
+      </Stack>
+    </Paper>
   );
 }
