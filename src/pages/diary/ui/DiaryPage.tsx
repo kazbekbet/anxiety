@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { startOfDay } from 'date-fns';
+import { Box, Button, Center, Group, Modal, Stack, Text } from '@mantine/core';
 import { Header } from '@/widgets/header';
-import { Modal, Button } from '@/shared/ui';
 import { useAnxietyEntries, AnxietyCard } from '@/entities/anxiety';
 import { ValuesDiaryForm } from '@/features/values-diary';
 import { LogAnxietyForm } from '@/features/log-anxiety';
@@ -32,52 +32,62 @@ export function DiaryPage() {
   }, [entries]);
 
   return (
-    <div className="space-y-4">
+    <Stack gap="md">
       <Header title="Дневник" subtitle={`${entries.length} записей`} />
 
-      <div className="flex gap-2">
-        <Button fullWidth onClick={() => setShowForm(true)}>
-          + Запись
-        </Button>
-        <Button fullWidth variant="secondary" onClick={() => setShowValues(true)}>
+      <Group gap="xs" grow>
+        <Button onClick={() => setShowForm(true)}>+ Запись</Button>
+        <Button variant="light" onClick={() => setShowValues(true)}>
           Ценности
         </Button>
-      </div>
+      </Group>
 
       {entries.length === 0 ? (
-        <div className="flex flex-col items-center py-12 text-center px-4">
-          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" className="mb-5 text-accent-soft opacity-80">
-            <rect x="16" y="12" width="48" height="56" rx="8" fill="currentColor"/>
-            <rect x="26" y="28" width="28" height="3" rx="1.5" fill="white" opacity="0.6"/>
-            <rect x="26" y="36" width="20" height="3" rx="1.5" fill="white" opacity="0.4"/>
-            <rect x="26" y="44" width="24" height="3" rx="1.5" fill="white" opacity="0.4"/>
-          </svg>
-          <p className="text-base font-semibold text-fg">Ваш дневник ждёт вас</p>
-          <p className="mt-2 text-sm text-muted max-w-[260px] leading-relaxed">
-            Записывайте моменты тревоги — это помогает увидеть паттерны и стать спокойнее
-          </p>
-          <Button className="mt-6" onClick={() => setShowForm(true)}>
-            Добавить первую запись
-          </Button>
-        </div>
+        <Center px="md" py={48}>
+          <Stack align="center" gap="xs">
+            <Box c="brand.3" mb="sm" style={{ opacity: 0.8 }}>
+              <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+                <rect x="16" y="12" width="48" height="56" rx="8" fill="currentColor" />
+                <rect x="26" y="28" width="28" height="3" rx="1.5" fill="white" opacity="0.6" />
+                <rect x="26" y="36" width="20" height="3" rx="1.5" fill="white" opacity="0.4" />
+                <rect x="26" y="44" width="24" height="3" rx="1.5" fill="white" opacity="0.4" />
+              </svg>
+            </Box>
+            <Text fz="md" fw={600} ta="center">
+              Ваш дневник ждёт вас
+            </Text>
+            <Text fz="sm" c="dimmed" ta="center" maw={260}>
+              Записывайте моменты тревоги — это помогает увидеть паттерны и стать спокойнее
+            </Text>
+            <Button mt="md" onClick={() => setShowForm(true)}>
+              Добавить первую запись
+            </Button>
+          </Stack>
+        </Center>
       ) : (
-        <div className="space-y-5">
+        <Stack gap="lg">
           {grouped.map((group) => (
-            <div key={group.date}>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-faint">
+            <Stack key={group.date} gap="xs">
+              <Text fz="xs" fw={600} c="dimmed" tt="uppercase" style={{ letterSpacing: '0.05em' }}>
                 {group.label}
-              </p>
-              <div className="space-y-3">
+              </Text>
+              <Stack gap="sm">
                 {group.entries.map((entry) => (
                   <AnxietyCard key={entry.id} entry={entry} onDelete={removeEntry} />
                 ))}
-              </div>
-            </div>
+              </Stack>
+            </Stack>
           ))}
-        </div>
+        </Stack>
       )}
 
-      <Modal open={showForm} onClose={() => setShowForm(false)} title="Новая запись">
+      <Modal
+        opened={showForm}
+        onClose={() => setShowForm(false)}
+        title="Новая запись"
+        centered
+        radius="lg"
+      >
         <LogAnxietyForm
           onSubmit={(data) => {
             addEntry(data);
@@ -87,12 +97,18 @@ export function DiaryPage() {
         />
       </Modal>
 
-      <Modal open={showValues} onClose={() => setShowValues(false)} title="Дневник ценностей">
+      <Modal
+        opened={showValues}
+        onClose={() => setShowValues(false)}
+        title="Дневник ценностей"
+        centered
+        radius="lg"
+      >
         <ValuesDiaryForm
           onComplete={() => setShowValues(false)}
           onCancel={() => setShowValues(false)}
         />
       </Modal>
-    </div>
+    </Stack>
   );
 }

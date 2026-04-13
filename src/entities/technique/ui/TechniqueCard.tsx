@@ -1,5 +1,5 @@
+import { ActionIcon, Anchor, Badge, Group, Paper, Progress, Stack, Text } from '@mantine/core';
 import type { Technique } from '@/shared/types';
-import { Card } from '@/shared/ui';
 
 interface TechniqueCardProps {
   technique: Technique;
@@ -10,76 +10,130 @@ interface TechniqueCardProps {
 }
 
 const categoryBadge = {
-  cbt: { bg: 'bg-badge-cbt', text: 'text-badge-cbt-fg', label: 'КПТ' },
-  existential: { bg: 'bg-badge-existential', text: 'text-badge-existential-fg', label: 'Экзистенциальная' },
-};
+  cbt: { color: 'brand', label: 'КПТ' },
+  existential: { color: 'grape', label: 'Экзистенциальная' },
+} as const;
 
-export function TechniqueCard({ technique, onStart, locked, unlockProgress, onManualUnlock }: TechniqueCardProps) {
+function LockIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
+}
+
+function ChevronIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+  );
+}
+
+export function TechniqueCard({
+  technique,
+  onStart,
+  locked,
+  unlockProgress,
+  onManualUnlock,
+}: TechniqueCardProps) {
   const badge = categoryBadge[technique.category];
 
   if (locked) {
     return (
-      <Card className="opacity-60">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${badge.bg} ${badge.text}`}>
+      <Paper withBorder radius="lg" p="md" opacity={0.65}>
+        <Group gap="sm" align="flex-start" wrap="nowrap">
+          <Stack gap={4} flex={1} miw={0}>
+            <Group gap="xs" wrap="nowrap">
+              <Badge color={badge.color} variant="light" radius="xl" size="sm">
                 {badge.label}
-              </span>
-              <span className="text-xs text-faint">{technique.duration}</span>
-            </div>
-            <h3 className="font-semibold text-fg">{technique.title}</h3>
+              </Badge>
+              <Text fz="xs" c="dimmed">
+                {technique.duration}
+              </Text>
+            </Group>
+            <Text fw={600}>{technique.title}</Text>
             {unlockProgress && (
-              <div className="mt-2">
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-hover">
-                  <div
-                    className="h-full rounded-full bg-accent transition-all"
-                    style={{ width: `${(unlockProgress.current / unlockProgress.required) * 100}%` }}
-                  />
-                </div>
-                <p className="mt-1 text-xs text-faint">
+              <Stack gap={4} mt={4}>
+                <Progress
+                  value={(unlockProgress.current / unlockProgress.required) * 100}
+                  color="brand"
+                  size="sm"
+                  radius="xl"
+                />
+                <Text fz="xs" c="dimmed">
                   Ещё {unlockProgress.required - unlockProgress.current} раз для разблокировки
-                </p>
-              </div>
+                </Text>
+              </Stack>
             )}
             {onManualUnlock && (
-              <button onClick={onManualUnlock} className="mt-2 text-xs text-accent-fg">
+              <Anchor component="button" fz="xs" onClick={onManualUnlock} mt={4}>
                 Разблокировать
-              </button>
+              </Anchor>
             )}
-          </div>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-elevated text-faint">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-          </div>
-        </div>
-      </Card>
+          </Stack>
+          <ActionIcon
+            component="div"
+            variant="default"
+            radius="md"
+            size={40}
+            style={{ cursor: 'default' }}
+          >
+            <LockIcon />
+          </ActionIcon>
+        </Group>
+      </Paper>
     );
   }
 
   return (
-    <Card
-      className="cursor-pointer active:scale-[0.98] transition-transform duration-150"
+    <Paper
+      withBorder
+      radius="lg"
+      p="md"
       onClick={() => onStart(technique)}
+      style={{ cursor: 'pointer', transition: 'transform 150ms ease' }}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${badge.bg} ${badge.text}`}>
+      <Group gap="sm" align="flex-start" wrap="nowrap">
+        <Stack gap={4} flex={1} miw={0}>
+          <Group gap="xs" wrap="nowrap">
+            <Badge color={badge.color} variant="light" radius="xl" size="sm">
               {badge.label}
-            </span>
-            <span className="text-xs text-faint">{technique.duration}</span>
-          </div>
-          <h3 className="font-semibold text-fg">{technique.title}</h3>
-          <p className="mt-1 text-sm text-muted line-clamp-2">{technique.description}</p>
-        </div>
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent-fg">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </div>
-      </div>
-    </Card>
+            </Badge>
+            <Text fz="xs" c="dimmed">
+              {technique.duration}
+            </Text>
+          </Group>
+          <Text fw={600}>{technique.title}</Text>
+          <Text fz="sm" c="dimmed" lineClamp={2}>
+            {technique.description}
+          </Text>
+        </Stack>
+        <ActionIcon variant="light" color="brand" radius="md" size={40} aria-label="Открыть">
+          <ChevronIcon />
+        </ActionIcon>
+      </Group>
+    </Paper>
   );
 }

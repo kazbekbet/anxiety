@@ -1,18 +1,19 @@
 import { useMemo } from 'react';
 import { startOfDay, subDays, format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { Box, Group, Stack, Text } from '@mantine/core';
 import type { AnxietyEntry } from '@/shared/types';
 
 interface HeatmapProps {
   entries: AnxietyEntry[];
 }
 
-function getColor(level: number): string {
-  if (level === 0) return 'bg-hover';
-  if (level <= 3) return 'bg-emerald-400 dark:bg-emerald-600';
-  if (level <= 5) return 'bg-amber-400 dark:bg-amber-500';
-  if (level <= 7) return 'bg-orange-400 dark:bg-orange-500';
-  return 'bg-red-400 dark:bg-red-500';
+function getCellBackground(level: number): string {
+  if (level === 0) return 'var(--mantine-color-default-hover)';
+  if (level <= 3) return 'var(--mantine-color-calm-5)';
+  if (level <= 5) return 'var(--mantine-color-yellow-5)';
+  if (level <= 7) return 'var(--mantine-color-orange-5)';
+  return 'var(--mantine-color-warm-5)';
 }
 
 const PERIODS = ['Утро', 'День', 'Вечер'] as const;
@@ -47,25 +48,34 @@ export function Heatmap({ entries }: HeatmapProps) {
   }, [entries]);
 
   return (
-    <div>
-      <div className="flex gap-1 mb-1">
-        <div className="w-10" />
+    <Stack gap={4}>
+      <Group gap={4} wrap="nowrap">
+        <Box w={40} />
         {data.map((d, i) => (
-          <div key={i} className="flex-1 text-center text-[10px] text-faint">{d.label}</div>
+          <Text key={i} fz={10} c="dimmed" ta="center" style={{ flex: 1 }}>
+            {d.label}
+          </Text>
         ))}
-      </div>
+      </Group>
       {PERIODS.map((period, row) => (
-        <div key={period} className="flex gap-1 mb-1">
-          <div className="w-10 text-[10px] text-faint flex items-center">{period}</div>
+        <Group key={period} gap={4} wrap="nowrap">
+          <Text w={40} fz={10} c="dimmed">
+            {period}
+          </Text>
           {data.map((d, col) => (
-            <div
+            <Box
               key={col}
-              className={`flex-1 aspect-square rounded-sm ${getColor(d.cells[row])}`}
+              style={{
+                flex: 1,
+                aspectRatio: '1 / 1',
+                borderRadius: 'var(--mantine-radius-sm)',
+                background: getCellBackground(d.cells[row]),
+              }}
               title={d.cells[row] > 0 ? `${d.label} ${period}: ${d.cells[row]}/10` : ''}
             />
           ))}
-        </div>
+        </Group>
       ))}
-    </div>
+    </Stack>
   );
 }

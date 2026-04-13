@@ -1,6 +1,21 @@
 import { useState } from 'react';
+import {
+  ActionIcon,
+  Box,
+  Button,
+  Center,
+  Checkbox,
+  Group,
+  Modal,
+  Paper,
+  Progress,
+  Slider,
+  Stack,
+  Text,
+  TextInput,
+} from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { Header } from '@/widgets/header';
-import { Card, Button, Modal, inputClass } from '@/shared/ui';
 import { useExposure } from '@/features/exposure';
 import type { ExposureHierarchy } from '@/features/exposure';
 
@@ -11,7 +26,8 @@ function HierarchyView({ hierarchy }: { hierarchy: ExposureHierarchy }) {
   const [showAdd, setShowAdd] = useState(false);
 
   const completedCount = hierarchy.steps.filter((s) => s.completed).length;
-  const progress = hierarchy.steps.length > 0 ? (completedCount / hierarchy.steps.length) * 100 : 0;
+  const progress =
+    hierarchy.steps.length > 0 ? (completedCount / hierarchy.steps.length) * 100 : 0;
 
   const handleAdd = () => {
     if (!newText.trim()) return;
@@ -22,97 +38,111 @@ function HierarchyView({ hierarchy }: { hierarchy: ExposureHierarchy }) {
   };
 
   return (
-    <Card>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold text-fg">{hierarchy.title}</h3>
-        <span className="text-xs text-faint">{completedCount}/{hierarchy.steps.length}</span>
-      </div>
+    <Paper withBorder radius="lg" p="md">
+      <Group justify="space-between" mb="xs">
+        <Text fw={600}>{hierarchy.title}</Text>
+        <Text fz="xs" c="dimmed">
+          {completedCount}/{hierarchy.steps.length}
+        </Text>
+      </Group>
 
-      {/* Progress bar */}
-      <div className="h-2 w-full overflow-hidden rounded-full bg-elevated mb-4">
-        <div
-          className="h-full rounded-full bg-emerald-500 transition-all duration-300"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+      <Progress value={progress} color="calm" radius="xl" mb="md" />
 
-      {/* Steps */}
       {hierarchy.steps.length === 0 ? (
-        <p className="text-sm text-faint text-center py-4">Добавьте первую ступень</p>
+        <Text fz="sm" c="dimmed" ta="center" py="md">
+          Добавьте первую ступень
+        </Text>
       ) : (
-        <div className="space-y-2">
+        <Stack gap="xs">
           {hierarchy.steps.map((step, i) => (
-            <div
+            <Paper
               key={step.id}
-              className={`flex items-start gap-3 rounded-xl p-3 transition-colors ${
-                step.completed ? 'bg-emerald-50 dark:bg-emerald-950' : 'bg-elevated'
-              }`}
+              radius="md"
+              p="sm"
+              bg={
+                step.completed
+                  ? 'var(--mantine-color-calm-light)'
+                  : 'var(--mantine-color-default-hover)'
+              }
             >
-              <button
-                role="checkbox"
-                aria-checked={step.completed}
-                aria-label={`Отметить: ${step.text}`}
-                onClick={() => toggleStep(hierarchy.id, step.id)}
-                className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-                  step.completed
-                    ? 'border-emerald-500 bg-emerald-500 text-white'
-                    : 'border-border'
-                }`}
-              >
-                {step.completed && <span className="text-xs">✓</span>}
-              </button>
-              <div className="flex-1 min-w-0">
-                <p className={`text-sm ${step.completed ? 'text-muted line-through' : 'text-fg'}`}>
-                  {i + 1}. {step.text}
-                </p>
-                <p className="text-xs text-faint mt-0.5">Тревога: {step.suds}/100</p>
-              </div>
-              <button
-                aria-label={`Удалить ступень: ${step.text}`}
-                onClick={() => removeStep(hierarchy.id, step.id)}
-                className="text-xs text-faint hover:text-red-500 shrink-0"
-              >
-                ✕
-              </button>
-            </div>
+              <Group align="flex-start" wrap="nowrap" gap="sm">
+                <Checkbox
+                  checked={step.completed}
+                  onChange={() => toggleStep(hierarchy.id, step.id)}
+                  aria-label={`Отметить: ${step.text}`}
+                  color="calm"
+                  mt={2}
+                />
+                <Box style={{ flex: 1, minWidth: 0 }}>
+                  <Text
+                    fz="sm"
+                    c={step.completed ? 'dimmed' : undefined}
+                    td={step.completed ? 'line-through' : undefined}
+                  >
+                    {i + 1}. {step.text}
+                  </Text>
+                  <Text fz="xs" c="dimmed" mt={2}>
+                    Тревога: {step.suds}/100
+                  </Text>
+                </Box>
+                <ActionIcon
+                  variant="subtle"
+                  color="gray"
+                  size="sm"
+                  aria-label={`Удалить ступень: ${step.text}`}
+                  onClick={() => removeStep(hierarchy.id, step.id)}
+                >
+                  ✕
+                </ActionIcon>
+              </Group>
+            </Paper>
           ))}
-        </div>
+        </Stack>
       )}
 
-      {/* Add step */}
       {showAdd ? (
-        <div className="mt-3 space-y-2">
-          <input
+        <Stack gap="xs" mt="sm">
+          <TextInput
             value={newText}
-            onChange={(e) => setNewText(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); }}
+            onChange={(e) => setNewText(e.currentTarget.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleAdd();
+            }}
             placeholder="Описание ситуации..."
-            className={inputClass}
+            data-autofocus
             autoFocus
           />
-          <div className="flex items-center gap-3">
-            <label className="text-xs text-muted shrink-0">Тревога:</label>
-            <input
-              type="range"
+          <Group gap="sm" wrap="nowrap" align="center">
+            <Text fz="xs" c="dimmed">
+              Тревога:
+            </Text>
+            <Slider
+              value={newSuds}
+              onChange={setNewSuds}
               min={0}
               max={100}
-              value={newSuds}
-              onChange={(e) => setNewSuds(Number(e.target.value))}
-              className="flex-1 accent-indigo-500"
+              color="brand"
+              style={{ flex: 1 }}
             />
-            <span className="text-sm font-medium text-fg w-8 text-right">{newSuds}</span>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="ghost" fullWidth onClick={() => setShowAdd(false)}>Отмена</Button>
-            <Button fullWidth onClick={handleAdd} disabled={!newText.trim()}>Добавить</Button>
-          </div>
-        </div>
+            <Text fz="sm" fw={500} w={32} ta="right">
+              {newSuds}
+            </Text>
+          </Group>
+          <Group gap="xs" grow>
+            <Button variant="subtle" onClick={() => setShowAdd(false)}>
+              Отмена
+            </Button>
+            <Button onClick={handleAdd} disabled={!newText.trim()} color="brand">
+              Добавить
+            </Button>
+          </Group>
+        </Stack>
       ) : (
-        <Button variant="secondary" fullWidth className="mt-3" onClick={() => setShowAdd(true)}>
+        <Button variant="light" color="brand" fullWidth mt="sm" onClick={() => setShowAdd(true)}>
           + Добавить ступень
         </Button>
       )}
-    </Card>
+    </Paper>
   );
 }
 
@@ -120,7 +150,7 @@ export function ExposurePage() {
   const hierarchies = useExposure((s) => s.hierarchies);
   const addHierarchy = useExposure((s) => s.addHierarchy);
   const removeHierarchy = useExposure((s) => s.removeHierarchy);
-  const [showNew, setShowNew] = useState(false);
+  const [newOpened, { open: openNew, close: closeNew }] = useDisclosure(false);
   const [newTitle, setNewTitle] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
@@ -128,69 +158,99 @@ export function ExposurePage() {
     if (!newTitle.trim()) return;
     addHierarchy(newTitle.trim());
     setNewTitle('');
-    setShowNew(false);
+    closeNew();
+  };
+
+  const handleCloseNew = () => {
+    setNewTitle('');
+    closeNew();
   };
 
   return (
-    <div className="space-y-4">
+    <Stack gap="md">
       <Header title="Лестница страха" subtitle="Пошаговая экспозиция" />
 
-      <Card className="bg-elevated">
-        <p className="text-xs text-muted leading-relaxed">
-          Создайте иерархию страхов — от лёгких ситуаций к самым тревожным.
-          Начните с нижних ступеней и постепенно поднимайтесь.
-        </p>
-      </Card>
+      <Paper withBorder radius="lg" p="md" bg="var(--mantine-color-default-hover)">
+        <Text fz="xs" c="dimmed">
+          Создайте иерархию страхов — от лёгких ситуаций к самым тревожным. Начните с нижних
+          ступеней и постепенно поднимайтесь.
+        </Text>
+      </Paper>
 
-      <Button fullWidth onClick={() => setShowNew(true)}>
+      <Button fullWidth color="brand" onClick={openNew}>
         + Новая лестница
       </Button>
 
       {hierarchies.length === 0 && (
-        <div className="py-8 text-center">
-          <p className="text-sm text-faint">Создайте первую лестницу страха</p>
-        </div>
+        <Center py="xl">
+          <Text fz="sm" c="dimmed">
+            Создайте первую лестницу страха
+          </Text>
+        </Center>
       )}
 
       {hierarchies.map((h) => (
-        <div key={h.id}>
+        <Stack key={h.id} gap={4}>
           <HierarchyView hierarchy={h} />
-          <button
-            onClick={() => setConfirmDelete(h.id)}
-            className="mt-1 text-xs text-faint hover:text-red-500 transition-colors"
-          >
-            Удалить лестницу
-          </button>
-        </div>
+          <Center>
+            <Button
+              variant="subtle"
+              color="gray"
+              size="xs"
+              onClick={() => setConfirmDelete(h.id)}
+            >
+              Удалить лестницу
+            </Button>
+          </Center>
+        </Stack>
       ))}
 
-      {/* New hierarchy modal */}
-      <Modal open={showNew} onClose={() => setShowNew(false)} title="Новая лестница">
-        <div className="space-y-4">
-          <input
+      <Modal opened={newOpened} onClose={handleCloseNew} title="Новая лестница" centered>
+        <Stack gap="md">
+          <TextInput
             value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
+            onChange={(e) => setNewTitle(e.currentTarget.value)}
             placeholder="Название (например: Социальные ситуации)"
-            className={inputClass}
+            data-autofocus
             autoFocus
           />
-          <div className="flex gap-3">
-            <Button variant="ghost" fullWidth onClick={() => setShowNew(false)}>Отмена</Button>
-            <Button fullWidth onClick={handleCreate} disabled={!newTitle.trim()}>Создать</Button>
-          </div>
-        </div>
+          <Group gap="sm" grow>
+            <Button variant="subtle" onClick={handleCloseNew}>
+              Отмена
+            </Button>
+            <Button onClick={handleCreate} disabled={!newTitle.trim()} color="brand">
+              Создать
+            </Button>
+          </Group>
+        </Stack>
       </Modal>
 
-      {/* Delete confirmation */}
-      <Modal open={!!confirmDelete} onClose={() => setConfirmDelete(null)} title="Удалить лестницу?">
-        <p className="text-sm text-muted mb-4">Все ступени будут потеряны. Это нельзя отменить.</p>
-        <div className="flex gap-3">
-          <Button variant="ghost" fullWidth onClick={() => setConfirmDelete(null)}>Отмена</Button>
-          <Button variant="danger" fullWidth onClick={() => { if (confirmDelete) removeHierarchy(confirmDelete); setConfirmDelete(null); }}>
-            Удалить
-          </Button>
-        </div>
+      <Modal
+        opened={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        title="Удалить лестницу?"
+        centered
+      >
+        <Stack gap="md">
+          <Text fz="sm" c="dimmed">
+            Все ступени будут потеряны. Это нельзя отменить.
+          </Text>
+          <Group gap="sm" grow>
+            <Button variant="subtle" onClick={() => setConfirmDelete(null)}>
+              Отмена
+            </Button>
+            <Button
+              color="warm"
+              onClick={() => {
+                if (confirmDelete) removeHierarchy(confirmDelete);
+                setConfirmDelete(null);
+              }}
+            >
+              Удалить
+            </Button>
+          </Group>
+        </Stack>
       </Modal>
-    </div>
+    </Stack>
   );
 }

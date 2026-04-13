@@ -1,27 +1,19 @@
 import { describe, it, expect } from 'vitest';
-import { render } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderWithProviders as render } from '@/shared/test/render';
 import { PageSkeleton } from './PageSkeleton';
 
 describe('PageSkeleton', () => {
-  it('renders without crashing', () => {
-    const { container } = render(<PageSkeleton />);
-    expect(container.firstChild).toBeInTheDocument();
-  });
-
-  it('has the animate-pulse class for loading animation', () => {
-    const { container } = render(<PageSkeleton />);
-    expect(container.firstChild).toHaveClass('animate-pulse');
+  it('renders a status region with the loading label', () => {
+    render(<PageSkeleton />);
+    const region = screen.getByRole('status', { name: 'Загрузка' });
+    expect(region).toBeInTheDocument();
+    expect(region).toHaveAttribute('aria-busy', 'true');
   });
 
   it('renders 4 skeleton placeholder blocks', () => {
-    const { container } = render(<PageSkeleton />);
-    const blocks = container.querySelectorAll('.bg-elevated');
-    expect(blocks).toHaveLength(4);
-  });
-
-  it('renders blocks with rounded corners', () => {
-    const { container } = render(<PageSkeleton />);
-    const blocks = container.querySelectorAll('.rounded-2xl.bg-elevated');
+    render(<PageSkeleton />);
+    const blocks = screen.getByRole('status').querySelectorAll('.mantine-Skeleton-root');
     expect(blocks).toHaveLength(4);
   });
 });

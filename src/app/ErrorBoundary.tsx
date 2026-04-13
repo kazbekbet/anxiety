@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import type { ReactNode, ErrorInfo } from 'react';
-import { Card, Button } from '@/shared/ui';
+import { Button, Center, MantineProvider, Paper, Stack, Text, Title } from '@mantine/core';
+import { cssVariablesResolver, mantineTheme } from './providers/mantine/theme';
 
 interface Props {
   children: ReactNode;
@@ -34,32 +35,40 @@ export class AppErrorBoundary extends Component<Props, State> {
   render() {
     if (!this.state.hasError) return this.props.children;
 
-    const isQuotaError = this.state.error?.name === 'QuotaExceededError'
-      || this.state.error?.message?.includes('quota');
+    const isQuotaError =
+      this.state.error?.name === 'QuotaExceededError' ||
+      this.state.error?.message?.includes('quota');
 
+    // ErrorBoundary lives outside the app-level MantineProvider so it can catch
+    // errors from that provider itself; render its own provider to guarantee
+    // Mantine context is available regardless of where the failure happened.
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface px-4">
-        <Card className="w-full max-w-sm text-center">
-          <h2 className="text-lg font-semibold text-fg mb-2">
-            {isQuotaError ? 'Хранилище переполнено' : 'Что-то пошло не так'}
-          </h2>
-          <p className="text-sm text-muted mb-4">
-            {isQuotaError
-              ? 'Экспортируйте данные и очистите старые записи.'
-              : 'Попробуйте перезагрузить приложение.'}
-          </p>
-          <div className="space-y-2">
-            <Button fullWidth onClick={this.handleReset}>
-              Попробовать снова
-            </Button>
-            {isQuotaError && (
-              <Button fullWidth variant="danger" onClick={this.handleClearData}>
-                Очистить данные
-              </Button>
-            )}
-          </div>
-        </Card>
-      </div>
+      <MantineProvider theme={mantineTheme} cssVariablesResolver={cssVariablesResolver}>
+        <Center mih="100vh" px="md" bg="var(--mantine-color-body)">
+          <Paper withBorder radius="lg" p="lg" w="100%" maw={380}>
+            <Stack gap="md" align="stretch">
+              <Title order={2} fz="lg" fw={600} ta="center">
+                {isQuotaError ? 'Хранилище переполнено' : 'Что-то пошло не так'}
+              </Title>
+              <Text fz="sm" c="dimmed" ta="center">
+                {isQuotaError
+                  ? 'Экспортируйте данные и очистите старые записи.'
+                  : 'Попробуйте перезагрузить приложение.'}
+              </Text>
+              <Stack gap="xs">
+                <Button fullWidth onClick={this.handleReset}>
+                  Попробовать снова
+                </Button>
+                {isQuotaError && (
+                  <Button fullWidth color="red" variant="light" onClick={this.handleClearData}>
+                    Очистить данные
+                  </Button>
+                )}
+              </Stack>
+            </Stack>
+          </Paper>
+        </Center>
+      </MantineProvider>
     );
   }
 }

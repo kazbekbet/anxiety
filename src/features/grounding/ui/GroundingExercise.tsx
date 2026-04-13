@@ -1,14 +1,22 @@
 import { useState } from 'react';
-import { Button, Card, StepProgress, inputClass } from '@/shared/ui';
+import {
+  Button,
+  Group,
+  Paper,
+  Progress,
+  Stack,
+  Text,
+  TextInput,
+  Title,
+} from '@mantine/core';
 
 const STEPS = [
-  { sense: 'ВИДИТЕ', count: 5, icon: '👁', color: 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300' },
-  { sense: 'ТРОГАЕТЕ', count: 4, icon: '✋', color: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' },
-  { sense: 'СЛЫШИТЕ', count: 3, icon: '👂', color: 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300' },
-  { sense: 'ЧУВСТВУЕТЕ (запах)', count: 2, icon: '👃', color: 'bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300' },
-  { sense: 'ОЩУЩАЕТЕ на вкус', count: 1, icon: '👅', color: 'bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300' },
-];
-
+  { sense: 'ВИДИТЕ', count: 5, icon: '👁', color: 'blue' },
+  { sense: 'ТРОГАЕТЕ', count: 4, icon: '✋', color: 'teal' },
+  { sense: 'СЛЫШИТЕ', count: 3, icon: '👂', color: 'yellow' },
+  { sense: 'ЧУВСТВУЕТЕ (запах)', count: 2, icon: '👃', color: 'grape' },
+  { sense: 'ОЩУЩАЕТЕ на вкус', count: 1, icon: '👅', color: 'warm' },
+] as const;
 
 interface GroundingExerciseProps {
   onComplete: () => void;
@@ -22,6 +30,7 @@ export function GroundingExercise({ onComplete, onCancel }: GroundingExercisePro
   const step = STEPS[currentStep];
   const isLast = currentStep === STEPS.length - 1;
   const hasAtLeastOne = inputs[currentStep].some((v) => v.trim().length > 0);
+  const progressValue = ((currentStep + 1) / STEPS.length) * 100;
 
   const updateInput = (index: number, value: string) => {
     const next = [...inputs];
@@ -31,33 +40,48 @@ export function GroundingExercise({ onComplete, onCancel }: GroundingExercisePro
   };
 
   return (
-    <div className="space-y-4">
-      <StepProgress total={STEPS.length} current={currentStep} />
+    <Stack gap="md">
+      <Progress value={progressValue} radius="xl" />
 
-      <Card className={step.color}>
-        <div className="text-center">
-          <div className="mb-2 text-3xl">{step.icon}</div>
-          <h3 className="text-lg font-semibold">
-            Назовите {step.count} {step.count === 1 ? 'вещь' : step.count < 5 ? 'вещи' : 'вещей'},
-            которые вы {step.sense}
-          </h3>
-        </div>
-      </Card>
+      <Paper withBorder radius="lg" p="md" bg={`${step.color}.0`}>
+        <Stack gap="xs" align="center">
+          <Text fz={32}>{step.icon}</Text>
+          <Title order={3} fz="lg" fw={600} ta="center" c={`${step.color}.8`}>
+            Назовите {step.count}{' '}
+            {step.count === 1 ? 'вещь' : step.count < 5 ? 'вещи' : 'вещей'}, которые вы{' '}
+            {step.sense}
+          </Title>
+        </Stack>
+      </Paper>
 
-      <div className="space-y-2">
+      <Stack gap="xs">
         {inputs[currentStep].map((val, i) => (
-          <input key={i} value={val} onChange={(e) => updateInput(i, e.target.value)} placeholder={`${i + 1}.`} className={inputClass} autoFocus={i === 0} />
+          <TextInput
+            key={i}
+            value={val}
+            onChange={(e) => updateInput(i, e.currentTarget.value)}
+            placeholder={`${i + 1}.`}
+            autoFocus={i === 0}
+          />
         ))}
-      </div>
+      </Stack>
 
-      <div className="flex gap-3">
-        <Button type="button" variant="ghost" fullWidth onClick={currentStep === 0 ? onCancel : () => setCurrentStep(currentStep - 1)}>
+      <Group gap="sm" grow>
+        <Button
+          type="button"
+          variant="subtle"
+          onClick={currentStep === 0 ? onCancel : () => setCurrentStep(currentStep - 1)}
+        >
           {currentStep === 0 ? 'Отмена' : 'Назад'}
         </Button>
-        <Button type="button" fullWidth disabled={!hasAtLeastOne} onClick={isLast ? onComplete : () => setCurrentStep(currentStep + 1)}>
+        <Button
+          type="button"
+          disabled={!hasAtLeastOne}
+          onClick={isLast ? onComplete : () => setCurrentStep(currentStep + 1)}
+        >
           {isLast ? 'Готово' : 'Далее'}
         </Button>
-      </div>
-    </div>
+      </Group>
+    </Stack>
   );
 }

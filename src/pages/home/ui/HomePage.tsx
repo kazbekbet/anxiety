@@ -1,14 +1,27 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  ActionIcon,
+  Box,
+  Button,
+  Group,
+  Modal,
+  Paper,
+  SimpleGrid,
+  Stack,
+  Text,
+  ThemeIcon,
+  Title,
+  UnstyledButton,
+} from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { Sparkline } from '@mantine/charts';
 import { Header } from '@/widgets/header';
 import { ThemeToggle } from '@/widgets/theme-toggle';
-import { Card, Button, LevelIndicator, Modal } from '@/shared/ui';
-import { Sparkline } from '@/shared/ui/Sparkline';
 import { useAnxietyEntries } from '@/entities/anxiety';
 import { LogAnxietyForm } from '@/features/log-anxiety';
 import { WorryTimer } from '@/features/worry-time';
 import { techniques } from '@/entities/technique';
-import { getLevelBgColor, getLevelTextColor } from '@/shared/lib/level-colors';
 import { sparklineData, trendDirection } from '@/shared/lib/insights';
 import { generateSmartInsight } from '@/shared/lib/smart-insights';
 import { useAssessmentResults, assessments } from '@/entities/assessment';
@@ -37,12 +50,19 @@ function getRecommendation(level: number): Recommendation {
   return { text: 'Вы не одиноки. Обратитесь за помощью', route: '', level: 'crisis' };
 }
 
+function levelColor(level: number) {
+  if (level <= 3) return 'calm';
+  if (level <= 5) return 'yellow';
+  if (level <= 7) return 'orange';
+  return 'warm';
+}
+
 export function HomePage() {
   const entries = useAnxietyEntries((s) => s.entries);
   const addEntry = useAnxietyEntries((s) => s.addEntry);
   const latestEntry = entries[0] ?? null;
-  const [showForm, setShowForm] = useState(false);
-  const [showWorryTimer, setShowWorryTimer] = useState(false);
+  const [formOpened, formActions] = useDisclosure(false);
+  const [worryOpened, worryActions] = useDisclosure(false);
   const [tapped, setTapped] = useState<number | null>(null);
   const [recommendation, setRecommendation] = useState<Recommendation | null>(null);
   const navigate = useNavigate();
@@ -71,6 +91,7 @@ export function HomePage() {
     if (h < 22) return { title: 'Добрый вечер', sub: 'Время подвести итоги дня' };
     return { title: 'Поздний вечер', sub: 'Всё в порядке' };
   })();
+
   const sparkData = useMemo(() => sparklineData(entries), [entries]);
   const trend = useMemo(() => trendDirection(entries), [entries]);
   const smartInsight = useMemo(() => generateSmartInsight(entries), [entries]);
@@ -83,204 +104,384 @@ export function HomePage() {
     setTimeout(() => setTapped(null), 1500);
   };
 
+  const lastDigest = entries.length >= 3 ? localStorage.getItem('last-digest-shown') : null;
+  const daysSinceDigest = lastDigest
+    ? Math.floor((new Date().getTime() - new Date(lastDigest).getTime()) / 86400000)
+    : 999;
+  const showDigestBanner = entries.length >= 3 && daysSinceDigest >= 7;
+
+  const insightColor =
+    smartInsight?.type === 'positive'
+      ? 'calm'
+      : smartInsight?.type === 'suggestion'
+        ? 'brand'
+        : 'gray';
+
   return (
-    <div className="space-y-4">
+    <Stack gap="md">
       <Header title={greeting.title} subtitle={greeting.sub} action={<ThemeToggle />} />
 
       {/* SOS button */}
-      <Card
-        className="flex cursor-pointer items-center gap-3 bg-red-50 dark:bg-red-950 active:scale-[0.98] transition-transform"
+      <Paper
+        withBorder
+        radius="lg"
+        p="md"
+        bg="var(--mantine-color-warm-0)"
         onClick={() => window.open(`tel:${CRISIS_PHONE}`)}
+        style={{ cursor: 'pointer' }}
       >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-500 text-white text-sm font-bold">
-          SOS
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-medium text-red-700 dark:text-red-300 text-sm">Если сейчас очень плохо</p>
-          <p className="text-xs text-red-600/70 dark:text-red-400/70">Телефон доверия: {CRISIS_PHONE}</p>
-        </div>
-      </Card>
+        <Group gap="sm" wrap="nowrap">
+          <ThemeIcon color="warm" radius="md" size={40}>
+            <Text fw={700} fz="xs" c="white">
+              SOS
+            </Text>
+          </ThemeIcon>
+          <Stack gap={2} flex={1} miw={0}>
+            <Text fz="sm" fw={500} c="warm.7">
+              Если сейчас очень плохо
+            </Text>
+            <Text fz="xs" c="warm.6">
+              Телефон доверия: {CRISIS_PHONE}
+            </Text>
+          </Stack>
+        </Group>
+      </Paper>
 
       {/* One-tap check-in */}
-      <Card>
-        <p className="mb-3 text-sm font-medium text-subtle text-center">Быстрая запись</p>
-        <div className="flex gap-2">
-          {QUICK_LEVELS.map((q) => (
-            <button
-              key={q.level}
-              onClick={() => handleQuickTap(q.level)}
-              className={`flex flex-1 flex-col items-center gap-1.5 rounded-xl py-3.5 transition-all active:scale-95 ${getLevelBgColor(q.level)} ${getLevelTextColor(q.level)} ${tapped === q.level ? 'ring-2 ring-accent scale-95' : ''}`}
-            >
-              <span className="text-base font-bold leading-none">{q.range}</span>
-              <span className="text-[11px] font-medium leading-tight opacity-80">{q.label}</span>
-            </button>
-          ))}
-        </div>
+      <Paper withBorder radius="lg" p="md">
+        <Stack gap="sm">
+          <Text fz="sm" fw={500} c="dimmed" ta="center">
+            Быстрая запись
+          </Text>
+          <SimpleGrid cols={5} spacing="xs">
+            {QUICK_LEVELS.map((q) => {
+              const color = levelColor(q.level);
+              const isTapped = tapped === q.level;
+              return (
+                <UnstyledButton
+                  key={q.level}
+                  onClick={() => handleQuickTap(q.level)}
+                  p="xs"
+                  bg={`var(--mantine-color-${color}-0)`}
+                  style={{
+                    borderRadius: 'var(--mantine-radius-md)',
+                    transition: 'transform 120ms ease',
+                    transform: isTapped ? 'scale(0.95)' : undefined,
+                    outline: isTapped ? '2px solid var(--mantine-color-brand-5)' : undefined,
+                  }}
+                >
+                  <Stack gap={4} align="center">
+                    <Text fz="sm" fw={700} c={`${color}.7`} lh={1}>
+                      {q.range}
+                    </Text>
+                    <Text fz={10} fw={500} c={`${color}.7`} opacity={0.85} lh={1.1}>
+                      {q.label}
+                    </Text>
+                  </Stack>
+                </UnstyledButton>
+              );
+            })}
+          </SimpleGrid>
 
-        {/* Recommendation after check-in */}
-        {recommendation && (
-          <div key={recommendation.text} className="mt-3 rounded-xl bg-elevated p-3 animate-success-pop">
-            <p className="text-sm text-subtle mb-2">{recommendation.text}</p>
-            {recommendation.level === 'crisis' ? (
-              <a
-                href={`tel:${CRISIS_PHONE}`}
-                className="block w-full rounded-xl bg-red-500 py-2.5 text-center text-sm font-medium text-white"
-              >
-                Позвонить: {CRISIS_PHONE}
-              </a>
-            ) : (
-              <Button
-                fullWidth
-                variant="secondary"
-                className="!py-2 text-xs"
-                onClick={() => navigate(recommendation.route)}
-              >
-                {recommendation.level === 'calm' ? 'Открыть дневник' : 'Начать технику'}
-              </Button>
-            )}
-          </div>
-        )}
+          {recommendation && (
+            <Paper key={recommendation.text} radius="md" p="sm" bg="var(--app-surface-muted)">
+              <Stack gap="xs">
+                <Text fz="sm" c="dimmed">
+                  {recommendation.text}
+                </Text>
+                {recommendation.level === 'crisis' ? (
+                  <Button
+                    component="a"
+                    href={`tel:${CRISIS_PHONE}`}
+                    color="warm"
+                    fullWidth
+                    size="sm"
+                  >
+                    Позвонить: {CRISIS_PHONE}
+                  </Button>
+                ) : (
+                  <Button
+                    fullWidth
+                    variant="light"
+                    size="sm"
+                    onClick={() => navigate(recommendation.route)}
+                  >
+                    {recommendation.level === 'calm' ? 'Открыть дневник' : 'Начать технику'}
+                  </Button>
+                )}
+              </Stack>
+            </Paper>
+          )}
 
-        {tapped && !recommendation && (
-          <p key={tapped} className="mt-2 text-center text-xs text-accent-fg animate-success-pop">
-            ✓ Записано
-          </p>
-        )}
-      </Card>
+          {tapped && !recommendation && (
+            <Text key={tapped} fz="xs" c="brand.6" ta="center">
+              ✓ Записано
+            </Text>
+          )}
+        </Stack>
+      </Paper>
 
       {/* Digest banner */}
-      {entries.length >= 3 && (() => {
-        const lastDigest = localStorage.getItem('last-digest-shown');
-        const daysSinceDigest = lastDigest ? Math.floor((new Date().getTime() - new Date(lastDigest).getTime()) / 86400000) : 999;
-        if (daysSinceDigest < 7) return null;
-        return (
-          <Card
-            className="flex cursor-pointer items-center gap-3 bg-accent-soft active:scale-[0.98] transition-transform"
-            onClick={() => { localStorage.setItem('last-digest-shown', new Date().toISOString()); navigate('/digest'); }}
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent text-white text-sm font-bold">7д</div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-accent-soft-fg">Итоги недели</p>
-              <p className="text-xs text-muted">Посмотрите вашу динамику</p>
-            </div>
-          </Card>
-        );
-      })()}
+      {showDigestBanner && (
+        <Paper
+          withBorder
+          radius="lg"
+          p="md"
+          bg="var(--mantine-color-brand-0)"
+          onClick={() => {
+            localStorage.setItem('last-digest-shown', new Date().toISOString());
+            navigate('/digest');
+          }}
+          style={{ cursor: 'pointer' }}
+        >
+          <Group gap="sm" wrap="nowrap">
+            <ThemeIcon color="brand" radius="md" size={40}>
+              <Text fw={700} fz="xs" c="white">
+                7д
+              </Text>
+            </ThemeIcon>
+            <Stack gap={2} flex={1} miw={0}>
+              <Text fz="sm" fw={500} c="brand.7">
+                Итоги недели
+              </Text>
+              <Text fz="xs" c="dimmed">
+                Посмотрите вашу динамику
+              </Text>
+            </Stack>
+          </Group>
+        </Paper>
+      )}
 
       {/* Smart insight */}
       {smartInsight && (
-        <Card className={`text-sm ${
-          smartInsight.type === 'positive' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-          : smartInsight.type === 'suggestion' ? 'bg-accent-soft text-accent-soft-fg'
-          : 'bg-elevated text-subtle'
-        }`}>
-          {smartInsight.text}
-        </Card>
+        <Paper
+          withBorder
+          radius="lg"
+          p="md"
+          bg={`var(--mantine-color-${insightColor}-0)`}
+        >
+          <Text fz="sm" c={`${insightColor}.7`}>
+            {smartInsight.text}
+          </Text>
+        </Paper>
       )}
 
       {/* Test banner */}
       {showTestBanner && (
-        <Card className="flex items-center gap-3 bg-accent-soft">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent text-white text-lg">
-            ?
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-accent-soft-fg">Оцените тревожность</p>
-            <p className="text-xs text-muted">GAD-7 — займёт 2 минуты</p>
-          </div>
-          <Button variant="secondary" className="shrink-0 !py-2 !px-3 text-xs" onClick={() => navigate('/stats/tests/gad7')}>
-            Пройти
-          </Button>
-          <button onClick={() => setDismissedBanner(true)} className="text-faint hover:text-subtle text-xs">
-            ✕
-          </button>
-        </Card>
+        <Paper withBorder radius="lg" p="md" bg="var(--mantine-color-brand-0)">
+          <Group gap="sm" wrap="nowrap">
+            <ThemeIcon color="brand" radius="md" size={40}>
+              <Text fw={700} fz="md" c="white">
+                ?
+              </Text>
+            </ThemeIcon>
+            <Stack gap={2} flex={1} miw={0}>
+              <Text fz="sm" fw={500} c="brand.7">
+                Оцените тревожность
+              </Text>
+              <Text fz="xs" c="dimmed">
+                GAD-7 — займёт 2 минуты
+              </Text>
+            </Stack>
+            <Button variant="light" size="xs" onClick={() => navigate('/stats/tests/gad7')}>
+              Пройти
+            </Button>
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="sm"
+              onClick={() => setDismissedBanner(true)}
+              aria-label="Скрыть"
+            >
+              ✕
+            </ActionIcon>
+          </Group>
+        </Paper>
       )}
 
       {/* Latest entry with sparkline */}
       {latestEntry && (
-        <Card className="flex items-center gap-4">
-          <LevelIndicator level={latestEntry.level} />
-          <div className="flex-1">
-            <p className="text-sm text-muted">Последняя запись</p>
-            <p className="text-sm font-medium text-fg">
-              {latestEntry.level}/10
-              {trend && (
-                <span className={`ml-1 ${trend === 'down' ? 'text-emerald-500' : trend === 'up' ? 'text-red-500' : ''}`}>
-                  {trend === 'up' ? '↑' : trend === 'down' ? '↓' : ''}
-                </span>
-              )}
-            </p>
-          </div>
-          <Sparkline data={sparkData} width={80} height={28} className="text-accent" />
-        </Card>
+        <Paper withBorder radius="lg" p="md">
+          <Group gap="md" wrap="nowrap">
+            <ThemeIcon
+              color={levelColor(latestEntry.level)}
+              variant="light"
+              radius="xl"
+              size={48}
+            >
+              <Text fw={700} fz="md" c={`${levelColor(latestEntry.level)}.7`}>
+                {latestEntry.level}
+              </Text>
+            </ThemeIcon>
+            <Stack gap={2} flex={1} miw={0}>
+              <Text fz="sm" c="dimmed">
+                Последняя запись
+              </Text>
+              <Group gap={4}>
+                <Text fz="sm" fw={500}>
+                  {latestEntry.level}/10
+                </Text>
+                {trend && (
+                  <Text
+                    fz="sm"
+                    fw={500}
+                    c={trend === 'down' ? 'calm.6' : trend === 'up' ? 'warm.6' : undefined}
+                  >
+                    {trend === 'up' ? '↑' : trend === 'down' ? '↓' : ''}
+                  </Text>
+                )}
+              </Group>
+            </Stack>
+            {sparkData.filter((v) => v > 0).length >= 2 && (
+              <Box w={80} h={28}>
+                <Sparkline
+                  w={80}
+                  h={28}
+                  data={sparkData}
+                  color="brand"
+                  curveType="natural"
+                  fillOpacity={0.4}
+                />
+              </Box>
+            )}
+          </Group>
+        </Paper>
       )}
 
-      <Button fullWidth variant="secondary" onClick={() => setShowForm(true)}>
+      <Button fullWidth variant="light" onClick={formActions.open}>
         + Подробная запись
       </Button>
 
       {/* Worry Time card */}
-      <Card
-        className="flex cursor-pointer items-center gap-3 active:scale-[0.98] transition-transform"
-        onClick={() => setShowWorryTimer(true)}
+      <Paper
+        withBorder
+        radius="lg"
+        p="md"
+        onClick={worryActions.open}
+        style={{ cursor: 'pointer' }}
       >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent-fg">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="12 6 12 12 16 14" />
-          </svg>
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-medium text-fg text-sm">Время беспокойства</p>
-          <p className="text-xs text-faint">Запланированная сессия для тревожных мыслей</p>
-        </div>
-      </Card>
-
-      <div>
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-fg">Быстрые техники</h2>
-          <button onClick={() => navigate('/techniques')} className="text-sm text-accent-fg hover:underline">
-            Все
-          </button>
-        </div>
-        <div className="space-y-2">
-          {quickTechniques.map((t) => (
-            <Card
-              key={t.id}
-              className="flex cursor-pointer items-center gap-3 active:scale-[0.98] transition-transform"
-              onClick={() => navigate('/techniques')}
+        <Group gap="sm" wrap="nowrap">
+          <ThemeIcon color="brand" variant="light" radius="md" size={40}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent-fg">
-                {t.category === 'cbt' ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" />
-                  </svg>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-fg text-sm">{t.title}</p>
-                <p className="text-xs text-faint">{t.duration}</p>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+          </ThemeIcon>
+          <Stack gap={2} flex={1} miw={0}>
+            <Text fz="sm" fw={500}>
+              Время беспокойства
+            </Text>
+            <Text fz="xs" c="dimmed">
+              Запланированная сессия для тревожных мыслей
+            </Text>
+          </Stack>
+        </Group>
+      </Paper>
 
-      <Modal open={showForm} onClose={() => setShowForm(false)} title="Новая запись">
+      <Stack gap="xs">
+        <Group justify="space-between" align="center">
+          <Title order={2} fz="lg" fw={600}>
+            Быстрые техники
+          </Title>
+          <Button
+            variant="subtle"
+            size="compact-sm"
+            onClick={() => navigate('/techniques')}
+          >
+            Все
+          </Button>
+        </Group>
+        <Stack gap="xs">
+          {quickTechniques.map((t) => (
+            <Paper
+              key={t.id}
+              withBorder
+              radius="lg"
+              p="md"
+              onClick={() => navigate('/techniques')}
+              style={{ cursor: 'pointer' }}
+            >
+              <Group gap="sm" wrap="nowrap">
+                <ThemeIcon color="brand" variant="light" radius="md" size={40}>
+                  {t.category === 'cbt' ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 16v-4" />
+                      <path d="M12 8h.01" />
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" />
+                    </svg>
+                  )}
+                </ThemeIcon>
+                <Stack gap={2} flex={1} miw={0}>
+                  <Text fz="sm" fw={500}>
+                    {t.title}
+                  </Text>
+                  <Text fz="xs" c="dimmed">
+                    {t.duration}
+                  </Text>
+                </Stack>
+              </Group>
+            </Paper>
+          ))}
+        </Stack>
+      </Stack>
+
+      <Modal
+        opened={formOpened}
+        onClose={formActions.close}
+        title="Новая запись"
+        centered
+      >
         <LogAnxietyForm
-          onSubmit={(data) => { addEntry(data); setShowForm(false); }}
-          onCancel={() => setShowForm(false)}
+          onSubmit={(data) => {
+            addEntry(data);
+            formActions.close();
+          }}
+          onCancel={formActions.close}
         />
       </Modal>
 
-      <Modal open={showWorryTimer} onClose={() => setShowWorryTimer(false)} title="Время беспокойства">
-        <WorryTimer onClose={() => setShowWorryTimer(false)} />
+      <Modal
+        opened={worryOpened}
+        onClose={worryActions.close}
+        title="Время беспокойства"
+        centered
+      >
+        <WorryTimer onClose={worryActions.close} />
       </Modal>
-    </div>
+    </Stack>
   );
 }
