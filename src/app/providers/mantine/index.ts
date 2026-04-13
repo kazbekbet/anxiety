@@ -1,0 +1,1 @@
+export { MantineThemeProvider } from './MantineThemeProvider';

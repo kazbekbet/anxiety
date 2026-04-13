@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderWithProviders as render } from '@/shared/test/render';
 import { ProgressCard } from './ProgressCard';
 import { useAnxietyEntries } from '@/entities/anxiety/model/store';
 import { useThoughtRecords } from '@/entities/anxiety/model/thought-store';
@@ -38,8 +39,8 @@ describe('ProgressCard', () => {
   });
 
   it('renders nothing when no entries and no records', () => {
-    const { container } = render(<ProgressCard />);
-    expect(container.innerHTML).toBe('');
+    render(<ProgressCard />);
+    expect(screen.queryByText('Прогресс')).not.toBeInTheDocument();
   });
 
   it('shows "add more entries" message when between 1 and 6 entries (with thought records to prevent early null)', () => {
