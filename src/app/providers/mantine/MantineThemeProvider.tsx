@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { MantineProvider } from '@mantine/core';
 import { useTheme } from '@/shared/lib/theme-context';
-import { mantineTheme } from './theme';
+import { cssVariablesResolver, mantineTheme } from './theme';
 
 interface Props {
   children: ReactNode;
@@ -16,7 +16,11 @@ export function MantineThemeProvider({ children }: Props) {
   const { resolved } = useTheme();
 
   return (
-    <MantineProvider theme={mantineTheme} forceColorScheme={resolved}>
+    <MantineProvider
+      theme={mantineTheme}
+      forceColorScheme={resolved}
+      cssVariablesResolver={cssVariablesResolver}
+    >
       {children}
     </MantineProvider>
   );

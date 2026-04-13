@@ -1,11 +1,23 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button } from '@/shared/ui';
+import { subDays, startOfDay, isWithinInterval } from 'date-fns';
+import {
+  Box,
+  Button,
+  Center,
+  Group,
+  Paper,
+  SimpleGrid,
+  Stack,
+  Text,
+  Title,
+} from '@mantine/core';
 import { Heatmap } from '@/widgets/heatmap';
 import { useAnxietyEntries } from '@/entities/anxiety';
 import { filterByPeriod, averageLevel } from '@/shared/lib/insights';
 import { generateSmartInsight } from '@/shared/lib/smart-insights';
-import { subDays, startOfDay, isWithinInterval } from 'date-fns';
+
+const LEGEND_COLORS = ['calm.5', 'yellow.5', 'orange.5', 'warm.5'];
 
 export function DigestPage() {
   const entries = useAnxietyEntries((s) => s.entries);
@@ -26,73 +38,133 @@ export function DigestPage() {
 
   if (weekEntries.length === 0) {
     return (
-      <div className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4 pt-[env(safe-area-inset-top)]">
-        <Card className="w-full text-center">
-          <h2 className="text-lg font-semibold text-fg mb-2">Ещё нет данных</h2>
-          <p className="text-sm text-muted mb-4">Начните записывать тревогу, чтобы увидеть еженедельный дайджест</p>
-          <Button onClick={() => navigate('/', { replace: true })}>На главную</Button>
-        </Card>
-      </div>
+      <Center mih="100vh" px="md">
+        <Paper withBorder radius="lg" p="md" w="100%" maw={480}>
+          <Stack gap="sm" align="center">
+            <Title order={2} fz="lg" fw={600}>
+              Ещё нет данных
+            </Title>
+            <Text fz="sm" c="dimmed" ta="center">
+              Начните записывать тревогу, чтобы увидеть еженедельный дайджест
+            </Text>
+            <Button onClick={() => navigate('/', { replace: true })}>На главную</Button>
+          </Stack>
+        </Paper>
+      </Center>
     );
   }
 
+  const deltaColor =
+    delta === null ? 'dimmed' : delta < 0 ? 'calm.6' : delta > 0 ? 'warm.6' : 'dimmed';
+
   return (
-    <div className="mx-auto min-h-screen max-w-lg px-4 pb-6 pt-[max(1.5rem,env(safe-area-inset-top))]">
-      <h1 className="text-2xl font-bold text-fg mb-1">Ваша неделя</h1>
-      <p className="text-sm text-muted mb-5">{weekEntries.length} записей за 7 дней</p>
+    <Stack gap="md" px="md" pb="md" pt="lg" maw={480} mx="auto" mih="100vh">
+      <Stack gap={4}>
+        <Title order={1} fz={24} fw={700}>
+          Ваша неделя
+        </Title>
+        <Text fz="sm" c="dimmed">
+          {weekEntries.length} записей за 7 дней
+        </Text>
+      </Stack>
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-3 mb-4">
-        <Card className="text-center">
-          <p className="text-2xl font-bold text-accent-fg">{weekEntries.length}</p>
-          <p className="text-xs text-muted">Записей</p>
-        </Card>
-        <Card className="text-center">
-          <p className="text-2xl font-bold text-accent-fg">{weekAvg.toFixed(1)}</p>
-          <p className="text-xs text-muted">Средний</p>
-        </Card>
-        <Card className="text-center">
-          {delta !== null ? (
-            <p className={`text-2xl font-bold ${delta < 0 ? 'text-emerald-500' : delta > 0 ? 'text-red-500' : 'text-faint'}`}>
-              {delta > 0 ? '+' : ''}{delta.toFixed(1)}
-            </p>
-          ) : (
-            <p className="text-2xl font-bold text-faint">—</p>
-          )}
-          <p className="text-xs text-muted">vs прошлая</p>
-        </Card>
-      </div>
+      <SimpleGrid cols={3} spacing="xs">
+        <Paper withBorder radius="lg" p="md">
+          <Stack gap={2} align="center">
+            <Text fz={24} fw={700} c="brand.6">
+              {weekEntries.length}
+            </Text>
+            <Text fz="xs" c="dimmed">
+              Записей
+            </Text>
+          </Stack>
+        </Paper>
+        <Paper withBorder radius="lg" p="md">
+          <Stack gap={2} align="center">
+            <Text fz={24} fw={700} c="brand.6">
+              {weekAvg.toFixed(1)}
+            </Text>
+            <Text fz="xs" c="dimmed">
+              Средний
+            </Text>
+          </Stack>
+        </Paper>
+        <Paper withBorder radius="lg" p="md">
+          <Stack gap={2} align="center">
+            {delta !== null ? (
+              <Text fz={24} fw={700} c={deltaColor}>
+                {delta > 0 ? '+' : ''}
+                {delta.toFixed(1)}
+              </Text>
+            ) : (
+              <Text fz={24} fw={700} c="dimmed">
+                —
+              </Text>
+            )}
+            <Text fz="xs" c="dimmed">
+              vs прошлая
+            </Text>
+          </Stack>
+        </Paper>
+      </SimpleGrid>
 
-      {/* Heatmap */}
-      <Card className="mb-4">
-        <h3 className="font-semibold text-fg mb-3">Карта тревожности</h3>
-        <Heatmap entries={entries} />
-        <div className="mt-3 flex items-center gap-2 text-[10px] text-faint">
-          <span>Спокойно</span>
-          <div className="flex gap-0.5">
-            <div className="h-3 w-3 rounded-sm bg-emerald-400 dark:bg-emerald-600" />
-            <div className="h-3 w-3 rounded-sm bg-amber-400 dark:bg-amber-500" />
-            <div className="h-3 w-3 rounded-sm bg-orange-400 dark:bg-orange-500" />
-            <div className="h-3 w-3 rounded-sm bg-red-400 dark:bg-red-500" />
-          </div>
-          <span>Тревожно</span>
-        </div>
-      </Card>
+      <Paper withBorder radius="lg" p="md">
+        <Stack gap="sm">
+          <Text fw={600}>Карта тревожности</Text>
+          <Heatmap entries={entries} />
+          <Group gap="xs">
+            <Text fz={10} c="dimmed">
+              Спокойно
+            </Text>
+            <Group gap={2}>
+              {LEGEND_COLORS.map((c) => (
+                <Box
+                  key={c}
+                  w={12}
+                  h={12}
+                  bg={c}
+                  style={{ borderRadius: 'var(--mantine-radius-sm)' }}
+                />
+              ))}
+            </Group>
+            <Text fz={10} c="dimmed">
+              Тревожно
+            </Text>
+          </Group>
+        </Stack>
+      </Paper>
 
-      {/* Insight */}
       {insight && (
-        <Card className={`mb-4 text-sm ${
-          insight.type === 'positive' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-          : insight.type === 'suggestion' ? 'bg-accent-soft text-accent-soft-fg'
-          : 'bg-elevated text-subtle'
-        }`}>
-          {insight.text}
-        </Card>
+        <Paper
+          withBorder
+          radius="lg"
+          p="md"
+          bg={
+            insight.type === 'positive'
+              ? 'calm.0'
+              : insight.type === 'suggestion'
+                ? 'brand.0'
+                : undefined
+          }
+        >
+          <Text
+            fz="sm"
+            c={
+              insight.type === 'positive'
+                ? 'calm.8'
+                : insight.type === 'suggestion'
+                  ? 'brand.8'
+                  : undefined
+            }
+          >
+            {insight.text}
+          </Text>
+        </Paper>
       )}
 
       <Button fullWidth onClick={() => navigate('/', { replace: true })}>
         Продолжить
       </Button>
-    </div>
+    </Stack>
   );
 }

@@ -1,10 +1,21 @@
+import { Skeleton, Stack } from '@mantine/core';
+
 export function PageSkeleton() {
   return (
-    <div role="status" aria-busy="true" aria-label="Загрузка" className="mx-auto max-w-lg space-y-4 p-4 pt-8 animate-pulse">
-      <div className="h-12 w-48 rounded-2xl bg-elevated" />
-      <div className="h-32 rounded-2xl bg-elevated" />
-      <div className="h-12 rounded-2xl bg-elevated" />
-      <div className="h-24 rounded-2xl bg-elevated" />
-    </div>
+    <Stack
+      role="status"
+      aria-busy
+      aria-label="Загрузка"
+      gap="md"
+      p="md"
+      pt="xl"
+      mx="auto"
+      maw={512}
+    >
+      <Skeleton height={48} width={192} radius="lg" />
+      <Skeleton height={128} radius="lg" />
+      <Skeleton height={48} radius="lg" />
+      <Skeleton height={96} radius="lg" />
+    </Stack>
   );
 }

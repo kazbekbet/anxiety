@@ -1,4 +1,6 @@
-  import { SideNav } from '@/widgets/side-nav';
+import { Box, Container, useMantineTheme } from '@mantine/core';
+import { useTheme } from '@/shared/lib/theme-context';
+import { SideNav } from '@/widgets/side-nav';
 import { BottomNav } from '@/widgets/bottom-nav';
 
 interface AppLayoutProps {
@@ -6,21 +8,29 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
+  const theme = useMantineTheme();
+  const { resolved } = useTheme();
+  const background =
+    resolved === 'dark' ? theme.other.bodyGradientDark : theme.other.bodyGradientLight;
+
   return (
-    <div className="min-h-screen bg-surface lg:flex">
+    <Box mih="100vh" style={{ background }}>
       <SideNav />
-      <main className="flex-1 lg:pl-16">
-        <div className="mx-auto max-w-2xl px-4
-                        pt-[max(1rem,env(safe-area-inset-top))]
-                        pb-[calc(5rem+env(safe-area-inset-bottom))]
-                        pl-[max(1rem,env(safe-area-inset-left))]
-                        pr-[max(1rem,env(safe-area-inset-right))]
-                        lg:pt-8 lg:pb-8 lg:px-6
-                        min-h-screen">
+      <Box
+        component="main"
+        style={{
+          minHeight: '100vh',
+          paddingTop: 'max(1rem, env(safe-area-inset-top))',
+          paddingBottom: 'calc(5rem + env(safe-area-inset-bottom))',
+          paddingLeft: 'max(1rem, env(safe-area-inset-left))',
+          paddingRight: 'max(1rem, env(safe-area-inset-right))',
+        }}
+      >
+        <Container size="sm" px={0}>
           {children}
-        </div>
-      </main>
+        </Container>
+      </Box>
       <BottomNav />
-    </div>
+    </Box>
   );
 }

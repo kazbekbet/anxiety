@@ -1,20 +1,65 @@
 import { useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Card } from '@/shared/ui';
-import { Sparkline } from '@/shared/ui/Sparkline';
+import {
+  Badge,
+  Box,
+  Button,
+  Center,
+  Container,
+  Paper,
+  Stack,
+  Text,
+  Title,
+  useMantineTheme,
+} from '@mantine/core';
 import { getTestById, getLevel, useAssessmentResults } from '@/entities/assessment';
 import { TestGauge } from './TestGauge';
 
-const LEVEL_BADGE: Record<string, string> = {
-  emerald: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400',
-  amber: 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-400',
-  orange: 'bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-400',
-  red: 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-400',
+const LEVEL_COLOR: Record<string, string> = {
+  emerald: 'calm',
+  amber: 'yellow',
+  orange: 'orange',
+  red: 'warm',
 };
+
+interface SparklineProps {
+  data: number[];
+  width?: number;
+  height?: number;
+  color: string;
+}
+
+function Sparkline({ data, width = 120, height = 32, color }: SparklineProps) {
+  if (data.length < 2) return null;
+  const max = Math.max(...data, 1);
+  const min = Math.min(...data, 0);
+  const range = Math.max(max - min, 1);
+  const stepX = width / (data.length - 1);
+  const points = data
+    .map((v, i) => {
+      const x = i * stepX;
+      const y = height - ((v - min) / range) * height;
+      return `${x},${y}`;
+    })
+    .join(' ');
+  return (
+    <Box component="svg" width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+      <polyline
+        fill="none"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        points={points}
+      />
+    </Box>
+  );
+}
 
 export function AssessmentResultPage() {
   const { testId } = useParams<{ testId: string }>();
   const navigate = useNavigate();
+  const theme = useMantineTheme();
   const results = useAssessmentResults((s) => s.results);
   const test = getTestById(testId ?? '');
 
@@ -27,14 +72,16 @@ export function AssessmentResultPage() {
 
   if (!test || !latest) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-4">
-        <Card className="w-full max-w-lg text-center">
-          <p className="text-muted">Результат не найден</p>
-          <Button className="mt-4" onClick={() => navigate('/stats', { replace: true })}>
-            К статистике
-          </Button>
-        </Card>
-      </div>
+      <Center mih="100vh" px="md">
+        <Paper withBorder radius="lg" p="md" w="100%" maw={480} ta="center">
+          <Stack gap="md" align="center">
+            <Text c="dimmed">Результат не найден</Text>
+            <Button onClick={() => navigate('/stats', { replace: true })}>
+              К статистике
+            </Button>
+          </Stack>
+        </Paper>
+      </Center>
     );
   }
 
@@ -42,62 +89,87 @@ export function AssessmentResultPage() {
   const sparkData = testResults.map((r) => r.score);
   const prevResult = testResults.length >= 2 ? testResults[testResults.length - 2] : null;
   const delta = prevResult ? latest.score - prevResult.score : null;
+  const badgeColor = LEVEL_COLOR[level.color] ?? 'brand';
+  const sparkColor =
+    theme.colors[badgeColor]?.[5] ?? 'var(--mantine-primary-color-filled)';
+
+  const deltaColor: string =
+    delta === null
+      ? 'dimmed'
+      : delta > 0
+        ? 'warm.6'
+        : delta < 0
+          ? 'calm.6'
+          : 'dimmed';
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-lg flex-col px-4 pb-6 pt-[max(1.5rem,env(safe-area-inset-top))]">
-      <h1 className="mb-6 text-center text-xl font-bold text-fg">{test.shortTitle} — результат</h1>
+    <Container size="sm" px="md" pb="lg" pt="lg" mih="100vh">
+      <Stack gap="md" mih="100vh">
+        <Title order={1} fz="xl" fw={700} ta="center">
+          {test.shortTitle} — результат
+        </Title>
 
-      {/* Gauge */}
-      <Card className="mb-4 flex flex-col items-center py-6">
-        <TestGauge score={latest.score} maxScore={test.maxScore} color={level.color} />
+        {/* Gauge */}
+        <Paper withBorder radius="lg" p="lg">
+          <Stack gap="sm" align="center">
+            <TestGauge score={latest.score} maxScore={test.maxScore} color={level.color} />
 
-        <span
-          className={`mt-2 rounded-full px-4 py-1.5 text-sm font-medium ${LEVEL_BADGE[level.color] ?? ''}`}
-        >
-          {level.label}
-        </span>
+            <Badge color={badgeColor} variant="light" size="lg" radius="xl">
+              {level.label}
+            </Badge>
 
-        {delta !== null && (
-          <p className={`mt-3 text-sm ${delta > 0 ? 'text-red-500' : delta < 0 ? 'text-emerald-500' : 'text-faint'}`}>
-            {delta > 0 ? `+${delta}` : delta} к прошлому разу {delta > 0 ? '↑' : delta < 0 ? '↓' : ''}
-          </p>
-        )}
+            {delta !== null && (
+              <Text fz="sm" c={deltaColor}>
+                {delta > 0 ? `+${delta}` : delta} к прошлому разу{' '}
+                {delta > 0 ? '↑' : delta < 0 ? '↓' : ''}
+              </Text>
+            )}
 
-        {/* Sparkline history */}
-        {testResults.length >= 2 && (
-          <div className="mt-4">
-            <Sparkline data={sparkData} width={120} height={32} className="text-accent" />
-          </div>
-        )}
+            {testResults.length >= 2 && (
+              <Box mt="xs">
+                <Sparkline data={sparkData} width={120} height={32} color={sparkColor} />
+              </Box>
+            )}
 
-        {testResults.length === 1 && (
-          <p className="mt-4 text-center text-xs text-faint max-w-[240px]">
-            Это ваш первый результат. Пройдите тест снова через {test.intervalDays} дней, чтобы отследить динамику.
-          </p>
-        )}
-      </Card>
+            {testResults.length === 1 && (
+              <Text fz="xs" c="dimmed" ta="center" maw={240} mt="xs">
+                Это ваш первый результат. Пройдите тест снова через {test.intervalDays} дней,
+                чтобы отследить динамику.
+              </Text>
+            )}
+          </Stack>
+        </Paper>
 
-      {/* Disclaimer */}
-      <Card className="mb-4 bg-elevated">
-        <p className="text-xs text-muted leading-relaxed">
-          Этот опросник — инструмент самонаблюдения, не медицинский тест.
-          Результаты не являются диагнозом и не заменяют консультацию специалиста.
-          При устойчивом ухудшении состояния обратитесь к психологу или психиатру.
-        </p>
-        <p className="mt-2 text-xs text-faint">{test.attribution}</p>
-      </Card>
+        {/* Disclaimer */}
+        <Paper withBorder radius="lg" p="md" bg="var(--mantine-color-default-hover)">
+          <Stack gap="xs">
+            <Text fz="xs" c="dimmed">
+              Этот опросник — инструмент самонаблюдения, не медицинский тест.
+              Результаты не являются диагнозом и не заменяют консультацию специалиста.
+              При устойчивом ухудшении состояния обратитесь к психологу или психиатру.
+            </Text>
+            <Text fz="xs" c="dimmed">
+              {test.attribution}
+            </Text>
+          </Stack>
+        </Paper>
 
-      {/* Actions */}
-      <div className="mt-auto space-y-2">
-        {(level.color === 'orange' || level.color === 'red') && (
-          <Button fullWidth variant="secondary" onClick={() => navigate('/techniques', { replace: true })}>
-            Изучить техники снижения тревожности
+        {/* Actions */}
+        <Stack gap="xs" mt="auto">
+          {(level.color === 'orange' || level.color === 'red') && (
+            <Button
+              fullWidth
+              variant="light"
+              onClick={() => navigate('/techniques', { replace: true })}
+            >
+              Изучить техники снижения тревожности
+            </Button>
+          )}
+          <Button fullWidth onClick={() => navigate('/stats', { replace: true })}>
+            К статистике
           </Button>
-        )}
-        <Button fullWidth onClick={() => navigate('/stats', { replace: true })}>
-          К статистике
-        </Button>
-      </div>
-    </div>
+        </Stack>
+      </Stack>
+    </Container>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Card, StepProgress } from '@/shared/ui';
+import { Button, Group, Paper, Progress, Stack, Text } from '@mantine/core';
 import type { Technique } from '@/shared/types';
 
 interface TechniqueStepsProps {
@@ -11,28 +11,32 @@ export function TechniqueSteps({ technique, onComplete }: TechniqueStepsProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const totalSteps = technique.steps.length;
   const isLast = currentStep === totalSteps - 1;
+  const progressValue = ((currentStep + 1) / totalSteps) * 100;
 
   return (
-    <div className="space-y-4">
-      <StepProgress total={totalSteps} current={currentStep} />
+    <Stack gap="md">
+      <Progress value={progressValue} radius="xl" />
 
-      <Card className="bg-accent-soft">
-        <p className="text-sm text-muted">
+      <Paper withBorder radius="lg" p="md" bg="brand.0">
+        <Text fz="sm" c="dimmed">
           Шаг {currentStep + 1} из {totalSteps}
-        </p>
-        <p className="mt-2 text-base font-medium text-fg">
+        </Text>
+        <Text mt="xs" fz="md" fw={500}>
           {technique.steps[currentStep]}
-        </p>
-      </Card>
+        </Text>
+      </Paper>
 
-      <div className="flex gap-3">
-        <Button variant="ghost" fullWidth onClick={currentStep === 0 ? onComplete : () => setCurrentStep(currentStep - 1)}>
+      <Group gap="sm" grow>
+        <Button
+          variant="subtle"
+          onClick={currentStep === 0 ? onComplete : () => setCurrentStep(currentStep - 1)}
+        >
           {currentStep === 0 ? 'Закрыть' : 'Назад'}
         </Button>
-        <Button fullWidth onClick={isLast ? onComplete : () => setCurrentStep(currentStep + 1)}>
+        <Button onClick={isLast ? onComplete : () => setCurrentStep(currentStep + 1)}>
           {isLast ? 'Готово' : 'Далее'}
         </Button>
-      </div>
-    </div>
+      </Group>
+    </Stack>
   );
 }

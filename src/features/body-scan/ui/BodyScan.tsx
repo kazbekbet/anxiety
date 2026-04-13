@@ -1,20 +1,31 @@
 import { useState } from 'react';
-import { Button } from '@/shared/ui';
+import {
+  ActionIcon,
+  Badge,
+  Box,
+  Button,
+  Group,
+  Paper,
+  Slider,
+  SimpleGrid,
+  Stack,
+  Text,
+  UnstyledButton,
+} from '@mantine/core';
 
 interface Sensation {
   id: string;
   label: string;
-  color: string;
   hex: string;
 }
 
 const SENSATIONS: Sensation[] = [
-  { id: 'tension', label: 'Напряжение', color: 'bg-red-500', hex: '#ef4444' },
-  { id: 'pressure', label: 'Давление', color: 'bg-orange-500', hex: '#f97316' },
-  { id: 'burning', label: 'Жжение', color: 'bg-yellow-500', hex: '#eab308' },
-  { id: 'trembling', label: 'Дрожь', color: 'bg-violet-500', hex: '#8b5cf6' },
-  { id: 'stiffness', label: 'Скованность', color: 'bg-slate-500', hex: '#64748b' },
-  { id: 'tingling', label: 'Покалывание', color: 'bg-cyan-500', hex: '#06b6d4' },
+  { id: 'tension', label: 'Напряжение', hex: '#ef4444' },
+  { id: 'pressure', label: 'Давление', hex: '#f97316' },
+  { id: 'burning', label: 'Жжение', hex: '#eab308' },
+  { id: 'trembling', label: 'Дрожь', hex: '#8b5cf6' },
+  { id: 'stiffness', label: 'Скованность', hex: '#64748b' },
+  { id: 'tingling', label: 'Покалывание', hex: '#06b6d4' },
 ];
 
 interface BodyZone {
@@ -179,17 +190,19 @@ export function BodyScan({ onComplete, onCancel }: BodyScanProps) {
   const activeSelection = activeZone ? selections.get(activeZone.id) : null;
 
   return (
-    <div className="space-y-3">
-      <p className="text-sm text-muted text-center">
+    <Stack gap="sm">
+      <Text fz="sm" c="dimmed" ta="center">
         Нажмите на зоны тела — затем выберите ощущение
-      </p>
+      </Text>
 
       {/* Body with interactive zones */}
-      <div className="relative mx-auto w-full" style={{ maxWidth: 240 }}>
-        <svg
-          viewBox="0 0 220 540"
-          className="w-full h-auto"
-          style={{ touchAction: 'manipulation' }}
+      <Box pos="relative" mx="auto" w="100%" maw={240}>
+        <Box
+          component="svg"
+          {...{ viewBox: '0 0 220 540' }}
+          w="100%"
+          h="auto"
+          style={{ touchAction: 'manipulation', color: 'var(--mantine-color-gray-3)' }}
         >
           <defs>
             <filter id="body-heat-blur" x="-50%" y="-50%" width="200%" height="200%">
@@ -209,7 +222,6 @@ export function BodyScan({ onComplete, onCancel }: BodyScanProps) {
           <path
             d={BODY_PATH}
             fill="currentColor"
-            className="text-elevated"
             style={{
               animation: activeZone ? 'none' : 'body-breathe 4s ease-in-out infinite',
               transformOrigin: '110px 270px',
@@ -220,10 +232,9 @@ export function BodyScan({ onComplete, onCancel }: BodyScanProps) {
           <path
             d={BODY_PATH}
             fill="none"
-            stroke="currentColor"
+            stroke="var(--mantine-color-gray-5)"
             strokeWidth="1.5"
             strokeLinejoin="round"
-            className="text-border"
           />
 
           {/* Heatmap layer */}
@@ -258,7 +269,7 @@ export function BodyScan({ onComplete, onCancel }: BodyScanProps) {
                   cy={zone.cy}
                   r={zone.hitR}
                   fill="transparent"
-                  className="cursor-pointer"
+                  style={{ cursor: 'pointer' }}
                   role="button"
                   aria-label={zone.label}
                   aria-pressed={isSelected}
@@ -271,10 +282,10 @@ export function BodyScan({ onComplete, onCancel }: BodyScanProps) {
                     cy={zone.cy}
                     r={zone.hitR - 2}
                     fill="none"
-                    stroke="currentColor"
+                    stroke="var(--mantine-color-brand-5)"
                     strokeWidth="2"
                     strokeDasharray="4 3"
-                    className="text-accent pointer-events-none animate-pulse"
+                    style={{ pointerEvents: 'none' }}
                   />
                 )}
                 {/* Pulse ring animation */}
@@ -284,117 +295,170 @@ export function BodyScan({ onComplete, onCancel }: BodyScanProps) {
                     cy={zone.cy}
                     r={zone.hitR}
                     fill="none"
-                    stroke="currentColor"
+                    stroke="var(--mantine-color-brand-5)"
                     strokeWidth="2"
-                    className="text-accent pointer-events-none"
-                    style={{ animation: 'pulse-ring 600ms ease-out forwards' }}
+                    style={{ pointerEvents: 'none', animation: 'pulse-ring 600ms ease-out forwards' }}
                   />
                 )}
               </g>
             );
           })}
-        </svg>
+        </Box>
 
         {selections.size === 0 && !activeZone && (
-          <p className="absolute -bottom-1 left-0 right-0 text-center text-xs text-faint">
+          <Text
+            pos="absolute"
+            left={0}
+            right={0}
+            ta="center"
+            fz="xs"
+            c="dimmed"
+            style={{ bottom: -4 }}
+          >
             Коснитесь любой зоны
-          </p>
+          </Text>
         )}
-      </div>
+      </Box>
 
       {/* Selected zones summary */}
       {selections.size > 0 && (
-        <div className="flex flex-wrap justify-center gap-1.5">
+        <Group justify="center" gap={6}>
           {Array.from(selections.entries()).map(([zoneId, data]) => {
             const zone = BODY_ZONES.find((z) => z.id === zoneId);
             if (!zone) return null;
             return (
-              <span
+              <Badge
                 key={zoneId}
-                className="inline-flex items-center gap-1 rounded-full bg-elevated px-2.5 py-1 text-xs text-subtle"
+                variant="light"
+                color="gray"
+                radius="xl"
+                size="sm"
+                leftSection={
+                  <Box
+                    w={8}
+                    h={8}
+                    style={{ borderRadius: '50%', backgroundColor: data.sensation.hex }}
+                  />
+                }
               >
-                <span
-                  className="h-2 w-2 rounded-full"
-                  style={{ backgroundColor: data.sensation.hex }}
-                />
                 {zone.label}: {data.sensation.label} · {data.intensity}/5
-              </span>
+              </Badge>
             );
           })}
-        </div>
+        </Group>
       )}
 
       {/* Bottom sheet */}
       {activeZone && (
-        <div className="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-lg rounded-t-2xl bg-card p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl animate-slide-up">
-          <div className="mb-3 flex items-center justify-between">
-            <p className="text-sm font-medium text-fg">
+        <Paper
+          pos="fixed"
+          left={0}
+          right={0}
+          bottom={0}
+          mx="auto"
+          w="100%"
+          maw={512}
+          radius="lg"
+          p="lg"
+          shadow="xl"
+          style={{
+            zIndex: 50,
+            paddingBottom: 'calc(1.25rem + env(safe-area-inset-bottom))',
+            borderBottomLeftRadius: 0,
+            borderBottomRightRadius: 0,
+            animation: 'slide-up 240ms cubic-bezier(0.32, 0.72, 0, 1) forwards',
+          }}
+        >
+          <Group justify="space-between" mb="sm" align="center">
+            <Text fz="sm" fw={500}>
               {activeZone.label} — что вы чувствуете?
-            </p>
-            <button
+            </Text>
+            <ActionIcon
               type="button"
               onClick={closeSheet}
               aria-label="Закрыть"
-              className="flex h-7 w-7 items-center justify-center rounded-full text-faint hover:bg-elevated"
+              variant="subtle"
+              color="gray"
+              radius="xl"
+              size="sm"
             >
               ✕
-            </button>
-          </div>
+            </ActionIcon>
+          </Group>
 
-          <div className="grid grid-cols-3 gap-2 mb-4">
+          <SimpleGrid cols={3} spacing="xs" mb="md">
             {SENSATIONS.map((s) => {
               const isSelected = activeSelection?.sensation.id === s.id;
               return (
-                <button
+                <UnstyledButton
                   key={s.id}
                   type="button"
                   onClick={() => selectSensation(s)}
-                  className={`flex flex-col items-center gap-1 rounded-xl border-2 px-2 py-2.5 text-xs transition-all ${
-                    isSelected
-                      ? 'border-accent bg-accent-soft'
-                      : 'border-transparent bg-elevated hover:bg-hover'
-                  }`}
+                  p="xs"
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 4,
+                    borderRadius: 12,
+                    border: '2px solid',
+                    borderColor: isSelected
+                      ? 'var(--mantine-color-brand-5)'
+                      : 'transparent',
+                    backgroundColor: isSelected
+                      ? 'var(--mantine-color-brand-0)'
+                      : 'var(--mantine-color-gray-0)',
+                    transition: 'all 200ms ease',
+                  }}
                 >
-                  <span className="h-3 w-3 rounded-full" style={{ backgroundColor: s.hex }} />
-                  <span className={isSelected ? 'text-accent-soft-fg font-medium' : 'text-subtle'}>
+                  <Box
+                    w={12}
+                    h={12}
+                    style={{ borderRadius: '50%', backgroundColor: s.hex }}
+                  />
+                  <Text fz="xs" fw={isSelected ? 500 : 400} c={isSelected ? 'brand.7' : 'dimmed'}>
                     {s.label}
-                  </span>
-                </button>
+                  </Text>
+                </UnstyledButton>
               );
             })}
-          </div>
+          </SimpleGrid>
 
           {activeSelection && (
-            <div className="mb-4">
-              <div className="mb-1.5 flex items-center justify-between">
-                <span className="text-xs text-muted">Интенсивность</span>
-                <span className="text-xs font-bold text-accent-fg">{activeSelection.intensity}/5</span>
-              </div>
-              <input
-                type="range"
+            <Stack gap={6} mb="md">
+              <Group justify="space-between">
+                <Text fz="xs" c="dimmed">
+                  Интенсивность
+                </Text>
+                <Text fz="xs" fw={700} c="brand.7">
+                  {activeSelection.intensity}/5
+                </Text>
+              </Group>
+              <Slider
+                value={activeSelection.intensity}
+                onChange={setIntensity}
                 min={1}
                 max={5}
-                value={activeSelection.intensity}
-                onChange={(e) => setIntensity(Number(e.target.value))}
-                className="w-full accent-indigo-500"
+                step={1}
+                label={null}
               />
-            </div>
+            </Stack>
           )}
 
           <Button fullWidth onClick={closeSheet} disabled={!activeSelection}>
             Готово
           </Button>
-        </div>
+        </Paper>
       )}
 
-      <div className="flex gap-3 pt-1">
-        <Button type="button" variant="ghost" fullWidth onClick={onCancel}>
+      <Group gap="sm" grow pt={4}>
+        <Button type="button" variant="subtle" onClick={onCancel}>
           Отмена
         </Button>
-        <Button type="button" fullWidth onClick={handleComplete} disabled={selections.size === 0}>
+        <Button type="button" onClick={handleComplete} disabled={selections.size === 0}>
           Завершить ({selections.size})
         </Button>
-      </div>
-    </div>
+      </Group>
+    </Stack>
   );
 }

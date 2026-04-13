@@ -1,5 +1,15 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Button, Card, StepProgress } from '@/shared/ui';
+import {
+  Button,
+  Chip,
+  Group,
+  Paper,
+  Progress,
+  SimpleGrid,
+  Stack,
+  Text,
+  Title,
+} from '@mantine/core';
 
 interface MuscleGroup {
   id: string;
@@ -48,8 +58,6 @@ export function PmrExercise({ onComplete, onCancel }: PmrExerciseProps) {
     ? MUSCLE_GROUPS.find((g) => g.id === selectedGroups[currentGroupIndex])
     : null;
 
-  // Effect-driven timer: starts interval when phase is tense or relax.
-  // timeLeft is already set before entering these phases.
   useEffect(() => {
     if (phase !== 'tense' && phase !== 'relax') return;
 
@@ -63,9 +71,7 @@ export function PmrExercise({ onComplete, onCancel }: PmrExerciseProps) {
             clearInterval(intervalRef.current);
             intervalRef.current = null;
           }
-          // Set duration for next timed phase before transitioning
           if (nextDuration > 0) {
-            // We need a microtask to batch the state updates properly
             queueMicrotask(() => {
               setTimeLeft(nextDuration);
               setPhase(nextPhase);
@@ -86,12 +92,6 @@ export function PmrExercise({ onComplete, onCancel }: PmrExerciseProps) {
       }
     };
   }, [phase]);
-
-  const toggleGroup = (id: string) => {
-    setSelectedGroups((prev) =>
-      prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id],
-    );
-  };
 
   const startExercise = () => {
     if (selectedGroups.length === 0) return;
@@ -119,173 +119,180 @@ export function PmrExercise({ onComplete, onCancel }: PmrExerciseProps) {
   };
 
   const renderRatingButtons = (onSelect: (n: number) => void) => (
-    <div className="grid grid-cols-5 gap-2">
+    <SimpleGrid cols={5} spacing="xs">
       {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-        <button
+        <Button
           key={n}
           type="button"
+          variant="light"
+          color="gray"
+          size="sm"
           onClick={() => onSelect(n)}
-          className="flex h-10 w-full items-center justify-center rounded-xl bg-elevated text-fg font-medium text-sm hover:bg-hover transition-colors"
+          h={40}
         >
           {n}
-        </button>
+        </Button>
       ))}
-    </div>
+    </SimpleGrid>
   );
 
   // --- Selection phase ---
   if (phase === 'select') {
     return (
-      <div className="space-y-4">
-        <p className="text-sm text-muted text-center">
+      <Stack gap="md">
+        <Text fz="sm" c="dimmed" ta="center">
           Выберите группы мышц для расслабления
-        </p>
+        </Text>
 
-        <div className="grid grid-cols-2 gap-2">
-          {MUSCLE_GROUPS.map((group) => {
-            const isSelected = selectedGroups.includes(group.id);
-            return (
-              <button
+        <Chip.Group multiple value={selectedGroups} onChange={setSelectedGroups}>
+          <SimpleGrid cols={2} spacing="xs">
+            {MUSCLE_GROUPS.map((group) => (
+              <Chip
                 key={group.id}
-                type="button"
-                onClick={() => toggleGroup(group.id)}
-                className={`rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
-                  isSelected
-                    ? 'bg-accent text-white'
-                    : 'bg-elevated text-subtle hover:bg-hover'
-                }`}
+                value={group.id}
+                variant="light"
+                radius="md"
+                size="md"
+                styles={{ label: { width: '100%', justifyContent: 'center' } }}
               >
                 {group.label}
-              </button>
-            );
-          })}
-        </div>
+              </Chip>
+            ))}
+          </SimpleGrid>
+        </Chip.Group>
 
-        <div className="flex gap-3">
-          <Button type="button" variant="ghost" fullWidth onClick={onCancel}>
+        <Group gap="sm" grow>
+          <Button type="button" variant="subtle" onClick={onCancel}>
             Отмена
           </Button>
-          <Button
-            type="button"
-            fullWidth
-            onClick={startExercise}
-            disabled={selectedGroups.length === 0}
-          >
+          <Button type="button" onClick={startExercise} disabled={selectedGroups.length === 0}>
             Начать ({selectedGroups.length})
           </Button>
-        </div>
-      </div>
+        </Group>
+      </Stack>
     );
   }
 
   // --- Done phase ---
   if (phase === 'done') {
     return (
-      <div className="space-y-4">
-        <h3 className="text-center text-lg font-bold text-fg">Результаты</h3>
+      <Stack gap="md">
+        <Title order={3} fz="lg" fw={700} ta="center">
+          Результаты
+        </Title>
 
-        <div className="space-y-2">
+        <Stack gap="xs">
           {selectedGroups.map((groupId) => {
             const group = MUSCLE_GROUPS.find((g) => g.id === groupId);
             const before = tensionBefore[groupId] ?? 0;
             const after = tensionAfter[groupId] ?? 0;
             const diff = before - after;
             return (
-              <Card key={groupId}>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-fg">
+              <Paper key={groupId} withBorder radius="lg" p="md">
+                <Group justify="space-between">
+                  <Text fz="sm" fw={500}>
                     {group?.label}
-                  </span>
-                  <div className="flex items-center gap-3 text-xs">
-                    <span className="text-muted">До: {before}</span>
-                    <span className="text-muted">После: {after}</span>
+                  </Text>
+                  <Group gap="md">
+                    <Text fz="xs" c="dimmed">
+                      До: {before}
+                    </Text>
+                    <Text fz="xs" c="dimmed">
+                      После: {after}
+                    </Text>
                     {diff > 0 && (
-                      <span className="text-accent-soft-fg font-medium">
+                      <Text fz="xs" fw={500} c="calm.7">
                         -{diff}
-                      </span>
+                      </Text>
                     )}
-                  </div>
-                </div>
-              </Card>
+                  </Group>
+                </Group>
+              </Paper>
             );
           })}
-        </div>
+        </Stack>
 
         <Button type="button" fullWidth onClick={onComplete}>
           Завершить
         </Button>
-      </div>
+      </Stack>
     );
   }
 
   // --- Exercise phases ---
+  const progressValue = ((currentGroupIndex + 1) / selectedGroups.length) * 100;
+
   return (
-    <div className="space-y-4">
-      <StepProgress total={selectedGroups.length} current={currentGroupIndex} />
+    <Stack gap="md">
+      <Progress value={progressValue} radius="xl" />
 
-      <p className="text-xs text-muted text-center">
+      <Text fz="xs" c="dimmed" ta="center">
         Группа {currentGroupIndex + 1} из {selectedGroups.length}
-      </p>
+      </Text>
 
-      <div className="flex justify-center">
-        <div className="text-center">
-          <h3 className="text-lg font-bold text-fg">{currentGroup?.label}</h3>
-        </div>
-      </div>
+      <Group justify="center">
+        <Title order={3} fz="lg" fw={700}>
+          {currentGroup?.label}
+        </Title>
+      </Group>
 
       {phase === 'rate-before' && (
-        <Card>
-          <div className="space-y-3">
-            <p className="text-sm text-center text-muted">
+        <Paper withBorder radius="lg" p="md">
+          <Stack gap="sm">
+            <Text fz="sm" ta="center" c="dimmed">
               Оцените напряжение в этой зоне (1-10)
-            </p>
+            </Text>
             {renderRatingButtons(handleBeforeRating)}
-          </div>
-        </Card>
+          </Stack>
+        </Paper>
       )}
 
       {phase === 'tense' && (
-        <Card className="bg-accent-soft">
-          <div className="text-center space-y-3">
-            <p className="text-sm font-medium text-accent-soft-fg">
+        <Paper withBorder radius="lg" p="md" bg="brand.0">
+          <Stack gap="sm" align="center">
+            <Text fz="sm" fw={500} c="brand.7" ta="center">
               Напрягите {currentGroup?.label?.toLowerCase()} на 5 секунд
-            </p>
-            <div className="text-4xl font-bold text-accent-fg tabular-nums">
+            </Text>
+            <Text fz={36} fw={700} c="brand.7" style={{ fontVariantNumeric: 'tabular-nums' }}>
               {timeLeft}
-            </div>
-            <p className="text-xs text-muted">Держите напряжение...</p>
-          </div>
-        </Card>
+            </Text>
+            <Text fz="xs" c="dimmed">
+              Держите напряжение...
+            </Text>
+          </Stack>
+        </Paper>
       )}
 
       {phase === 'relax' && (
-        <Card>
-          <div className="text-center space-y-3">
-            <p className="text-sm font-medium text-fg">
+        <Paper withBorder radius="lg" p="md">
+          <Stack gap="sm" align="center">
+            <Text fz="sm" fw={500}>
               Расслабьте {currentGroup?.label?.toLowerCase()} на 10 секунд
-            </p>
-            <div className="text-4xl font-bold text-accent-fg tabular-nums">
+            </Text>
+            <Text fz={36} fw={700} c="brand.7" style={{ fontVariantNumeric: 'tabular-nums' }}>
               {timeLeft}
-            </div>
-            <p className="text-xs text-muted">Почувствуйте разницу...</p>
-          </div>
-        </Card>
+            </Text>
+            <Text fz="xs" c="dimmed">
+              Почувствуйте разницу...
+            </Text>
+          </Stack>
+        </Paper>
       )}
 
       {phase === 'rate-after' && (
-        <Card>
-          <div className="space-y-3">
-            <p className="text-sm text-center text-muted">
+        <Paper withBorder radius="lg" p="md">
+          <Stack gap="sm">
+            <Text fz="sm" ta="center" c="dimmed">
               Оцените напряжение после расслабления (1-10)
-            </p>
+            </Text>
             {renderRatingButtons(handleAfterRating)}
-          </div>
-        </Card>
+          </Stack>
+        </Paper>
       )}
 
-      <Button type="button" variant="ghost" fullWidth onClick={onCancel}>
+      <Button type="button" variant="subtle" fullWidth onClick={onCancel}>
         Отмена
       </Button>
-    </div>
+    </Stack>
   );
 }

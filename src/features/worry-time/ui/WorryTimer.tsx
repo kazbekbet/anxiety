@@ -1,5 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Button } from '@/shared/ui';
+import {
+  Button,
+  Center,
+  Group,
+  Paper,
+  RingProgress,
+  Stack,
+  Text,
+  Textarea,
+} from '@mantine/core';
 import { useWorryTime } from '../model/store';
 
 const DURATION_OPTIONS = [5, 10, 15] as const;
@@ -20,7 +29,10 @@ export function WorryTimer({ onClose }: WorryTimerProps) {
   const totalSeconds = selectedDuration * 60;
 
   const cleanup = useCallback(() => {
-    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
   }, []);
 
   useEffect(() => cleanup, [cleanup]);
@@ -35,7 +47,12 @@ export function WorryTimer({ onClose }: WorryTimerProps) {
     if (!isRunning) return;
     intervalRef.current = setInterval(() => {
       setSecondsLeft((prev) => {
-        if (prev <= 1) { cleanup(); setIsRunning(false); setIsFinished(true); return 0; }
+        if (prev <= 1) {
+          cleanup();
+          setIsRunning(false);
+          setIsFinished(true);
+          return 0;
+        }
         return prev - 1;
       });
     }, 1000);
@@ -53,74 +70,95 @@ export function WorryTimer({ onClose }: WorryTimerProps) {
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
-  const size = 200;
-  const strokeWidth = 8;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const progress = isRunning || isFinished ? 1 - secondsLeft / totalSeconds : 0;
-  const dashOffset = circumference * (1 - progress);
+  const elapsedPct =
+    isRunning || isFinished ? (1 - secondsLeft / totalSeconds) * 100 : 0;
 
   if (!isRunning && !isFinished) {
     return (
-      <div className="flex flex-col items-center gap-5">
-        <p className="text-sm text-muted">Выберите длительность сессии</p>
-        <div className="flex gap-3">
+      <Stack align="center" gap="md">
+        <Text fz="sm" c="dimmed">
+          Выберите длительность сессии
+        </Text>
+        <Group gap="sm">
           {DURATION_OPTIONS.map((d) => (
-            <button
+            <Button
               key={d}
+              variant={selectedDuration === d ? 'filled' : 'light'}
+              color="brand"
               onClick={() => setSelectedDuration(d)}
-              className={`rounded-xl px-5 py-3 text-sm font-medium transition-colors ${
-                selectedDuration === d ? 'bg-accent text-white' : 'bg-elevated text-subtle hover:bg-hover'
-              }`}
             >
               {d} мин
-            </button>
+            </Button>
           ))}
-        </div>
-        <Button fullWidth onClick={handleStart}>Начать</Button>
-      </div>
+        </Group>
+        <Button fullWidth color="brand" onClick={handleStart}>
+          Начать
+        </Button>
+      </Stack>
     );
   }
 
   if (isFinished) {
     return (
-      <div className="flex flex-col items-center gap-5">
-        <div className="rounded-2xl bg-accent-soft p-6 text-center">
-          <p className="text-lg font-medium text-accent-soft-fg">
+      <Stack align="center" gap="md">
+        <Paper withBorder radius="lg" p="md" bg="var(--mantine-color-brand-light)" w="100%">
+          <Text fz="lg" fw={500} ta="center" c="bright">
             Время вышло. Отпустите беспокойства до завтра.
-          </p>
-        </div>
+          </Text>
+        </Paper>
         {text.trim() && (
-          <div className="w-full rounded-xl bg-elevated p-3 text-sm text-subtle">
-            <p className="mb-1 text-xs font-medium text-faint">Вы записали:</p>
-            <p className="whitespace-pre-wrap">{text}</p>
-          </div>
+          <Paper withBorder radius="lg" p="sm" w="100%">
+            <Text fz="xs" fw={500} c="dimmed" mb={4}>
+              Вы записали:
+            </Text>
+            <Text fz="sm" style={{ whiteSpace: 'pre-wrap' }}>
+              {text}
+            </Text>
+          </Paper>
         )}
-        <Button fullWidth onClick={handleSave}>Сохранить и закрыть</Button>
-        <Button fullWidth variant="ghost" onClick={onClose}>Закрыть без сохранения</Button>
-      </div>
+        <Button fullWidth color="brand" onClick={handleSave}>
+          Сохранить и закрыть
+        </Button>
+        <Button fullWidth variant="subtle" onClick={onClose}>
+          Закрыть без сохранения
+        </Button>
+      </Stack>
     );
   }
 
   return (
-    <div className="flex flex-col items-center gap-5">
-      <div className="relative">
-        <svg width={size} height={size} className="-rotate-90">
-          <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth} className="text-elevated" />
-          <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={dashOffset} className="text-accent transition-[stroke-dashoffset] duration-1000 ease-linear" />
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-3xl font-bold tabular-nums text-fg">{formatTime(secondsLeft)}</span>
-        </div>
-      </div>
-      <textarea
+    <Stack align="center" gap="md">
+      <Center>
+        <RingProgress
+          size={200}
+          thickness={8}
+          roundCaps
+          sections={[{ value: elapsedPct, color: 'brand' }]}
+          label={
+            <Text ta="center" fz={32} fw={700} style={{ fontVariantNumeric: 'tabular-nums' }}>
+              {formatTime(secondsLeft)}
+            </Text>
+          }
+        />
+      </Center>
+      <Textarea
         value={text}
-        onChange={(e) => setText(e.target.value)}
+        onChange={(e) => setText(e.currentTarget.value)}
         placeholder="Запишите свои беспокойства..."
-        className="w-full resize-none rounded-xl border border-input-border bg-input p-3 text-sm text-fg placeholder:text-faint focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
         rows={4}
+        autosize={false}
+        w="100%"
       />
-      <Button fullWidth variant="ghost" onClick={() => { cleanup(); onClose(); }}>Отменить</Button>
-    </div>
+      <Button
+        fullWidth
+        variant="subtle"
+        onClick={() => {
+          cleanup();
+          onClose();
+        }}
+      >
+        Отменить
+      </Button>
+    </Stack>
   );
 }

@@ -1,7 +1,17 @@
 import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import {
+  Anchor,
+  Chip,
+  Group,
+  Modal,
+  Paper,
+  Stack,
+  Text,
+  ThemeIcon,
+} from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { Header } from '@/widgets/header';
-import { Card, Modal } from '@/shared/ui';
 import { techniques, TechniqueCard, useProgression } from '@/entities/technique';
 import { useThoughtRecords } from '@/entities/anxiety';
 import { ThoughtRecordForm } from '@/features/thought-record';
@@ -28,6 +38,7 @@ export function TechniquesPage() {
   const [tab, setTab] = useState<Tab>('all');
   const [activeTechnique, setActiveTechnique] = useState<Technique | null>(null);
   const [completion, setCompletion] = useState<CompletionData | null>(null);
+  const [opened, { open, close }] = useDisclosure(false);
   const addRecord = useThoughtRecords((s) => s.addRecord);
   const { recordUsage, isUnlocked, getUsageCount, manualUnlock } = useProgression();
   const startTimeRef = useRef<number>(0);
@@ -44,6 +55,7 @@ export function TechniquesPage() {
     startTimeRef.current = Date.now();
     setActiveTechnique(technique);
     setCompletion(null);
+    open();
   };
 
   const handleComplete = () => {
@@ -55,6 +67,7 @@ export function TechniquesPage() {
   const handleClose = () => {
     setActiveTechnique(null);
     setCompletion(null);
+    close();
   };
 
   const renderTechniqueContent = () => {
@@ -95,24 +108,20 @@ export function TechniquesPage() {
   };
 
   return (
-    <div className="space-y-4">
+    <Stack gap="md">
       <Header title="Техники" subtitle="Выберите, что вы чувствуете" />
 
-      <div className="flex gap-2 overflow-x-auto scrollbar-none -mx-1 px-1">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-              tab === t.key ? 'bg-accent text-white' : 'bg-elevated text-subtle hover:bg-hover'
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <Chip.Group value={tab} onChange={(v) => setTab(v as Tab)}>
+        <Group gap="xs" wrap="nowrap" style={{ overflowX: 'auto' }}>
+          {TABS.map((t) => (
+            <Chip key={t.key} value={t.key} variant="light" radius="xl" size="sm">
+              {t.label}
+            </Chip>
+          ))}
+        </Group>
+      </Chip.Group>
 
-      <div className="space-y-3">
+      <Stack gap="sm">
         {filtered.map((t) => {
           const uc = t.unlockCondition;
           const unlocked = isUnlocked(t.id, uc?.requiredId, uc?.uses);
@@ -128,30 +137,38 @@ export function TechniquesPage() {
             />
           );
         })}
-      </div>
+      </Stack>
 
       {/* Exposure hierarchy link */}
       {(tab === 'all' || tab === 'deep-work') && (
-        <Link to="/exposure" className="block">
-          <Card className="flex items-center gap-3 active:scale-[0.98] transition-transform">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent-fg text-lg">
-              ↗
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-fg text-sm">Лестница страха</p>
-              <p className="text-xs text-muted">Пошаговая экспозиция к тревожным ситуациям</p>
-            </div>
-          </Card>
-        </Link>
+        <Anchor component={Link} to="/exposure" underline="never">
+          <Paper withBorder radius="lg" p="md">
+            <Group gap="sm" wrap="nowrap">
+              <ThemeIcon color="brand" variant="light" radius="md" size={40}>
+                <Text fz="lg">↗</Text>
+              </ThemeIcon>
+              <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
+                <Text fz="sm" fw={600}>
+                  Лестница страха
+                </Text>
+                <Text fz="xs" c="dimmed">
+                  Пошаговая экспозиция к тревожным ситуациям
+                </Text>
+              </Stack>
+            </Group>
+          </Paper>
+        </Anchor>
       )}
 
       <Modal
-        open={!!activeTechnique}
+        opened={opened && !!activeTechnique}
         onClose={handleClose}
         title={completion ? 'Завершено' : (activeTechnique?.title ?? '')}
+        centered
+        radius="lg"
       >
         {renderTechniqueContent()}
       </Modal>
-    </div>
+    </Stack>
   );
 }

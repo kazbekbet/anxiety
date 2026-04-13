@@ -1,5 +1,15 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Button, Card } from '@/shared/ui';
+import {
+  Avatar,
+  Badge,
+  Button,
+  Group,
+  Paper,
+  Stack,
+  Text,
+  ThemeIcon,
+  Title,
+} from '@mantine/core';
 
 interface TippCard {
   id: string;
@@ -98,90 +108,99 @@ export function TippExercise({ onComplete, onCancel }: TippExerciseProps) {
   };
 
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-muted text-center">
+    <Stack gap="md">
+      <Text fz="sm" c="dimmed" ta="center">
         Выполните упражнения TIPP для быстрого снижения интенсивных эмоций
-      </p>
+      </Text>
 
-      <div className="space-y-3">
+      <Stack gap="sm">
         {TIPP_CARDS.map((card) => {
           const isActive = activeCard === card.id;
           const isDone = completed.has(card.id);
 
           return (
-            <Card
+            <Paper
               key={card.id}
-              className={`transition-all ${
-                isActive
-                  ? 'ring-2 ring-accent'
-                  : isDone
-                    ? 'opacity-60'
-                    : ''
-              }`}
+              withBorder
+              radius="lg"
+              p="md"
+              style={{
+                opacity: isDone ? 0.6 : 1,
+                borderColor: isActive ? 'var(--mantine-color-brand-5)' : undefined,
+                borderWidth: isActive ? 2 : undefined,
+                transition: 'all 200ms ease',
+              }}
             >
-              <div className="flex items-start gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-xl">
-                  {card.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-accent text-white text-xs font-bold">
-                      {card.letter}
-                    </span>
-                    <h3 className="font-semibold text-fg text-sm">
+              <Group gap="sm" align="flex-start" wrap="nowrap">
+                <ThemeIcon color="brand" variant="light" radius="md" size={48}>
+                  <Text fz="lg">{card.icon}</Text>
+                </ThemeIcon>
+                <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
+                  <Group gap="xs" align="center">
+                    <Avatar color="brand" radius="xl" size={24}>
+                      <Text fz="xs" fw={700} c="white">
+                        {card.letter}
+                      </Text>
+                    </Avatar>
+                    <Title order={3} fz="sm" fw={600}>
                       {card.title}
-                    </h3>
+                    </Title>
                     {isDone && (
-                      <span className="text-xs text-accent-soft-fg">\u2713</span>
+                      <Badge color="calm" variant="light" size="sm">
+                        ✓
+                      </Badge>
                     )}
-                  </div>
-                  <p className="text-xs text-muted mt-1">{card.instruction}</p>
+                  </Group>
+                  <Text fz="xs" c="dimmed">
+                    {card.instruction}
+                  </Text>
 
                   {isActive ? (
-                    <div className="mt-3 flex items-center gap-3">
-                      <div className="text-2xl font-bold text-accent-fg tabular-nums">
+                    <Group gap="sm" mt="xs" align="center">
+                      <Text fz="xl" fw={700} c="brand.7" style={{ fontVariantNumeric: 'tabular-nums' }}>
                         {formatTime(timeLeft)}
-                      </div>
+                      </Text>
                       <Button
                         type="button"
-                        variant="ghost"
-                        className="text-xs px-3 py-1"
+                        variant="subtle"
+                        size="xs"
                         onClick={stopTimer}
                       >
                         Стоп
                       </Button>
-                    </div>
+                    </Group>
                   ) : (
                     <Button
                       type="button"
-                      variant="secondary"
-                      className="mt-2 text-xs px-3 py-1.5"
+                      variant="light"
+                      size="xs"
+                      mt="xs"
+                      w="fit-content"
                       onClick={() => startTimer(card)}
                       disabled={!!activeCard || isDone}
                     >
                       {isDone ? 'Выполнено' : `Начать (${card.duration}с)`}
                     </Button>
                   )}
-                </div>
-              </div>
-            </Card>
+                </Stack>
+              </Group>
+            </Paper>
           );
         })}
-      </div>
+      </Stack>
 
-      <div className="flex gap-3">
-        <Button type="button" variant="ghost" fullWidth onClick={onCancel}>
+      <Group gap="sm" grow>
+        <Button type="button" variant="subtle" onClick={onCancel}>
           Отмена
         </Button>
         <Button
           type="button"
-          fullWidth
           onClick={onComplete}
           disabled={!allDone && completed.size === 0}
         >
           {allDone ? 'Завершить' : `Готово (${completed.size}/${TIPP_CARDS.length})`}
         </Button>
-      </div>
-    </div>
+      </Group>
+    </Stack>
   );
 }
