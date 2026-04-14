@@ -1,5 +1,14 @@
 import { useState } from 'react';
-import { Button, Card, StepProgress } from '@/shared/ui';
+import {
+  Avatar,
+  Button,
+  Group,
+  Paper,
+  Progress,
+  Stack,
+  Text,
+  Title,
+} from '@mantine/core';
 
 interface StopStep {
   letter: string;
@@ -45,45 +54,50 @@ export function StopSkill({ onComplete, onCancel }: StopSkillProps) {
 
   const step = STOP_STEPS[currentStep];
   const isLast = currentStep === STOP_STEPS.length - 1;
+  const progressValue = ((currentStep + 1) / STOP_STEPS.length) * 100;
 
   return (
-    <div className="space-y-4">
-      <StepProgress total={STOP_STEPS.length} current={currentStep} />
+    <Stack gap="md">
+      <Progress value={progressValue} radius="xl" />
 
-      <div className="flex justify-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-accent text-white text-4xl font-bold">
-          {step.letter}
-        </div>
-      </div>
+      <Group justify="center">
+        <Avatar color="brand" radius="xl" size={80}>
+          <Text fz={32} fw={700} c="white">
+            {step.letter}
+          </Text>
+        </Avatar>
+      </Group>
 
-      <Card className="bg-accent-soft">
-        <div className="text-center space-y-2">
-          <h3 className="text-lg font-bold text-fg">{step.title}</h3>
-          <p className="text-sm font-medium text-accent-soft-fg">
+      <Paper withBorder radius="lg" p="md" bg="brand.0">
+        <Stack gap="xs" align="center">
+          <Title order={3} fz="lg" fw={700}>
+            {step.title}
+          </Title>
+          <Text fz="sm" fw={500} c="brand.7" ta="center">
             {step.instruction}
-          </p>
-        </div>
-      </Card>
+          </Text>
+        </Stack>
+      </Paper>
 
-      <p className="text-sm text-muted text-center px-2">{step.prompt}</p>
+      <Text fz="sm" c="dimmed" ta="center" px="xs">
+        {step.prompt}
+      </Text>
 
-      <div className="flex gap-3">
+      <Group gap="sm" grow>
         <Button
           type="button"
-          variant="ghost"
-          fullWidth
+          variant="subtle"
           onClick={currentStep === 0 ? onCancel : () => setCurrentStep(currentStep - 1)}
         >
           {currentStep === 0 ? 'Отмена' : 'Назад'}
         </Button>
         <Button
           type="button"
-          fullWidth
           onClick={isLast ? onComplete : () => setCurrentStep(currentStep + 1)}
         >
           {isLast ? 'Готово' : 'Далее'}
         </Button>
-      </div>
-    </div>
+      </Group>
+    </Stack>
   );
 }

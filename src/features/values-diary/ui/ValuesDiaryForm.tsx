@@ -1,5 +1,17 @@
 import { useState } from 'react';
-import { Button, StepProgress, inputClass } from '@/shared/ui';
+import {
+  Badge,
+  Button,
+  Group,
+  SimpleGrid,
+  Slider,
+  Stack,
+  Stepper,
+  Text,
+  Textarea,
+  Title,
+  UnstyledButton,
+} from '@mantine/core';
 import { VALUE_OPTIONS } from '../model/data';
 import { useValuesStore } from '../model/store';
 
@@ -29,98 +41,154 @@ export function ValuesDiaryForm({ onComplete, onCancel }: ValuesDiaryFormProps) 
     onComplete();
   };
 
-  const canNext = step === 0 ? selectedValues.length >= 1 : step === 1 ? true : action.trim().length > 0;
-
-  const steps = [
-    // Step 1: Choose values
-    <div key="values">
-      <h3 className="mb-1 font-medium text-fg">Что для вас действительно важно?</h3>
-      <p className="mb-4 text-sm text-muted">Выберите до 5 ценностей</p>
-      <div className="grid grid-cols-2 gap-2">
-        {VALUE_OPTIONS.map((v) => (
-          <button
-            key={v.id}
-            onClick={() => toggleValue(v.id)}
-            className={`flex items-center gap-2 rounded-xl px-3 py-3 text-left text-sm transition-all ${
-              selectedValues.includes(v.id)
-                ? 'bg-accent-soft border-2 border-accent text-accent-soft-fg'
-                : 'bg-elevated text-subtle border-2 border-transparent'
-            }`}
-          >
-            <span className="text-lg">{v.icon}</span>
-            <span className="font-medium">{v.label}</span>
-          </button>
-        ))}
-      </div>
-    </div>,
-
-    // Step 2: Rate alignment
-    <div key="scores">
-      <h3 className="mb-1 font-medium text-fg">Насколько вы живёте в согласии?</h3>
-      <p className="mb-4 text-sm text-muted">Оцените каждую ценность</p>
-      <div className="space-y-4">
-        {selectedValues.map((id) => {
-          const v = VALUE_OPTIONS.find((o) => o.id === id);
-          if (!v) return null;
-          return (
-            <div key={id}>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-fg">{v.icon} {v.label}</span>
-                <span className="text-sm font-bold text-accent-fg">{scores[id] ?? 5}/10</span>
-              </div>
-              <input
-                type="range"
-                min={1}
-                max={10}
-                value={scores[id] ?? 5}
-                onChange={(e) => setScores({ ...scores, [id]: Number(e.target.value) })}
-                className="w-full accent-indigo-500"
-              />
-            </div>
-          );
-        })}
-      </div>
-    </div>,
-
-    // Step 3: Action
-    <div key="action">
-      <h3 className="mb-1 font-medium text-fg">Одно действие на эту неделю</h3>
-      <p className="mb-4 text-sm text-muted">Что вы можете сделать в согласии с вашими ценностями?</p>
-      <textarea
-        value={action}
-        onChange={(e) => setAction(e.target.value)}
-        placeholder="Например: позвонить маме, прогуляться в парке, написать в дневник..."
-        rows={3}
-        className={inputClass}
-        autoFocus
-      />
-      {selectedValues.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-1">
-          {selectedValues.map((id) => {
-            const v = VALUE_OPTIONS.find((o) => o.id === id);
-            return v ? (
-              <span key={id} className="rounded-full bg-accent-soft px-2 py-0.5 text-xs text-accent-fg">
-                {v.icon} {v.label}
-              </span>
-            ) : null;
-          })}
-        </div>
-      )}
-    </div>,
-  ];
+  const canNext =
+    step === 0 ? selectedValues.length >= 1 : step === 1 ? true : action.trim().length > 0;
 
   return (
-    <div className="space-y-4">
-      <StepProgress total={3} current={step} />
-      {steps[step]}
-      <div className="flex gap-3">
-        <Button variant="ghost" fullWidth onClick={step === 0 ? onCancel : () => setStep(step - 1)}>
+    <Stack gap="md">
+      <Stepper active={step} size="xs" iconSize={20} allowNextStepsSelect={false}>
+        <Stepper.Step />
+        <Stepper.Step />
+        <Stepper.Step />
+      </Stepper>
+
+      {step === 0 && (
+        <Stack gap="sm">
+          <Stack gap={4}>
+            <Title order={3} fz="md" fw={500}>
+              Что для вас действительно важно?
+            </Title>
+            <Text fz="sm" c="dimmed">
+              Выберите до 5 ценностей
+            </Text>
+          </Stack>
+          <SimpleGrid cols={2} spacing="xs">
+            {VALUE_OPTIONS.map((v) => {
+              const isSelected = selectedValues.includes(v.id);
+              return (
+                <UnstyledButton
+                  key={v.id}
+                  onClick={() => toggleValue(v.id)}
+                  p="sm"
+                  style={{
+                    borderRadius: 'var(--mantine-radius-md)',
+                    borderWidth: 2,
+                    borderStyle: 'solid',
+                    borderColor: isSelected
+                      ? 'var(--mantine-primary-color-filled)'
+                      : 'transparent',
+                    background: isSelected
+                      ? 'var(--mantine-primary-color-light)'
+                      : 'var(--mantine-color-default-hover)',
+                    color: isSelected
+                      ? 'var(--mantine-primary-color-light-color)'
+                      : 'var(--mantine-color-text)',
+                    transition: 'all 150ms ease',
+                  }}
+                >
+                  <Group gap="xs" wrap="nowrap">
+                    <Text fz="lg" component="span">
+                      {v.icon}
+                    </Text>
+                    <Text fz="sm" fw={500} component="span">
+                      {v.label}
+                    </Text>
+                  </Group>
+                </UnstyledButton>
+              );
+            })}
+          </SimpleGrid>
+        </Stack>
+      )}
+
+      {step === 1 && (
+        <Stack gap="sm">
+          <Stack gap={4}>
+            <Title order={3} fz="md" fw={500}>
+              Насколько вы живёте в согласии?
+            </Title>
+            <Text fz="sm" c="dimmed">
+              Оцените каждую ценность
+            </Text>
+          </Stack>
+          <Stack gap="md">
+            {selectedValues.map((id) => {
+              const v = VALUE_OPTIONS.find((o) => o.id === id);
+              if (!v) return null;
+              const value = scores[id] ?? 5;
+              return (
+                <Stack key={id} gap={4}>
+                  <Group justify="space-between" wrap="nowrap">
+                    <Text fz="sm" fw={500}>
+                      {v.icon} {v.label}
+                    </Text>
+                    <Text fz="sm" fw={700} c="brand">
+                      {value}/10
+                    </Text>
+                  </Group>
+                  <Slider
+                    min={1}
+                    max={10}
+                    step={1}
+                    value={value}
+                    onChange={(val) => setScores({ ...scores, [id]: val })}
+                    label={null}
+                  />
+                </Stack>
+              );
+            })}
+          </Stack>
+        </Stack>
+      )}
+
+      {step === 2 && (
+        <Stack gap="sm">
+          <Stack gap={4}>
+            <Title order={3} fz="md" fw={500}>
+              Одно действие на эту неделю
+            </Title>
+            <Text fz="sm" c="dimmed">
+              Что вы можете сделать в согласии с вашими ценностями?
+            </Text>
+          </Stack>
+          <Textarea
+            value={action}
+            onChange={(e) => setAction(e.currentTarget.value)}
+            placeholder="Например: позвонить маме, прогуляться в парке, написать в дневник..."
+            rows={3}
+            autoFocus
+          />
+          {selectedValues.length > 0 && (
+            <Group gap={4}>
+              {selectedValues.map((id) => {
+                const v = VALUE_OPTIONS.find((o) => o.id === id);
+                return v ? (
+                  <Badge key={id} variant="light" radius="xl" size="sm">
+                    {v.icon} {v.label}
+                  </Badge>
+                ) : null;
+              })}
+            </Group>
+          )}
+        </Stack>
+      )}
+
+      <Group gap="sm" wrap="nowrap">
+        <Button
+          variant="subtle"
+          fullWidth
+          onClick={step === 0 ? onCancel : () => setStep(step - 1)}
+        >
           {step === 0 ? 'Отмена' : 'Назад'}
         </Button>
-        <Button fullWidth disabled={!canNext} onClick={step === 2 ? handleSubmit : () => setStep(step + 1)}>
+        <Button
+          fullWidth
+          disabled={!canNext}
+          onClick={step === 2 ? handleSubmit : () => setStep(step + 1)}
+        >
           {step === 2 ? 'Сохранить' : 'Далее'}
         </Button>
-      </div>
-    </div>
+      </Group>
+    </Stack>
   );
 }

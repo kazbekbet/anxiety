@@ -1,5 +1,5 @@
 import { useReducer, useEffect, useRef, useCallback } from 'react';
-import { Button } from '@/shared/ui';
+import { Box, Button, Center, Group, Stack, Text } from '@mantine/core';
 
 type Phase = 'inhale' | 'hold' | 'exhale' | 'hold2';
 
@@ -95,13 +95,21 @@ export function BreathingExercise({ techniqueId, onComplete, onCancel }: Breathi
   const currentPhase = pattern.phases[phaseIndex];
 
   const cleanup = useCallback(() => {
-    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
   }, []);
 
-  useEffect(() => { if (finished) onComplete(elapsed); }, [finished, elapsed, onComplete]);
+  useEffect(() => {
+    if (finished) onComplete(elapsed);
+  }, [finished, elapsed, onComplete]);
 
   useEffect(() => {
-    if (!running) { cleanup(); return; }
+    if (!running) {
+      cleanup();
+      return;
+    }
     intervalRef.current = setInterval(() => dispatch({ type: 'tick', pattern }), 1000);
     return cleanup;
   }, [running, pattern, cleanup]);
@@ -114,54 +122,103 @@ export function BreathingExercise({ techniqueId, onComplete, onCancel }: Breathi
   const remaining = currentPhase.duration - phaseTimer;
 
   const circleScale =
-    currentPhase.phase === 'inhale' ? 0.5 + 0.5 * (phaseTimer / currentPhase.duration)
-    : currentPhase.phase === 'exhale' ? 1.0 - 0.5 * (phaseTimer / currentPhase.duration)
-    : currentPhase.phase === 'hold' ? 1.0 : 0.5;
+    currentPhase.phase === 'inhale'
+      ? 0.5 + 0.5 * (phaseTimer / currentPhase.duration)
+      : currentPhase.phase === 'exhale'
+        ? 1.0 - 0.5 * (phaseTimer / currentPhase.duration)
+        : currentPhase.phase === 'hold'
+          ? 1.0
+          : 0.5;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between text-sm text-muted">
-        <span>Цикл {Math.min(cycle + 1, pattern.totalCycles)} из {pattern.totalCycles}</span>
-        <span>{timeStr}</span>
-      </div>
+    <Stack gap="xl">
+      <Group justify="space-between">
+        <Text fz="sm" c="dimmed">
+          Цикл {Math.min(cycle + 1, pattern.totalCycles)} из {pattern.totalCycles}
+        </Text>
+        <Text fz="sm" c="dimmed">
+          {timeStr}
+        </Text>
+      </Group>
 
-      <div className="flex flex-col items-center justify-center py-4">
-        <div className="relative flex h-48 w-48 items-center justify-center">
-          <div
-            className="absolute inset-0 rounded-full bg-accent/20"
-            style={{ transform: `scale(${running ? circleScale : 0.5})`, transition: running ? 'transform 1s ease-in-out' : 'none' }}
+      <Center py="md">
+        <Box pos="relative" w={192} h={192} display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}>
+          <Box
+            pos="absolute"
+            top={0}
+            left={0}
+            right={0}
+            bottom={0}
+            style={{
+              borderRadius: '50%',
+              backgroundColor: 'var(--mantine-color-brand-1)',
+              opacity: 0.6,
+              transform: `scale(${running ? circleScale : 0.5})`,
+              transition: running ? 'transform 1s ease-in-out' : 'none',
+            }}
           />
-          <div
-            className="absolute rounded-full bg-accent/35"
-            style={{ width: '70%', height: '70%', transform: `scale(${running ? circleScale : 0.5})`, transition: running ? 'transform 1s ease-in-out' : 'none' }}
+          <Box
+            pos="absolute"
+            style={{
+              width: '70%',
+              height: '70%',
+              borderRadius: '50%',
+              backgroundColor: 'var(--mantine-color-brand-2)',
+              opacity: 0.7,
+              transform: `scale(${running ? circleScale : 0.5})`,
+              transition: running ? 'transform 1s ease-in-out' : 'none',
+            }}
           />
-          <div className="relative z-10 text-center">
+          <Box pos="relative" ta="center" style={{ zIndex: 1 }}>
             {running ? (
               <>
-                <div className="text-2xl font-bold text-accent-fg">{remaining}</div>
-                <div className="mt-1 text-sm font-medium text-subtle">{currentPhase.label}</div>
+                <Text fz={28} fw={700} c="brand.7">
+                  {remaining}
+                </Text>
+                <Text mt={4} fz="sm" fw={500} c="dimmed">
+                  {currentPhase.label}
+                </Text>
               </>
             ) : (
-              <div className="text-sm font-medium text-muted">{elapsed > 0 ? 'Пауза' : 'Готовы?'}</div>
+              <Text fz="sm" fw={500} c="dimmed">
+                {elapsed > 0 ? 'Пауза' : 'Готовы?'}
+              </Text>
             )}
-          </div>
-        </div>
-      </div>
+          </Box>
+        </Box>
+      </Center>
 
       {running && (
-        <div className="flex justify-center gap-2">
+        <Group justify="center" gap="xs">
           {pattern.phases.map((_, i) => (
-            <div key={i} className={`h-2 w-2 rounded-full transition-colors ${i === phaseIndex ? 'bg-accent' : 'bg-hover'}`} />
+            <Box
+              key={i}
+              w={8}
+              h={8}
+              style={{
+                borderRadius: '50%',
+                backgroundColor:
+                  i === phaseIndex
+                    ? 'var(--mantine-color-brand-5)'
+                    : 'var(--mantine-color-gray-3)',
+                transition: 'background-color 200ms ease',
+              }}
+            />
           ))}
-        </div>
+        </Group>
       )}
 
-      <div className="flex gap-3">
-        <Button type="button" variant="ghost" fullWidth onClick={onCancel}>Отмена</Button>
-        <Button type="button" fullWidth onClick={running ? () => dispatch({ type: 'stop' }) : () => dispatch({ type: 'start' })}>
+      <Group gap="sm" grow>
+        <Button type="button" variant="subtle" onClick={onCancel}>
+          Отмена
+        </Button>
+        <Button
+          type="button"
+          onClick={running ? () => dispatch({ type: 'stop' }) : () => dispatch({ type: 'start' })}
+        >
           {running ? 'Стоп' : elapsed > 0 ? 'Заново' : 'Начать'}
         </Button>
-      </div>
-    </div>
+      </Group>
+    </Stack>
   );
 }

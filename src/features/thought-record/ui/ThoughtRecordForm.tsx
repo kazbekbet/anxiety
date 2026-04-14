@@ -1,11 +1,23 @@
 import { useState } from 'react';
-import { Button, StepProgress, ChipGroup, inputClass } from '@/shared/ui';
+import {
+  Button,
+  Chip,
+  Group,
+  Paper,
+  Progress,
+  Slider,
+  Stack,
+  Text,
+  TextInput,
+  Textarea,
+  ThemeIcon,
+  Title,
+} from '@mantine/core';
 import {
   type CognitiveDistortion,
   COGNITIVE_DISTORTION_LABELS,
   type ThoughtRecord,
 } from '@/shared/types';
-import { getLevelBgColor, getLevelTextColor } from '@/shared/lib/level-colors';
 
 interface ThoughtRecordFormProps {
   onSubmit: (data: Omit<ThoughtRecord, 'id' | 'timestamp'>) => void;
@@ -13,6 +25,13 @@ interface ThoughtRecordFormProps {
 }
 
 const ALL_DISTORTIONS = Object.keys(COGNITIVE_DISTORTION_LABELS) as CognitiveDistortion[];
+
+function levelColor(level: number): string {
+  if (level <= 3) return 'calm';
+  if (level <= 5) return 'yellow';
+  if (level <= 7) return 'orange';
+  return 'warm';
+}
 
 export function ThoughtRecordForm({ onSubmit, onCancel }: ThoughtRecordFormProps) {
   const [step, setStep] = useState(0);
@@ -23,12 +42,6 @@ export function ThoughtRecordForm({ onSubmit, onCancel }: ThoughtRecordFormProps
   const [cognitiveDistortions, setCognitiveDistortions] = useState<CognitiveDistortion[]>([]);
   const [alternativeThought, setAlternativeThought] = useState('');
   const [newEmotionIntensity, setNewEmotionIntensity] = useState(5);
-
-  const toggleDistortion = (d: CognitiveDistortion) => {
-    setCognitiveDistortions((prev) =>
-      prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d],
-    );
-  };
 
   const handleSubmit = () => {
     onSubmit({
@@ -51,70 +64,170 @@ export function ThoughtRecordForm({ onSubmit, onCancel }: ThoughtRecordFormProps
     return true;
   };
 
+  const emotionColor = levelColor(emotionIntensity);
+  const newEmotionColor = levelColor(newEmotionIntensity);
+
   const steps = [
-    <div key="situation">
-      <h3 className="mb-1 font-medium text-fg">Шаг 1: Ситуация</h3>
-      <p className="mb-3 text-sm text-muted">Опишите ситуацию, которая вызвала тревогу</p>
-      <textarea value={situation} onChange={(e) => setSituation(e.target.value)} placeholder="Что произошло?" rows={3} className={inputClass} autoFocus />
-    </div>,
-    <div key="thought">
-      <h3 className="mb-1 font-medium text-fg">Шаг 2: Автоматическая мысль</h3>
-      <p className="mb-3 text-sm text-muted">Какая мысль возникла первой?</p>
-      <textarea value={automaticThought} onChange={(e) => setAutomaticThought(e.target.value)} placeholder="Я подумал(а), что..." rows={3} className={inputClass} autoFocus />
-    </div>,
-    <div key="emotion">
-      <h3 className="mb-1 font-medium text-fg">Шаг 3: Эмоция</h3>
-      <p className="mb-3 text-sm text-muted">Какую эмоцию вы почувствовали?</p>
-      <input value={emotion} onChange={(e) => setEmotion(e.target.value)} placeholder="Например: страх, тревога, стыд" className={`mb-4 ${inputClass}`} autoFocus />
-      <label className="mb-2 block text-sm text-muted">Интенсивность</label>
-      <div className="flex items-center gap-3">
-        <input type="range" min={1} max={10} value={emotionIntensity} onChange={(e) => setEmotionIntensity(Number(e.target.value))} className="flex-1 accent-indigo-500" />
-        <div className={`flex h-10 w-10 items-center justify-center rounded-full font-bold ${getLevelBgColor(emotionIntensity)} ${getLevelTextColor(emotionIntensity)}`}>{emotionIntensity}</div>
-      </div>
-    </div>,
-    <div key="distortions">
-      <h3 className="mb-1 font-medium text-fg">Шаг 4: Когнитивные искажения</h3>
-      <p className="mb-3 text-sm text-muted">Какие ловушки мышления вы заметили?</p>
-      <ChipGroup
-        options={ALL_DISTORTIONS}
-        selected={cognitiveDistortions}
-        onToggle={toggleDistortion}
-        labels={COGNITIVE_DISTORTION_LABELS}
+    <Stack key="situation" gap="xs">
+      <Title order={3} fz="md" fw={500}>
+        Шаг 1: Ситуация
+      </Title>
+      <Text fz="sm" c="dimmed">
+        Опишите ситуацию, которая вызвала тревогу
+      </Text>
+      <Textarea
+        value={situation}
+        onChange={(e) => setSituation(e.currentTarget.value)}
+        placeholder="Что произошло?"
+        autosize
+        minRows={3}
+        autoFocus
       />
-    </div>,
-    <div key="alternative">
-      <h3 className="mb-1 font-medium text-fg">Шаг 5: Альтернативная мысль</h3>
-      <p className="mb-3 text-sm text-muted">Как можно переформулировать мысль?</p>
-      <textarea value={alternativeThought} onChange={(e) => setAlternativeThought(e.target.value)} placeholder="Более реалистичный взгляд..." rows={3} className={inputClass} autoFocus />
-    </div>,
-    <div key="result">
-      <h3 className="mb-1 font-medium text-fg">Шаг 6: Переоценка</h3>
-      <p className="mb-3 text-sm text-muted">Какова интенсивность эмоции теперь?</p>
-      <div className="flex items-center gap-3">
-        <input type="range" min={1} max={10} value={newEmotionIntensity} onChange={(e) => setNewEmotionIntensity(Number(e.target.value))} className="flex-1 accent-indigo-500" />
-        <div className={`flex h-10 w-10 items-center justify-center rounded-full font-bold ${getLevelBgColor(newEmotionIntensity)} ${getLevelTextColor(newEmotionIntensity)}`}>{newEmotionIntensity}</div>
-      </div>
-      <div className="mt-4 rounded-xl bg-elevated p-3 text-sm text-subtle">
-        <p>Было: <strong>{emotionIntensity}/10</strong> → Стало: <strong>{newEmotionIntensity}/10</strong></p>
-      </div>
-    </div>,
+    </Stack>,
+    <Stack key="thought" gap="xs">
+      <Title order={3} fz="md" fw={500}>
+        Шаг 2: Автоматическая мысль
+      </Title>
+      <Text fz="sm" c="dimmed">
+        Какая мысль возникла первой?
+      </Text>
+      <Textarea
+        value={automaticThought}
+        onChange={(e) => setAutomaticThought(e.currentTarget.value)}
+        placeholder="Я подумал(а), что..."
+        autosize
+        minRows={3}
+        autoFocus
+      />
+    </Stack>,
+    <Stack key="emotion" gap="xs">
+      <Title order={3} fz="md" fw={500}>
+        Шаг 3: Эмоция
+      </Title>
+      <Text fz="sm" c="dimmed">
+        Какую эмоцию вы почувствовали?
+      </Text>
+      <TextInput
+        value={emotion}
+        onChange={(e) => setEmotion(e.currentTarget.value)}
+        placeholder="Например: страх, тревога, стыд"
+        autoFocus
+      />
+      <Text component="label" fz="sm" c="dimmed" mt="xs">
+        Интенсивность
+      </Text>
+      <Group gap="md" align="center" wrap="nowrap">
+        <Slider
+          value={emotionIntensity}
+          onChange={setEmotionIntensity}
+          min={1}
+          max={10}
+          step={1}
+          color={emotionColor}
+          flex={1}
+          label={null}
+        />
+        <ThemeIcon color={emotionColor} variant="light" radius="xl" size={40}>
+          <Text fw={700} c={`${emotionColor}.7`}>
+            {emotionIntensity}
+          </Text>
+        </ThemeIcon>
+      </Group>
+    </Stack>,
+    <Stack key="distortions" gap="xs">
+      <Title order={3} fz="md" fw={500}>
+        Шаг 4: Когнитивные искажения
+      </Title>
+      <Text fz="sm" c="dimmed">
+        Какие ловушки мышления вы заметили?
+      </Text>
+      <Chip.Group
+        multiple
+        value={cognitiveDistortions}
+        onChange={(v) => setCognitiveDistortions(v as CognitiveDistortion[])}
+      >
+        <Group gap="xs">
+          {ALL_DISTORTIONS.map((d) => (
+            <Chip key={d} value={d} variant="light" radius="xl" size="sm">
+              {COGNITIVE_DISTORTION_LABELS[d]}
+            </Chip>
+          ))}
+        </Group>
+      </Chip.Group>
+    </Stack>,
+    <Stack key="alternative" gap="xs">
+      <Title order={3} fz="md" fw={500}>
+        Шаг 5: Альтернативная мысль
+      </Title>
+      <Text fz="sm" c="dimmed">
+        Как можно переформулировать мысль?
+      </Text>
+      <Textarea
+        value={alternativeThought}
+        onChange={(e) => setAlternativeThought(e.currentTarget.value)}
+        placeholder="Более реалистичный взгляд..."
+        autosize
+        minRows={3}
+        autoFocus
+      />
+    </Stack>,
+    <Stack key="result" gap="xs">
+      <Title order={3} fz="md" fw={500}>
+        Шаг 6: Переоценка
+      </Title>
+      <Text fz="sm" c="dimmed">
+        Какова интенсивность эмоции теперь?
+      </Text>
+      <Group gap="md" align="center" wrap="nowrap">
+        <Slider
+          value={newEmotionIntensity}
+          onChange={setNewEmotionIntensity}
+          min={1}
+          max={10}
+          step={1}
+          color={newEmotionColor}
+          flex={1}
+          label={null}
+        />
+        <ThemeIcon color={newEmotionColor} variant="light" radius="xl" size={40}>
+          <Text fw={700} c={`${newEmotionColor}.7`}>
+            {newEmotionIntensity}
+          </Text>
+        </ThemeIcon>
+      </Group>
+      <Paper withBorder={false} radius="md" p="sm" mt="sm" bg="gray.0">
+        <Text fz="sm">
+          Было: <strong>{emotionIntensity}/10</strong> → Стало:{' '}
+          <strong>{newEmotionIntensity}/10</strong>
+        </Text>
+      </Paper>
+    </Stack>,
   ];
 
   const totalSteps = steps.length;
   const isLast = step === totalSteps - 1;
+  const progressValue = ((step + 1) / totalSteps) * 100;
 
   return (
-    <div className="space-y-4">
-      <StepProgress total={totalSteps} current={step} />
+    <Stack gap="md">
+      <Progress value={progressValue} radius="xl" />
       {steps[step]}
-      <div className="flex gap-3">
-        <Button type="button" variant="ghost" fullWidth onClick={step === 0 ? onCancel : () => setStep(step - 1)}>
+      <Group gap="sm" grow>
+        <Button
+          type="button"
+          variant="subtle"
+          onClick={step === 0 ? onCancel : () => setStep(step - 1)}
+        >
           {step === 0 ? 'Отмена' : 'Назад'}
         </Button>
-        <Button type="button" fullWidth disabled={!canNext()} onClick={isLast ? handleSubmit : () => setStep(step + 1)}>
+        <Button
+          type="button"
+          disabled={!canNext()}
+          onClick={isLast ? handleSubmit : () => setStep(step + 1)}
+        >
           {isLast ? 'Сохранить' : 'Далее'}
         </Button>
-      </div>
-    </div>
+      </Group>
+    </Stack>
   );
 }

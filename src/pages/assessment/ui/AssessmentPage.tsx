@@ -1,8 +1,21 @@
 import { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Card, StepProgress } from '@/shared/ui';
-import { getTestById, getLevel } from '@/entities/assessment';
-import { useAssessmentResults } from '@/entities/assessment';
+import {
+  Anchor,
+  Box,
+  Button,
+  Center,
+  Container,
+  Group,
+  Modal,
+  Progress,
+  Stack,
+  Text,
+  Title,
+  UnstyledButton,
+} from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { getTestById, getLevel, useAssessmentResults } from '@/entities/assessment';
 
 const CRISIS_PHONE = '8-800-2000-122';
 
@@ -16,8 +29,8 @@ export function AssessmentPage() {
   const [answers, setAnswers] = useState<(number | null)[]>(
     () => new Array(test?.questionCount ?? 0).fill(null),
   );
-  const [showExitConfirm, setShowExitConfirm] = useState(false);
-  const [showCrisis, setShowCrisis] = useState(false);
+  const [exitOpened, exitHandlers] = useDisclosure(false);
+  const [crisisOpened, crisisHandlers] = useDisclosure(false);
 
   const submitResults = useCallback(
     (finalAnswers: (number | null)[]) => {
@@ -45,7 +58,7 @@ export function AssessmentPage() {
       setAnswers(next);
 
       if (test.hasCrisisQuestion && step === test.hasCrisisQuestion.questionIndex && value > 0) {
-        setShowCrisis(true);
+        crisisHandlers.open();
         return;
       }
 
@@ -57,14 +70,14 @@ export function AssessmentPage() {
         }
       }, 300);
     },
-    [test, step, answers, submitResults],
+    [test, step, answers, submitResults, crisisHandlers],
   );
 
   if (!test) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted">Тест не найден</p>
-      </div>
+      <Center mih="100vh">
+        <Text c="dimmed">Тест не найден</Text>
+      </Center>
     );
   }
 
@@ -72,122 +85,166 @@ export function AssessmentPage() {
   const selected = answers[step];
   const isLast = step === test.questionCount - 1;
   const hasAnswered = answers.filter((a) => a !== null).length;
+  const progressValue = ((step + 1) / test.questionCount) * 100;
 
-  // Crisis contact screen
-  if (showCrisis) {
-    return (
-      <div className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4 pt-[env(safe-area-inset-top)]">
-        <Card className="w-full text-center">
-          <h2 className="text-lg font-semibold text-fg mb-3">Вы не одиноки</h2>
-          <p className="text-sm text-muted mb-4">
-            Если у вас есть мысли о причинении себе вреда, пожалуйста, обратитесь за помощью.
-          </p>
-          <a
-            href={`tel:${CRISIS_PHONE}`}
-            className="mb-4 flex items-center justify-center gap-2 rounded-xl bg-accent py-4 text-lg font-semibold text-white"
-          >
-            Телефон доверия: {CRISIS_PHONE}
-          </a>
-          <p className="text-xs text-faint mb-4">Бесплатно, анонимно, круглосуточно</p>
-          <Button
-            fullWidth
-            variant="secondary"
-            onClick={() => {
-              setShowCrisis(false);
-              if (isLast) {
-                submitResults(answers);
-              } else {
-                setTimeout(() => setStep(step + 1), 100);
-              }
-            }}
-          >
-            Продолжить тест
-          </Button>
-        </Card>
-      </div>
-    );
-  }
-
-  // Exit confirmation
-  if (showExitConfirm) {
-    return (
-      <div className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4 pt-[env(safe-area-inset-top)]">
-        <Card className="w-full">
-          <h2 className="text-lg font-semibold text-fg mb-2">Прервать тест?</h2>
-          <p className="text-sm text-muted mb-5">
-            Прогресс не сохранится. Вы ответили на {hasAnswered} из {test.questionCount} вопросов.
-          </p>
-          <div className="space-y-2">
-            <Button fullWidth onClick={() => setShowExitConfirm(false)}>
-              Продолжить тест
-            </Button>
-            <Button fullWidth variant="ghost" onClick={() => navigate('/stats', { replace: true })}>
-              Выйти
-            </Button>
-          </div>
-        </Card>
-      </div>
-    );
-  }
+  const handleCrisisContinue = () => {
+    crisisHandlers.close();
+    if (isLast) {
+      submitResults(answers);
+    } else {
+      setTimeout(() => setStep(step + 1), 100);
+    }
+  };
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-lg flex-col px-4 pb-6 pt-[max(1.5rem,env(safe-area-inset-top))]">
-      {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
-        <button onClick={() => setShowExitConfirm(true)} className="text-sm text-faint hover:text-subtle">
-          ← Выйти
-        </button>
-        <span className="text-sm text-muted">
-          Вопрос {step + 1} из {test.questionCount}
-        </span>
-      </div>
-
-      {/* Progress bar */}
-      <div className="mb-6">
-        <StepProgress total={test.questionCount} current={step} />
-      </div>
-
-      {/* Preamble */}
-      <p className="mb-2 text-xs text-faint">{test.preamble}</p>
-
-      {/* Question */}
-      <h2 className="mb-6 text-lg font-semibold text-fg leading-snug">{question.text}</h2>
-
-      {/* Options */}
-      <div className="flex-1 space-y-3">
-        {question.options.map((opt) => (
-          <button
-            key={opt.value}
-            onClick={() => handleSelect(opt.value)}
-            className={`w-full rounded-2xl px-4 py-4 text-left text-sm font-medium transition-all ${
-              selected === opt.value
-                ? 'bg-accent-soft border-2 border-accent text-accent-soft-fg scale-[0.98]'
-                : 'bg-elevated text-subtle border-2 border-transparent active:scale-[0.98]'
-            }`}
+    <Container size="sm" px="md" pb="lg" pt="lg" mih="100vh">
+      <Stack gap="md" mih="100vh">
+        {/* Header */}
+        <Group justify="space-between" align="center">
+          <Anchor
+            component="button"
+            type="button"
+            fz="sm"
+            c="dimmed"
+            onClick={exitHandlers.open}
           >
-            {opt.label}
-          </button>
-        ))}
-      </div>
+            ← Выйти
+          </Anchor>
+          <Text fz="sm" c="dimmed">
+            Вопрос {step + 1} из {test.questionCount}
+          </Text>
+        </Group>
 
-      {/* Navigation */}
-      <div className="mt-6 flex gap-3">
-        {step > 0 && (
-          <Button variant="ghost" fullWidth onClick={() => setStep(step - 1)}>
-            Назад
+        {/* Progress bar */}
+        <Progress value={progressValue} size="sm" radius="xl" />
+
+        {/* Preamble */}
+        <Text fz="xs" c="dimmed">
+          {test.preamble}
+        </Text>
+
+        {/* Question */}
+        <Title order={2} fz="lg" fw={600} lh={1.3}>
+          {question.text}
+        </Title>
+
+        {/* Options */}
+        <Stack gap="sm" style={{ flex: 1 }}>
+          {question.options.map((opt) => {
+            const isSelected = selected === opt.value;
+            return (
+              <UnstyledButton
+                key={opt.value}
+                onClick={() => handleSelect(opt.value)}
+                p="md"
+                style={{
+                  borderRadius: 'var(--mantine-radius-lg)',
+                  borderWidth: 2,
+                  borderStyle: 'solid',
+                  borderColor: isSelected
+                    ? 'var(--mantine-primary-color-filled)'
+                    : 'transparent',
+                  background: isSelected
+                    ? 'var(--mantine-primary-color-light)'
+                    : 'var(--mantine-color-default-hover)',
+                  color: isSelected
+                    ? 'var(--mantine-primary-color-light-color)'
+                    : 'var(--mantine-color-text)',
+                  transition: 'all 150ms ease',
+                  textAlign: 'left',
+                }}
+              >
+                <Text fz="sm" fw={500}>
+                  {opt.label}
+                </Text>
+              </UnstyledButton>
+            );
+          })}
+        </Stack>
+
+        {/* Navigation */}
+        <Group gap="sm" mt="md" wrap="nowrap">
+          {step > 0 && (
+            <Button variant="subtle" fullWidth onClick={() => setStep(step - 1)}>
+              Назад
+            </Button>
+          )}
+          <Button
+            fullWidth
+            disabled={selected === null}
+            onClick={() => {
+              if (isLast) submitResults(answers);
+              else setStep(step + 1);
+            }}
+          >
+            {isLast ? 'Завершить' : 'Далее'}
           </Button>
-        )}
-        <Button
-          fullWidth
-          disabled={selected === null}
-          onClick={() => {
-            if (isLast) submitResults(answers);
-            else setStep(step + 1);
-          }}
-        >
-          {isLast ? 'Завершить' : 'Далее'}
-        </Button>
-      </div>
-    </div>
+        </Group>
+      </Stack>
+
+      {/* Exit confirmation modal */}
+      <Modal
+        opened={exitOpened}
+        onClose={exitHandlers.close}
+        title="Прервать тест?"
+        centered
+        radius="lg"
+      >
+        <Stack gap="md">
+          <Text fz="sm" c="dimmed">
+            Прогресс не сохранится. Вы ответили на {hasAnswered} из {test.questionCount} вопросов.
+          </Text>
+          <Stack gap="xs">
+            <Button fullWidth onClick={exitHandlers.close}>
+              Продолжить тест
+            </Button>
+            <Button
+              fullWidth
+              variant="subtle"
+              onClick={() => navigate('/stats', { replace: true })}
+            >
+              Выйти
+            </Button>
+          </Stack>
+        </Stack>
+      </Modal>
+
+      {/* Crisis modal */}
+      <Modal
+        opened={crisisOpened}
+        onClose={handleCrisisContinue}
+        title="Вы не одиноки"
+        centered
+        radius="lg"
+      >
+        <Stack gap="md">
+          <Text fz="sm" c="dimmed">
+            Если у вас есть мысли о причинении себе вреда, пожалуйста, обратитесь за помощью.
+          </Text>
+          <Box
+            component="a"
+            href={`tel:${CRISIS_PHONE}`}
+            ta="center"
+            p="md"
+            fw={600}
+            fz="lg"
+            c="white"
+            style={{
+              borderRadius: 'var(--mantine-radius-lg)',
+              background: 'var(--mantine-primary-color-filled)',
+              textDecoration: 'none',
+            }}
+          >
+            Телефон доверия: {CRISIS_PHONE}
+          </Box>
+          <Text fz="xs" c="dimmed" ta="center">
+            Бесплатно, анонимно, круглосуточно
+          </Text>
+          <Button fullWidth variant="light" onClick={handleCrisisContinue}>
+            Продолжить тест
+          </Button>
+        </Stack>
+      </Modal>
+    </Container>
   );
 }

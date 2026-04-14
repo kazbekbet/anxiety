@@ -1,76 +1,102 @@
 import { useNavigate } from 'react-router-dom';
+import {
+  Button,
+  Group,
+  Paper,
+  Progress,
+  Stack,
+  Text,
+  Title,
+} from '@mantine/core';
 import { Header } from '@/widgets/header';
-import { Card, Button } from '@/shared/ui';
-import { LevelBar } from '@/shared/ui/LevelIndicator';
 import { allAssessments, getLevel, useAssessmentResults } from '@/entities/assessment';
 import { formatEntryDate } from '@/shared/lib/date';
 import { levelColorToNumber, daysSince } from '@/shared/lib/assessment-utils';
+
+function levelProgressColor(level: number) {
+  if (level <= 3) return 'calm';
+  if (level <= 5) return 'yellow';
+  if (level <= 7) return 'orange';
+  return 'warm';
+}
 
 export function TestsPage() {
   const results = useAssessmentResults((s) => s.results);
   const navigate = useNavigate();
 
   return (
-    <div className="space-y-4">
+    <Stack gap="md">
       <Header title="Тесты" subtitle="Стандартизированные опросники" />
 
-      <Card className="bg-elevated">
-        <p className="text-xs text-muted leading-relaxed">
+      <Paper withBorder radius="lg" p="md" bg="var(--mantine-color-default-hover)">
+        <Text fz="xs" c="dimmed">
           Тесты — инструмент самонаблюдения, не медицинский диагноз.
           Проходите регулярно для отслеживания динамики.
-        </p>
-      </Card>
+        </Text>
+      </Paper>
 
-      <div className="space-y-3">
+      <Stack gap="sm">
         {allAssessments.map((test) => {
           const lastResult = results.find((r) => r.testId === test.id);
           const days = lastResult ? daysSince(lastResult.timestamp) : null;
           const level = lastResult ? getLevel(test, lastResult.score) : null;
           const isDue = days === null || days >= test.intervalDays;
+          const numericLevel = level ? levelColorToNumber(level.color) : 0;
 
           return (
-            <Card key={test.id}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-fg">{test.shortTitle}</h3>
-                    <span className="text-xs text-faint">{test.questionCount} вопросов</span>
-                  </div>
-                  <p className="text-sm text-muted mb-2">{test.description}</p>
+            <Paper key={test.id} withBorder radius="lg" p="md">
+              <Stack gap="sm">
+                <Stack gap="xs">
+                  <Group gap="xs" align="baseline" wrap="nowrap">
+                    <Title order={3} fz="md" fw={600}>
+                      {test.shortTitle}
+                    </Title>
+                    <Text fz="xs" c="dimmed">
+                      {test.questionCount} вопросов
+                    </Text>
+                  </Group>
+                  <Text fz="sm" c="dimmed">
+                    {test.description}
+                  </Text>
 
                   {lastResult && level ? (
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1">
-                          <LevelBar level={levelColorToNumber(level.color)} />
-                        </div>
-                        <span className="text-xs font-medium text-subtle">
+                    <Stack gap={6}>
+                      <Group gap="xs" wrap="nowrap" align="center">
+                        <Progress
+                          flex={1}
+                          value={numericLevel * 10}
+                          color={levelProgressColor(numericLevel)}
+                          size="sm"
+                          radius="xl"
+                        />
+                        <Text fz="xs" fw={500}>
                           {lastResult.score}/{test.maxScore}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted">{level.label}</span>
-                        <span className="text-xs text-faint">
+                        </Text>
+                      </Group>
+                      <Group justify="space-between" wrap="nowrap">
+                        <Text fz="xs" c="dimmed">
+                          {level.label}
+                        </Text>
+                        <Text fz="xs" c="dimmed">
                           {formatEntryDate(lastResult.timestamp)}
-                        </span>
-                      </div>
-                    </div>
+                        </Text>
+                      </Group>
+                    </Stack>
                   ) : null}
-                </div>
-              </div>
+                </Stack>
 
-              <Button
-                fullWidth
-                variant={isDue ? 'primary' : 'secondary'}
-                className="mt-3"
-                onClick={() => navigate(`/stats/tests/${test.id}`)}
-              >
-                {lastResult ? (isDue ? 'Пройти снова' : 'Пройти ещё раз') : 'Пройти тест'}
-              </Button>
-            </Card>
+                <Button
+                  fullWidth
+                  variant={isDue ? 'filled' : 'light'}
+                  onClick={() => navigate(`/stats/tests/${test.id}`)}
+                >
+                  {lastResult ? (isDue ? 'Пройти снова' : 'Пройти ещё раз') : 'Пройти тест'}
+                </Button>
+              </Stack>
+            </Paper>
           );
         })}
-      </div>
-    </div>
+      </Stack>
+    </Stack>
   );
 }

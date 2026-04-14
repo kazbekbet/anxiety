@@ -1,6 +1,16 @@
 import { useState } from 'react';
+import {
+  ActionIcon,
+  Anchor,
+  Badge,
+  Box,
+  Group,
+  Paper,
+  Progress,
+  Stack,
+  Text,
+} from '@mantine/core';
 import type { AnxietyEntry } from '@/shared/types';
-import { Card, LevelIndicator, LevelBar } from '@/shared/ui';
 import { formatEntryDate, formatTime } from '@/shared/lib/date';
 
 interface AnxietyCardProps {
@@ -8,57 +18,107 @@ interface AnxietyCardProps {
   onDelete?: (id: string) => void;
 }
 
+function levelColor(level: number) {
+  if (level <= 3) return 'calm';
+  if (level <= 5) return 'yellow';
+  if (level <= 7) return 'orange';
+  return 'warm';
+}
+
+function LevelIndicator({ level }: { level: number }) {
+  const color = levelColor(level);
+  return (
+    <ActionIcon
+      component="div"
+      variant="light"
+      color={color}
+      radius="xl"
+      size={48}
+      style={{ flexShrink: 0, cursor: 'default' }}
+      aria-label={`Уровень тревожности ${level} из 10`}
+    >
+      <Text fw={700} fz="md" c={`${color}.7`}>
+        {level}
+      </Text>
+    </ActionIcon>
+  );
+}
+
 export function AnxietyCard({ entry, onDelete }: AnxietyCardProps) {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
-    <Card className="flex gap-3">
-      <LevelIndicator level={entry.level} />
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-subtle">
-            {formatEntryDate(entry.timestamp)}
-          </span>
-          <span className="text-xs text-faint">{formatTime(entry.timestamp)}</span>
-        </div>
-        <LevelBar level={entry.level} />
-        {entry.note && <p className="mt-1.5 text-sm text-muted line-clamp-2">{entry.note}</p>}
-        {entry.triggers.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1">
-            {entry.triggers.map((t) => (
-              <span key={t} className="rounded-full bg-accent-soft px-2 py-0.5 text-xs text-accent-fg">
-                {t}
-              </span>
-            ))}
-          </div>
-        )}
-        {onDelete && (
-          confirmDelete ? (
-            <div className="mt-2 flex items-center gap-2">
-              <span className="text-xs text-danger-soft-fg">Удалить запись?</span>
-              <button
-                onClick={() => onDelete(entry.id)}
-                className="text-xs font-medium text-danger-soft-fg"
-              >
-                Да
-              </button>
-              <button
-                onClick={() => setConfirmDelete(false)}
-                className="text-xs text-faint"
-              >
-                Нет
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => setConfirmDelete(true)}
-              className="mt-2 text-xs text-faint hover:text-red-500 transition-colors"
-            >
-              Удалить
-            </button>
-          )
-        )}
-      </div>
-    </Card>
+    <Paper withBorder radius="lg" p="md">
+      <Group gap="sm" align="flex-start" wrap="nowrap">
+        <LevelIndicator level={entry.level} />
+        <Stack gap={6} flex={1} miw={0}>
+          <Group justify="space-between" wrap="nowrap">
+            <Text fz="sm" fw={500}>
+              {formatEntryDate(entry.timestamp)}
+            </Text>
+            <Text fz="xs" c="dimmed">
+              {formatTime(entry.timestamp)}
+            </Text>
+          </Group>
+          <Progress
+            value={entry.level * 10}
+            color={levelColor(entry.level)}
+            size="sm"
+            radius="xl"
+          />
+          {entry.note && (
+            <Text fz="sm" c="dimmed" lineClamp={2}>
+              {entry.note}
+            </Text>
+          )}
+          {entry.triggers.length > 0 && (
+            <Group gap={6}>
+              {entry.triggers.map((t) => (
+                <Badge key={t} color="brand" variant="light" radius="xl" size="sm">
+                  {t}
+                </Badge>
+              ))}
+            </Group>
+          )}
+          {onDelete && (
+            <Box>
+              {confirmDelete ? (
+                <Group gap="xs">
+                  <Text fz="xs" c="red">
+                    Удалить запись?
+                  </Text>
+                  <Anchor
+                    component="button"
+                    c="red"
+                    fz="xs"
+                    fw={500}
+                    onClick={() => onDelete(entry.id)}
+                  >
+                    Да
+                  </Anchor>
+                  <Anchor
+                    component="button"
+                    c="dimmed"
+                    fz="xs"
+                    onClick={() => setConfirmDelete(false)}
+                  >
+                    Нет
+                  </Anchor>
+                </Group>
+              ) : (
+                <Anchor
+                  component="button"
+                  c="dimmed"
+                  fz="xs"
+                  onClick={() => setConfirmDelete(true)}
+                >
+                  Удалить
+                </Anchor>
+              )}
+            </Box>
+          )}
+        </Stack>
+      </Group>
+    </Paper>
   );
 }

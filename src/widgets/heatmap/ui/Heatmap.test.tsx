@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderWithProviders as render } from '@/shared/test/render';
 import { Heatmap } from './Heatmap';
 import type { AnxietyEntry } from '@/shared/types';
 
@@ -24,11 +25,9 @@ describe('Heatmap', () => {
 
   it('renders 7 day columns', () => {
     const { container } = render(<Heatmap entries={[]} />);
-    // Each period row has 7 day cells + 1 label = the day header row has 7 day labels
-    // The first row (header) has 7 day labels + 1 spacer
-    const rows = container.querySelectorAll('.flex.gap-1.mb-1');
-    // 1 header row + 3 period rows = 4
-    expect(rows).toHaveLength(4);
+    // 3 period rows x 7 cells = 21 colored cells
+    const cells = container.querySelectorAll('[title]');
+    expect(cells).toHaveLength(21);
   });
 
   it('renders with entries and creates title attributes for non-zero cells', () => {

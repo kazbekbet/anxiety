@@ -1,6 +1,16 @@
 import { useState } from 'react';
-import { Button, ChipGroup, inputClass } from '@/shared/ui';
-import { getLevelTextColor, getLevelBgColor } from '@/shared/lib/level-colors';
+import {
+  ActionIcon,
+  Button,
+  Chip,
+  Group,
+  Slider,
+  Stack,
+  Text,
+  TextInput,
+  Textarea,
+  ThemeIcon,
+} from '@mantine/core';
 import { getFromStorage, saveToStorage } from '@/shared/lib/storage';
 
 const DEFAULT_TRIGGERS = [
@@ -15,6 +25,13 @@ const DEFAULT_TRIGGERS = [
 ];
 
 const CUSTOM_TRIGGERS_KEY = 'custom-triggers';
+
+function levelColor(level: number) {
+  if (level <= 3) return 'calm';
+  if (level <= 5) return 'yellow';
+  if (level <= 7) return 'orange';
+  return 'warm';
+}
 
 interface LogAnxietyFormProps {
   onSubmit: (data: { level: number; note: string; triggers: string[] }) => void;
@@ -32,10 +49,6 @@ export function LogAnxietyForm({ onSubmit, onCancel }: LogAnxietyFormProps) {
 
   const allTriggers = [...DEFAULT_TRIGGERS, ...customTriggers];
 
-  const toggleTrigger = (t: string) => {
-    setTriggers((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
-  };
-
   const addCustomTrigger = () => {
     const trimmed = newTrigger.trim();
     if (!trimmed || allTriggers.includes(trimmed)) return;
@@ -51,69 +64,98 @@ export function LogAnxietyForm({ onSubmit, onCancel }: LogAnxietyFormProps) {
     onSubmit({ level, note, triggers });
   };
 
+  const color = levelColor(level);
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <div>
-        <label className="mb-2 block text-sm font-medium text-subtle">
-          Уровень тревожности
-        </label>
-        <div className="flex items-center gap-4">
-          <input
-            type="range"
-            min={1}
-            max={10}
-            value={level}
-            onChange={(e) => setLevel(Number(e.target.value))}
-            className="flex-1 accent-indigo-500"
-          />
-          <div
-            className={`flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold ${getLevelBgColor(level)} ${getLevelTextColor(level)}`}
-          >
-            {level}
-          </div>
-        </div>
-        <div className="mt-1 flex justify-between text-xs text-faint">
-          <span>Спокойствие</span>
-          <span>Паника</span>
-        </div>
-      </div>
+    <form onSubmit={handleSubmit}>
+      <Stack gap="lg">
+        <Stack gap="xs">
+          <Text component="label" fz="sm" fw={500} c="dimmed">
+            Уровень тревожности
+          </Text>
+          <Group gap="md" align="center" wrap="nowrap">
+            <Slider
+              value={level}
+              onChange={setLevel}
+              min={1}
+              max={10}
+              step={1}
+              color={color}
+              flex={1}
+              label={null}
+            />
+            <ThemeIcon color={color} variant="light" radius="xl" size={48}>
+              <Text fw={700} fz="lg" c={`${color}.7`}>
+                {level}
+              </Text>
+            </ThemeIcon>
+          </Group>
+          <Group justify="space-between">
+            <Text fz="xs" c="dimmed">
+              Спокойствие
+            </Text>
+            <Text fz="xs" c="dimmed">
+              Паника
+            </Text>
+          </Group>
+        </Stack>
 
-      <div>
-        <label className="mb-2 block text-sm font-medium text-subtle">Триггеры</label>
-        <ChipGroup options={allTriggers} selected={triggers} onToggle={toggleTrigger} />
-        <div className="mt-2 flex gap-2">
-          <input
-            value={newTrigger}
-            onChange={(e) => setNewTrigger(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCustomTrigger(); } }}
-            placeholder="Свой триггер..."
-            className={`${inputClass} !py-2 text-xs`}
-          />
-          <Button type="button" variant="secondary" className="shrink-0 !py-2 !px-3 text-xs" onClick={addCustomTrigger}>
-            +
-          </Button>
-        </div>
-      </div>
+        <Stack gap="xs">
+          <Text component="label" fz="sm" fw={500} c="dimmed">
+            Триггеры
+          </Text>
+          <Chip.Group multiple value={triggers} onChange={setTriggers}>
+            <Group gap="xs">
+              {allTriggers.map((t) => (
+                <Chip key={t} value={t} variant="light" radius="xl" size="sm">
+                  {t}
+                </Chip>
+              ))}
+            </Group>
+          </Chip.Group>
+          <Group gap="xs" wrap="nowrap">
+            <TextInput
+              flex={1}
+              size="sm"
+              value={newTrigger}
+              onChange={(e) => setNewTrigger(e.currentTarget.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addCustomTrigger();
+                }
+              }}
+              placeholder="Свой триггер..."
+            />
+            <ActionIcon
+              type="button"
+              variant="light"
+              size="lg"
+              radius="md"
+              onClick={addCustomTrigger}
+              aria-label="Добавить триггер"
+            >
+              +
+            </ActionIcon>
+          </Group>
+        </Stack>
 
-      <div>
-        <label className="mb-2 block text-sm font-medium text-subtle">Заметка</label>
-        <textarea
+        <Textarea
+          label="Заметка"
           value={note}
-          onChange={(e) => setNote(e.target.value)}
+          onChange={(e) => setNote(e.currentTarget.value)}
           placeholder="Что вы чувствуете?"
           rows={3}
-          className={inputClass}
+          styles={{ label: { fontWeight: 500 } }}
         />
-      </div>
 
-      <div className="flex gap-3">
-        <Button type="button" variant="ghost" fullWidth onClick={onCancel}>
-          Отмена
-        </Button>
-        <Button type="submit" fullWidth>
-          Сохранить
-        </Button>
-      </div>
+        <Group gap="sm" grow>
+          <Button type="button" variant="subtle" onClick={onCancel}>
+            Отмена
+          </Button>
+          <Button type="submit">Сохранить</Button>
+        </Group>
+      </Stack>
     </form>
   );
 }

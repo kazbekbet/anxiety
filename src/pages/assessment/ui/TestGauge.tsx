@@ -1,3 +1,5 @@
+import { Box, Center, Stack, Text, useMantineTheme } from '@mantine/core';
+
 interface TestGaugeProps {
   score: number;
   maxScore: number;
@@ -5,13 +7,14 @@ interface TestGaugeProps {
 }
 
 const COLOR_MAP: Record<string, string> = {
-  emerald: 'stroke-emerald-500',
-  amber: 'stroke-amber-500',
-  orange: 'stroke-orange-500',
-  red: 'stroke-red-500',
+  emerald: 'calm',
+  amber: 'yellow',
+  orange: 'orange',
+  red: 'warm',
 };
 
 export function TestGauge({ score, maxScore, color }: TestGaugeProps) {
+  const theme = useMantineTheme();
   const size = 180;
   const strokeWidth = 12;
   const cx = size / 2;
@@ -34,32 +37,45 @@ export function TestGauge({ score, maxScore, color }: TestGaugeProps) {
     return `M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2}`;
   };
 
+  const themeColorKey = COLOR_MAP[color] ?? 'brand';
+  const fillStroke = theme.colors[themeColorKey]?.[5] ?? 'var(--mantine-primary-color-filled)';
+  const trackStroke = 'var(--mantine-color-default-hover)';
+
   return (
-    <div className="relative flex items-center justify-center">
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+    <Center pos="relative" w={size} h={size}>
+      <Box component="svg" width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         {/* Background arc */}
         <path
           d={arcPath(totalSweep)}
           fill="none"
+          stroke={trackStroke}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
-          className="stroke-elevated"
         />
         {/* Filled arc */}
         {score > 0 && (
           <path
             d={arcPath(fillSweep)}
             fill="none"
+            stroke={fillStroke}
             strokeWidth={strokeWidth}
             strokeLinecap="round"
-            className={COLOR_MAP[color] ?? 'stroke-accent'}
           />
         )}
-      </svg>
-      <div className="absolute flex flex-col items-center" style={{ top: '40%' }}>
-        <span className="text-4xl font-bold text-fg">{score}</span>
-        <span className="text-sm text-faint">из {maxScore}</span>
-      </div>
-    </div>
+      </Box>
+      <Stack
+        gap={0}
+        align="center"
+        pos="absolute"
+        style={{ top: '40%' }}
+      >
+        <Text fz={36} fw={700} lh={1}>
+          {score}
+        </Text>
+        <Text fz="sm" c="dimmed">
+          из {maxScore}
+        </Text>
+      </Stack>
+    </Center>
   );
 }

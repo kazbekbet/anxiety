@@ -1,4 +1,4 @@
-import { Button, Card } from '@/shared/ui';
+import { Button, Paper, Stack, Text, ThemeIcon, Title } from '@mantine/core';
 
 interface CompletionScreenProps {
   elapsedSeconds: number;
@@ -8,24 +8,44 @@ interface CompletionScreenProps {
   closeLabel?: string;
 }
 
-export function CompletionScreen({ elapsedSeconds, thoughtRecordDiff, onClose, closeLabel = 'Закрыть' }: CompletionScreenProps) {
+export function CompletionScreen({
+  elapsedSeconds,
+  thoughtRecordDiff,
+  onClose,
+  closeLabel = 'Закрыть',
+}: CompletionScreenProps) {
   const minutes = Math.max(1, Math.round(elapsedSeconds / 60));
+  const minutesLabel =
+    minutes === 1 ? 'минуту' : minutes >= 2 && minutes <= 4 ? 'минуты' : 'минут';
 
   return (
-    <div className="space-y-4">
-      <Card className="bg-emerald-50 text-center dark:bg-emerald-950">
-        <div className="mb-2 text-4xl">&#10003;</div>
-        <h3 className="text-lg font-semibold text-fg">Отлично!</h3>
-        <p className="mt-1 text-sm text-muted">
-          Вы практиковали {minutes} {minutes === 1 ? 'минуту' : minutes >= 2 && minutes <= 4 ? 'минуты' : 'минут'}
-        </p>
-        {thoughtRecordDiff && (
-          <div className="mt-3 rounded-xl bg-elevated p-3 text-sm text-subtle">
-            <p>Было: <strong>{thoughtRecordDiff.before}/10</strong> &rarr; Стало: <strong>{thoughtRecordDiff.after}/10</strong></p>
-          </div>
-        )}
-      </Card>
-      <Button type="button" fullWidth onClick={onClose}>{closeLabel}</Button>
-    </div>
+    <Stack gap="md">
+      <Paper withBorder radius="lg" p="md" bg="calm.0">
+        <Stack gap="xs" align="center">
+          <ThemeIcon color="calm" variant="light" radius="xl" size={56}>
+            <Text fz="xl" fw={700}>
+              ✓
+            </Text>
+          </ThemeIcon>
+          <Title order={3} fz="lg" fw={600}>
+            Отлично!
+          </Title>
+          <Text fz="sm" c="dimmed" ta="center">
+            Вы практиковали {minutes} {minutesLabel}
+          </Text>
+          {thoughtRecordDiff && (
+            <Paper withBorder={false} radius="md" p="sm" bg="gray.0" w="100%">
+              <Text fz="sm" ta="center">
+                Было: <strong>{thoughtRecordDiff.before}/10</strong> &rarr; Стало:{' '}
+                <strong>{thoughtRecordDiff.after}/10</strong>
+              </Text>
+            </Paper>
+          )}
+        </Stack>
+      </Paper>
+      <Button type="button" fullWidth onClick={onClose}>
+        {closeLabel}
+      </Button>
+    </Stack>
   );
 }
