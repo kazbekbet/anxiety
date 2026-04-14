@@ -37,7 +37,7 @@ function LevelIndicator({ level }: { level: number }) {
       style={{ flexShrink: 0, cursor: 'default' }}
       aria-label={`Уровень тревожности ${level} из 10`}
     >
-      <Text fw={700} fz="md" c={`${color}.7`}>
+      <Text fw={700} fz="md" c={`var(--mantine-color-${color}-light-color)`}>
         {level}
       </Text>
     </ActionIcon>

@@ -128,7 +128,7 @@ export function ThoughtRecordForm({ onSubmit, onCancel }: ThoughtRecordFormProps
           label={null}
         />
         <ThemeIcon color={emotionColor} variant="light" radius="xl" size={40}>
-          <Text fw={700} c={`${emotionColor}.7`}>
+          <Text fw={700} c={`var(--mantine-color-${emotionColor}-light-color)`}>
             {emotionIntensity}
           </Text>
         </ThemeIcon>
@@ -190,12 +190,18 @@ export function ThoughtRecordForm({ onSubmit, onCancel }: ThoughtRecordFormProps
           label={null}
         />
         <ThemeIcon color={newEmotionColor} variant="light" radius="xl" size={40}>
-          <Text fw={700} c={`${newEmotionColor}.7`}>
+          <Text fw={700} c={`var(--mantine-color-${newEmotionColor}-light-color)`}>
             {newEmotionIntensity}
           </Text>
         </ThemeIcon>
       </Group>
-      <Paper withBorder={false} radius="md" p="sm" mt="sm" bg="gray.0">
+      <Paper
+        withBorder={false}
+        radius="md"
+        p="sm"
+        mt="sm"
+        bg="var(--mantine-color-default-hover)"
+      >
         <Text fz="sm">
           Было: <strong>{emotionIntensity}/10</strong> → Стало:{' '}
           <strong>{newEmotionIntensity}/10</strong>

@@ -1,3 +1,7 @@
+/* Fraunces — variable serif for headings (fancy but readable). Loaded via
+   Google Fonts with font-display: swap so it never blocks rendering. */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap');
+
 html {
   -webkit-tap-highlight-color: transparent;
 }

@@ -97,7 +97,17 @@ export function AssessmentPage() {
   };
 
   return (
-    <Container size="sm" px="md" pb="lg" pt="lg" mih="100vh">
+    <Container
+      size="sm"
+      px="md"
+      mih="100vh"
+      style={{
+        paddingTop: 'max(1rem, env(safe-area-inset-top))',
+        paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
+        paddingLeft: 'max(1rem, env(safe-area-inset-left))',
+        paddingRight: 'max(1rem, env(safe-area-inset-right))',
+      }}
+    >
       <Stack gap="md" mih="100vh">
         {/* Header */}
         <Group justify="space-between" align="center">

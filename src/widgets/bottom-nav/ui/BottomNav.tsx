@@ -46,7 +46,7 @@ export function BottomNav() {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: 2,
+                gap: 3,
                 paddingTop: 8,
                 paddingBottom: 8,
                 transition: 'color 200ms',
@@ -58,13 +58,13 @@ export function BottomNav() {
               <Box
                 style={{
                   transition: 'transform 200ms',
-                  transform: active ? 'scale(1.1)' : 'scale(1)',
+                  transform: active ? 'scale(1.08)' : 'scale(1)',
                   display: 'flex',
                 }}
               >
                 {item.icon}
               </Box>
-              <Text size="xs" inherit>
+              <Text fz={10} lh={1.1} inherit>
                 {item.label}
               </Text>
               {active && (

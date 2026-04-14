@@ -201,7 +201,7 @@ export function PmrExercise({ onComplete, onCancel }: PmrExerciseProps) {
                       После: {after}
                     </Text>
                     {diff > 0 && (
-                      <Text fz="xs" fw={500} c="calm.7">
+                      <Text fz="xs" fw={500} c="var(--mantine-color-calm-text)">
                         -{diff}
                       </Text>
                     )}
@@ -248,12 +248,22 @@ export function PmrExercise({ onComplete, onCancel }: PmrExerciseProps) {
       )}
 
       {phase === 'tense' && (
-        <Paper withBorder radius="lg" p="md" bg="brand.0">
+        <Paper withBorder radius="lg" p="md" bg="var(--mantine-color-brand-light)">
           <Stack gap="sm" align="center">
-            <Text fz="sm" fw={500} c="brand.7" ta="center">
+            <Text
+              fz="sm"
+              fw={500}
+              c="var(--mantine-color-brand-light-color)"
+              ta="center"
+            >
               Напрягите {currentGroup?.label?.toLowerCase()} на 5 секунд
             </Text>
-            <Text fz={36} fw={700} c="brand.7" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            <Text
+              fz={36}
+              fw={700}
+              c="var(--mantine-color-brand-light-color)"
+              style={{ fontVariantNumeric: 'tabular-nums' }}
+            >
               {timeLeft}
             </Text>
             <Text fz="xs" c="dimmed">
@@ -269,7 +279,12 @@ export function PmrExercise({ onComplete, onCancel }: PmrExerciseProps) {
             <Text fz="sm" fw={500}>
               Расслабьте {currentGroup?.label?.toLowerCase()} на 10 секунд
             </Text>
-            <Text fz={36} fw={700} c="brand.7" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            <Text
+              fz={36}
+              fw={700}
+              c="var(--mantine-color-brand-text)"
+              style={{ fontVariantNumeric: 'tabular-nums' }}
+            >
               {timeLeft}
             </Text>
             <Text fz="xs" c="dimmed">

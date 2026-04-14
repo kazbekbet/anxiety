@@ -406,8 +406,8 @@ export function BodyScan({ onComplete, onCancel }: BodyScanProps) {
                       ? 'var(--mantine-color-brand-5)'
                       : 'transparent',
                     backgroundColor: isSelected
-                      ? 'var(--mantine-color-brand-0)'
-                      : 'var(--mantine-color-gray-0)',
+                      ? 'var(--mantine-color-brand-light)'
+                      : 'var(--mantine-color-default-hover)',
                     transition: 'all 200ms ease',
                   }}
                 >
@@ -416,7 +416,11 @@ export function BodyScan({ onComplete, onCancel }: BodyScanProps) {
                     h={12}
                     style={{ borderRadius: '50%', backgroundColor: s.hex }}
                   />
-                  <Text fz="xs" fw={isSelected ? 500 : 400} c={isSelected ? 'brand.7' : 'dimmed'}>
+                  <Text
+                    fz="xs"
+                    fw={isSelected ? 500 : 400}
+                    c={isSelected ? 'var(--mantine-color-brand-light-color)' : 'dimmed'}
+                  >
                     {s.label}
                   </Text>
                 </UnstyledButton>
@@ -430,7 +434,7 @@ export function BodyScan({ onComplete, onCancel }: BodyScanProps) {
                 <Text fz="xs" c="dimmed">
                   Интенсивность
                 </Text>
-                <Text fz="xs" fw={700} c="brand.7">
+                <Text fz="xs" fw={700} c="var(--mantine-color-brand-text)">
                   {activeSelection.intensity}/5
                 </Text>
               </Group>
