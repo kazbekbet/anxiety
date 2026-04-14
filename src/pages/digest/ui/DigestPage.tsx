@@ -58,7 +58,18 @@ export function DigestPage() {
     delta === null ? 'dimmed' : delta < 0 ? 'calm.6' : delta > 0 ? 'warm.6' : 'dimmed';
 
   return (
-    <Stack gap="md" px="md" pb="md" pt="lg" maw={480} mx="auto" mih="100vh">
+    <Stack
+      gap="md"
+      maw={480}
+      mx="auto"
+      mih="100vh"
+      style={{
+        paddingTop: 'max(1rem, env(safe-area-inset-top))',
+        paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
+        paddingLeft: 'max(1rem, env(safe-area-inset-left))',
+        paddingRight: 'max(1rem, env(safe-area-inset-right))',
+      }}
+    >
       <Stack gap={4}>
         <Title order={1} fz={24} fw={700}>
           Ваша неделя
@@ -141,9 +152,9 @@ export function DigestPage() {
           p="md"
           bg={
             insight.type === 'positive'
-              ? 'calm.0'
+              ? 'var(--mantine-color-calm-light)'
               : insight.type === 'suggestion'
-                ? 'brand.0'
+                ? 'var(--mantine-color-brand-light)'
                 : undefined
           }
         >

@@ -20,7 +20,7 @@ export function CompletionScreen({
 
   return (
     <Stack gap="md">
-      <Paper withBorder radius="lg" p="md" bg="calm.0">
+      <Paper withBorder radius="lg" p="md" bg="var(--mantine-color-calm-light)">
         <Stack gap="xs" align="center">
           <ThemeIcon color="calm" variant="light" radius="xl" size={56}>
             <Text fz="xl" fw={700}>
@@ -30,11 +30,17 @@ export function CompletionScreen({
           <Title order={3} fz="lg" fw={600}>
             Отлично!
           </Title>
-          <Text fz="sm" c="dimmed" ta="center">
+          <Text fz="sm" c="var(--mantine-color-calm-light-color)" ta="center">
             Вы практиковали {minutes} {minutesLabel}
           </Text>
           {thoughtRecordDiff && (
-            <Paper withBorder={false} radius="md" p="sm" bg="gray.0" w="100%">
+            <Paper
+              withBorder={false}
+              radius="md"
+              p="sm"
+              bg="var(--mantine-color-default-hover)"
+              w="100%"
+            >
               <Text fz="sm" ta="center">
                 Было: <strong>{thoughtRecordDiff.before}/10</strong> &rarr; Стало:{' '}
                 <strong>{thoughtRecordDiff.after}/10</strong>

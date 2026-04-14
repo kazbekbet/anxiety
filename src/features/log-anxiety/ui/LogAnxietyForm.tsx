@@ -85,7 +85,7 @@ export function LogAnxietyForm({ onSubmit, onCancel }: LogAnxietyFormProps) {
               label={null}
             />
             <ThemeIcon color={color} variant="light" radius="xl" size={48}>
-              <Text fw={700} fz="lg" c={`${color}.7`}>
+              <Text fw={700} fz="lg" c={`var(--mantine-color-${color}-light-color)`}>
                 {level}
               </Text>
             </ThemeIcon>

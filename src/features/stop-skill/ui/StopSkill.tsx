@@ -68,12 +68,17 @@ export function StopSkill({ onComplete, onCancel }: StopSkillProps) {
         </Avatar>
       </Group>
 
-      <Paper withBorder radius="lg" p="md" bg="brand.0">
+      <Paper withBorder radius="lg" p="md" bg="var(--mantine-color-brand-light)">
         <Stack gap="xs" align="center">
           <Title order={3} fz="lg" fw={700}>
             {step.title}
           </Title>
-          <Text fz="sm" fw={500} c="brand.7" ta="center">
+          <Text
+            fz="sm"
+            fw={500}
+            c="var(--mantine-color-brand-light-color)"
+            ta="center"
+          >
             {step.instruction}
           </Text>
         </Stack>

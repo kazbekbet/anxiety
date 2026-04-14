@@ -151,7 +151,7 @@ export function BreathingExercise({ techniqueId, onComplete, onCancel }: Breathi
             bottom={0}
             style={{
               borderRadius: '50%',
-              backgroundColor: 'var(--mantine-color-brand-1)',
+              backgroundColor: 'var(--mantine-color-brand-light)',
               opacity: 0.6,
               transform: `scale(${running ? circleScale : 0.5})`,
               transition: running ? 'transform 1s ease-in-out' : 'none',
@@ -172,7 +172,7 @@ export function BreathingExercise({ techniqueId, onComplete, onCancel }: Breathi
           <Box pos="relative" ta="center" style={{ zIndex: 1 }}>
             {running ? (
               <>
-                <Text fz={28} fw={700} c="brand.7">
+                <Text fz={28} fw={700} c="var(--mantine-color-brand-light-color)">
                   {remaining}
                 </Text>
                 <Text mt={4} fz="sm" fw={500} c="dimmed">

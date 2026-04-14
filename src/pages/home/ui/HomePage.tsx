@@ -126,7 +126,7 @@ export function HomePage() {
         withBorder
         radius="lg"
         p="md"
-        bg="var(--mantine-color-warm-0)"
+        bg="var(--mantine-color-warm-light)"
         onClick={() => window.open(`tel:${CRISIS_PHONE}`)}
         style={{ cursor: 'pointer' }}
       >
@@ -137,10 +137,10 @@ export function HomePage() {
             </Text>
           </ThemeIcon>
           <Stack gap={2} flex={1} miw={0}>
-            <Text fz="sm" fw={500} c="warm.7">
+            <Text fz="sm" fw={500} c="var(--mantine-color-warm-light-color)">
               Если сейчас очень плохо
             </Text>
-            <Text fz="xs" c="warm.6">
+            <Text fz="xs" c="var(--mantine-color-warm-light-color)" opacity={0.85}>
               Телефон доверия: {CRISIS_PHONE}
             </Text>
           </Stack>
@@ -162,7 +162,7 @@ export function HomePage() {
                   key={q.level}
                   onClick={() => handleQuickTap(q.level)}
                   p="xs"
-                  bg={`var(--mantine-color-${color}-0)`}
+                  bg={`var(--mantine-color-${color}-light)`}
                   style={{
                     borderRadius: 'var(--mantine-radius-md)',
                     transition: 'transform 120ms ease',
@@ -171,10 +171,21 @@ export function HomePage() {
                   }}
                 >
                   <Stack gap={4} align="center">
-                    <Text fz="sm" fw={700} c={`${color}.7`} lh={1}>
+                    <Text
+                      fz="sm"
+                      fw={700}
+                      c={`var(--mantine-color-${color}-light-color)`}
+                      lh={1}
+                    >
                       {q.range}
                     </Text>
-                    <Text fz={10} fw={500} c={`${color}.7`} opacity={0.85} lh={1.1}>
+                    <Text
+                      fz={10}
+                      fw={500}
+                      c={`var(--mantine-color-${color}-light-color)`}
+                      opacity={0.85}
+                      lh={1.1}
+                    >
                       {q.label}
                     </Text>
                   </Stack>
@@ -227,7 +238,7 @@ export function HomePage() {
           withBorder
           radius="lg"
           p="md"
-          bg="var(--mantine-color-brand-0)"
+          bg="var(--mantine-color-brand-light)"
           onClick={() => {
             localStorage.setItem('last-digest-shown', new Date().toISOString());
             navigate('/digest');
@@ -241,7 +252,7 @@ export function HomePage() {
               </Text>
             </ThemeIcon>
             <Stack gap={2} flex={1} miw={0}>
-              <Text fz="sm" fw={500} c="brand.7">
+              <Text fz="sm" fw={500} c="var(--mantine-color-brand-light-color)">
                 Итоги недели
               </Text>
               <Text fz="xs" c="dimmed">
@@ -258,9 +269,9 @@ export function HomePage() {
           withBorder
           radius="lg"
           p="md"
-          bg={`var(--mantine-color-${insightColor}-0)`}
+          bg={`var(--mantine-color-${insightColor}-light)`}
         >
-          <Text fz="sm" c={`${insightColor}.7`}>
+          <Text fz="sm" c={`var(--mantine-color-${insightColor}-light-color)`}>
             {smartInsight.text}
           </Text>
         </Paper>
@@ -268,7 +279,7 @@ export function HomePage() {
 
       {/* Test banner */}
       {showTestBanner && (
-        <Paper withBorder radius="lg" p="md" bg="var(--mantine-color-brand-0)">
+        <Paper withBorder radius="lg" p="md" bg="var(--mantine-color-brand-light)">
           <Group gap="sm" wrap="nowrap">
             <ThemeIcon color="brand" radius="md" size={40}>
               <Text fw={700} fz="md" c="white">
@@ -276,7 +287,7 @@ export function HomePage() {
               </Text>
             </ThemeIcon>
             <Stack gap={2} flex={1} miw={0}>
-              <Text fz="sm" fw={500} c="brand.7">
+              <Text fz="sm" fw={500} c="var(--mantine-color-brand-light-color)">
                 Оцените тревожность
               </Text>
               <Text fz="xs" c="dimmed">
@@ -309,7 +320,7 @@ export function HomePage() {
               radius="xl"
               size={48}
             >
-              <Text fw={700} fz="md" c={`${levelColor(latestEntry.level)}.7`}>
+              <Text fw={700} fz="md" c={`var(--mantine-color-${levelColor(latestEntry.level)}-light-color)`}>
                 {latestEntry.level}
               </Text>
             </ThemeIcon>

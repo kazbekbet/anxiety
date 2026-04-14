@@ -157,7 +157,12 @@ export function TippExercise({ onComplete, onCancel }: TippExerciseProps) {
 
                   {isActive ? (
                     <Group gap="sm" mt="xs" align="center">
-                      <Text fz="xl" fw={700} c="brand.7" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      <Text
+                        fz="xl"
+                        fw={700}
+                        c="var(--mantine-color-brand-text)"
+                        style={{ fontVariantNumeric: 'tabular-nums' }}
+                      >
                         {formatTime(timeLeft)}
                       </Text>
                       <Button

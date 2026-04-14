@@ -63,8 +63,13 @@ export const mantineTheme = createTheme({
     '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
   headings: {
     fontFamily:
-      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      '"Fraunces", ui-serif, Georgia, "Times New Roman", serif',
     fontWeight: '600',
+    sizes: {
+      h1: { fontWeight: '600', fontSize: '1.75rem', lineHeight: '1.2' },
+      h2: { fontWeight: '600', fontSize: '1.375rem', lineHeight: '1.25' },
+      h3: { fontWeight: '600', fontSize: '1.125rem', lineHeight: '1.3' },
+    },
   },
   radius: {
     md: '0.75rem',

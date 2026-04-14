@@ -17,7 +17,7 @@ export function TechniqueSteps({ technique, onComplete }: TechniqueStepsProps) {
     <Stack gap="md">
       <Progress value={progressValue} radius="xl" />
 
-      <Paper withBorder radius="lg" p="md" bg="brand.0">
+      <Paper withBorder radius="lg" p="md" bg="var(--mantine-color-brand-light)">
         <Text fz="sm" c="dimmed">
           Шаг {currentStep + 1} из {totalSteps}
         </Text>
